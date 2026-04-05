@@ -1,81 +1,81 @@
-# MERN Stack Job Portal
+# 💼 Job Portal — MERN Stack
 
-Welcome to the Job Portal project! This project is a job portal application built using the MERN stack (MongoDB, Express, React, Node.js).
+A full-stack job portal web application built with the **MERN** stack (MongoDB, Express.js, React, Node.js). 
+The platform connects **job seekers**, **job providers (employers)**, and **admins** in one unified system.
 
-## Table of Contents
+## ✨ Features
 
-- [Project Overview](#project-overview)
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
+### 👤 Job Seekers
+- Browse and search for job listings
+- Apply for jobs with resume upload
+- Track applied jobs and application status
 
-## Project Overview
+### 🏢 Job Providers (Employers)
+- Post and manage job listings
+- Review applicants and their resumes
+- Shortlist and manage candidates
+- View reports and analytics
 
-This Job Portal application allows users to search and apply for jobs, as well as for employers to post job openings. The application is built using the MERN stack, which provides a robust and efficient development environment for full-stack applications.
+### 🛠️ Admin
+- Manage all users (job seekers & providers)
+- Oversee all job listings
+- Platform-wide dashboard and reports
 
-## Features
+## 🧰 Tech Stack
 
-- User authentication and authorization
-- Job listing and search functionality
-- Job application process
-- Employer dashboard for managing job postings
-- Responsive design for mobile and desktop
+| Layer      | Technology                              |
+|------------|-----------------------------------------|
+| Frontend   | React 17, React Router, Redux, Tailwind CSS, Bootstrap |
+| Backend    | Node.js, Express.js                     |
+| Database   | MongoDB, Mongoose                       |
+| Auth       | JWT (JSON Web Tokens), bcryptjs         |
+| Forms      | Formik + Yup validation                 |
+| File Upload| Multer (resume PDF uploads)             |
+| UI Extras  | AG Grid, React Toastify, React Slick    |
 
-## Installation
+## 🚀 Getting Started
 
-To run this project locally, follow these steps:
+### Prerequisites
+- Node.js & npm
+- MongoDB (local or Atlas)
 
-### Backend Setup
+### Installation
+```bash
+# Clone the repo
+git clone https://github.com/your-username/job-portal.git
 
-1. Navigate to the backend directory:
-   ```bash
-   cd ./backend
-   ```
+# Install frontend dependencies
+cd job-frontend
+npm install -f
 
-2. Install the required dependencies:
-   ```bash
-   npm i
-   ```
+# Install backend dependencies
+cd ../job-backend
+npm install -f
+```
 
-3. Start the backend server:
-   ```bash
-   npm run dev
-   ```
+### Running the App
+```bash
+# Start the frontend (from job-frontend/)
+npm start
 
-   You should see the following messages:
-   ```
-   "Your server is running on a port"
-   "MongoDB connected..."
-   ```
+# Start the backend (from job-backend/)
+npm start
+```
 
-### Frontend Setup
+Create a `.env` file in `job-backend/` with your MongoDB URI, JWT secret, and other environment variables.
 
-1. Navigate to the frontend directory:
-   ```bash
-   cd ./frontend
-   ```
-
-2. Install the required dependencies:
-   ```bash
-   npm i
-   ```
-
-3. Start the frontend development server:
-   ```bash
-   npm run dev
-   ```
-
-## Usage
-
-Once both the backend and frontend servers are running, you can access the application on your local machine. The default development server is typically available at `http://localhost:3000`.
-
-## Contributing
-
-Contributions are welcome! If you would like to contribute to this project, please fork the repository and submit a pull request.
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for more details.
-
+## 📁 Project Structure
+```
+job-portal-project/
+├── job-frontend/       # React frontend
+│   ├── src/
+│   │   ├── pages/      # Page components (Admin, Provider, Seeker)
+│   │   ├── JobSeeker/  # Job seeker components
+│   │   ├── Job Provider/ # Employer components
+│   │   └── login/      # Auth components & Redux
+└── job-backend/        # Express REST API
+    ├── controllers/    # Route logic (admin, auth, provider, user)
+    ├── models/         # Mongoose schemas
+    ├── routes/         # API routes
+    └── middleware/     # Auth & authorization middleware
+```
