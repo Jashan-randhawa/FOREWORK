@@ -4,10 +4,11 @@ import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloud.js";
 
+const isProduction = process.env.NODE_ENV === "production";
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  sameSite: "None",
-  secure: true,
+  sameSite: isProduction ? "None" : "Lax",
+  secure: isProduction,
 };
 
 export const register = async (req, res) => {
