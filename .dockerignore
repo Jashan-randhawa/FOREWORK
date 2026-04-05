@@ -1,0 +1,3 @@
+# Exclude local env files from Docker builds
+**/.env
+.env
