@@ -1,6 +1,5 @@
 import React, { lazy, Suspense } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import ProtectedRoute from "./components/admincomponent/ProtectedRoute";
 
 const Home = lazy(() => import("./components/components_lite/Home"));
 const Login = lazy(() => import("./components/authentication/Login"));
@@ -17,6 +16,7 @@ const CompanySetup = lazy(() => import("./components/admincomponent/CompanySetup
 const AdminJobs = lazy(() => import("./components/admincomponent/AdminJobs.jsx"));
 const PostJob = lazy(() => import("./components/admincomponent/PostJob"));
 const Applicants = lazy(() => import("./components/admincomponent/Applicants"));
+const ProtectedRoute = lazy(() => import("./components/admincomponent/ProtectedRoute"));
 const Creator = lazy(() => import("./components/creator/Creator.jsx"));
 
 const appRouter = createBrowserRouter([
@@ -118,7 +118,7 @@ const appRouter = createBrowserRouter([
 function App() {
   return (
     <div>
-      <Suspense fallback={null}>
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
         <RouterProvider router={appRouter}></RouterProvider>
       </Suspense>
     </div>
