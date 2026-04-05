@@ -6,7 +6,7 @@ import { Button } from "../ui/button";
 import { LogOut, User2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
-import axios from "axios"; // Import axios
+import API from "@/utils/axiosInstance";
 import { setUser } from "@/redux/authSlice";
 import { USER_API_ENDPOINT } from "@/utils/data";
 
@@ -16,9 +16,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const logoutHandler = async () => {
     try {
-      const res = await axios.post(`${USER_API_ENDPOINT}/logout`, {
-        withCredentials: true,
-      });
+      const res = await API.post(`${USER_API_ENDPOINT}/logout`);
       if (res && res.data && res.data.success) {
         dispatch(setUser(null));
         navigate("/");
