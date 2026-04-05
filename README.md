@@ -62,7 +62,19 @@ npm start
 npm start
 ```
 
-Create a `.env` file in `job-backend/` with your MongoDB URI, JWT secret, and other environment variables.
+Create a `.env` file in `Backend/` based on `.env.example` with your settings for local development:
+
+```
+MONGO_URI=<your MongoDB Atlas connection string>
+JWT_SECRET=<your JWT secret>
+PORT=5001
+CLOUD_NAME=<cloudinary cloud name>
+CLOUD_API=<cloudinary api key>
+API_SECRET=<cloudinary api secret>
+FRONTEND_URL=<your frontend URL>
+```
+
+> **Deploying to Render:** Do **not** rely on a `.env` file in production. Set all environment variables directly in the Render dashboard under **Environment → Environment Variables**. The `MONGO_URI` must point to a remote MongoDB instance (e.g., [MongoDB Atlas](https://www.mongodb.com/atlas)) — `localhost` will not work inside a cloud container.
 
 ## 📁 Project Structure
 ```
