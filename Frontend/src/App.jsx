@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 
 const Home = lazy(() => import("./components/components_lite/Home"));
 const Login = lazy(() => import("./components/authentication/Login"));
@@ -121,6 +122,7 @@ function App() {
       <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
         <RouterProvider router={appRouter}></RouterProvider>
       </Suspense>
+      <Analytics />
     </div>
   );
 }
