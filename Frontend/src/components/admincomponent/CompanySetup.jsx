@@ -4,7 +4,7 @@ import { Button } from "../ui/button.jsx";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Label } from "../ui/label.jsx";
 import { Input } from "../ui/input.jsx";
-import axios from "axios";
+import API from "@/utils/axiosInstance";
 import { COMPANY_API_ENDPOINT } from "../../utils/data.js";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -47,14 +47,13 @@ const CompanySetup = () => {
     }
     try {
       setLoading(true);
-      const res = await axios.put(
+      const res = await API.put(
         `${COMPANY_API_ENDPOINT}/update/${params.id}`,
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-          withCredentials: true,
         }
       );
       console.log(res); // Debugging API response

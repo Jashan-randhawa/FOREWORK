@@ -2,14 +2,12 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY Backend/package*.json ./Backend/
-RUN cd Backend && npm install
+COPY Backend/package*.json ./
 
-COPY Backend ./Backend
+RUN npm install --omit=dev
 
-COPY start.sh ./start.sh
-RUN chmod +x ./start.sh
+COPY Backend/ .
 
-EXPOSE 5011
+EXPOSE 5001
 
-CMD ["sh", "start.sh"]
+CMD ["node", "index.js"]

@@ -90,24 +90,18 @@ const Creator = () => {
           {/* Developer 1 - Ankit Pathak */}
           <a  target="_blank" rel="noopener noreferrer" className="block text-center">
             <img src="https://img.freepik.com/free-vector/user-circles-set_78370-4704.jpg?semt=ais_hybrid&w=740&q=80" alt="Ankit Pathak" className="mx-auto rounded-lg shadow-md" />
-            <h3 className="text-lg font-semibold text-gray-700 mt-2">Jashanpreet Singh</h3>
-            <p className="text-gray-600 text-sm">Registration No: 2022033029</p>
+            <h3 className="text-lg font-semibold text-gray-700 mt-2">JasKirat Singh</h3>
+            <p className="text-gray-600 text-sm">Registration No: 2022033065</p>
             <p className="text-gray-600 text-sm">Full Stack Developer</p>
           </a>
           {/* Developer 2 - Ritik Shrivastava */}
           <a href="#" className="block text-center">
             <img src="https://img.freepik.com/free-vector/user-circles-set_78370-4704.jpg?semt=ais_hybrid&w=740&q=80" alt="Ritik Shrivastava" className="mx-auto rounded-lg shadow-md" />
-            <h3 className="text-lg font-semibold text-gray-700 mt-2">Natish Maan</h3>
-            <p className="text-gray-600 text-sm">Registration No: 2022033040</p>
+            <h3 className="text-lg font-semibold text-gray-700 mt-2">Himanshu Raheja</h3>
+            <p className="text-gray-600 text-sm">Registration No: 2022033064</p>
             <p className="text-gray-600 text-sm">UI/UX Designer</p>
           </a>
-          {/* Developer 3 - Gaurav Kumar */}
-          <a href="#" className="block text-center">
-            <img src="https://img.freepik.com/free-vector/user-circles-set_78370-4704.jpg?semt=ais_hybrid&w=740&q=80" alt="Gaurav Kumar" className="mx-auto rounded-lg shadow-md" />
-            <h3 className="text-lg font-semibold text-gray-700 mt-2">Dipanshu Sharma</h3>
-            <p className="text-gray-600 text-sm">Registration No: 2022033022</p>
-            <p className="text-gray-600 text-sm">Research</p>
-          </a>
+       
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { setAllJobs } from "@/redux/jobSlice";
 import { JOB_API_ENDPOINT } from "@/utils/data";
-import axios from "axios";
+import API from "@/utils/axiosInstance";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -15,11 +15,8 @@ const useGetAllJobs = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await axios.get(
-          `${JOB_API_ENDPOINT}/get?keyword=${searchedQuery}`,
-          {
-            withCredentials: true,
-          }
+        const res = await API.get(
+          `${JOB_API_ENDPOINT}/get?keyword=${searchedQuery}`
         );
         console.log("API Response:", res.data);
         if (res.data.status) {

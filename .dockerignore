@@ -1,3 +1,4 @@
-# Exclude local env files from Docker builds
+Backend/.env
+Backend/node_modules
 **/.env
 .env
