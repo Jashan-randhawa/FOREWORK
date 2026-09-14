@@ -9,6 +9,7 @@ import healthRoute from "./routes/health.route.js";
 import userRoute from "./routes/user.route.js";
 import categoryRoute from "./routes/category.route.js";
 import productRoute from "./routes/product.route.js";
+import inventoryRoute from "./routes/inventory.route.js";
 import errorHandler from "./middleware/errorHandler.js";
 import ApiError from "./utils/ApiError.js";
 
@@ -66,6 +67,9 @@ app.use("/api/categories", categoryRoute);
 
 // Product routes
 app.use("/api/products", productRoute);
+
+// Inventory routes
+app.use("/api/inventory", inventoryRoute);
 
 // Existing User route (repurposed in Phase 3)
 app.use("/api/user", userRoute);
