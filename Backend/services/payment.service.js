@@ -98,17 +98,20 @@ export const processRefund = async (orderId, requestedAmount = null) => {
   }
 
   const remainingPaid = payment.amount - payment.refundedAmount;
-  // requestedAmount from API is in dollars; payment.amount is stored in cents
-  const refundAmount = requestedAmount ? Math.round(Number(requestedAmount) * 100) : remainingPaid;
+  // requestedAmount is in the same unit as payment.amount (cents)
+  const refundAmount =
+    requestedAmount !== null && requestedAmount !== undefined
+      ? Number(requestedAmount)
+      : remainingPaid;
 
-  if (refundAmount <= 0) {
-    throw new ApiError(400, "Refund amount must be greater than zero");
+  if (!Number.isFinite(refundAmount) || refundAmount <= 0) {
+    throw new ApiError(400, "Refund amount must be a positive number");
   }
 
   if (refundAmount > remainingPaid) {
     throw new ApiError(
       400,
-      `Requested refund amount (${refundAmount / 100}) exceeds remaining refundable amount (${remainingPaid / 100})`
+      `Requested refund amount ($${(refundAmount / 100).toFixed(2)}) exceeds remaining refundable amount ($${(remainingPaid / 100).toFixed(2)})`
     );
   }
 
