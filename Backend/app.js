@@ -7,6 +7,7 @@ import rateLimit from "express-rate-limit";
 import config from "./config/index.js";
 import healthRoute from "./routes/health.route.js";
 import userRoute from "./routes/user.route.js";
+import categoryRoute from "./routes/category.route.js";
 import errorHandler from "./middleware/errorHandler.js";
 import ApiError from "./utils/ApiError.js";
 
@@ -58,6 +59,9 @@ app.use("/api/", globalLimiter);
 
 // Health check
 app.use("/api", healthRoute);
+
+// Category routes
+app.use("/api/categories", categoryRoute);
 
 // Existing User route (repurposed in Phase 3)
 app.use("/api/user", userRoute);
