@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import Order from "../models/order.model.js";
+import User from "../models/user.model.js";
 import { releaseReservation, adjustStock } from "../services/inventory.service.js";
+import { notifyOrderShipped } from "../services/notification.service.js";
 import Inventory from "../models/inventory.model.js";
 import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -190,6 +192,16 @@ export const shipOrder = asyncHandler(async (req, res) => {
   order.trackingNumber = trackingNumber.trim();
   order.carrier = carrier ? carrier.trim() : "Standard Carrier";
   await order.save();
+
+  // Asynchronously notify customer
+  try {
+    const user = await User.findById(order.user);
+    if (user) {
+      notifyOrderShipped(order, user);
+    }
+  } catch (err) {
+    console.error("[Shipment Notification Error]", err.message);
+  }
 
   return res.status(200).json({
     success: true,

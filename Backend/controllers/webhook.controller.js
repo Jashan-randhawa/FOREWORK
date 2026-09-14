@@ -2,7 +2,9 @@ import stripe from "../integrations/stripe.client.js";
 import config from "../config/index.js";
 import Payment from "../models/payment.model.js";
 import Order from "../models/order.model.js";
+import User from "../models/user.model.js";
 import { commitReservation, releaseReservation } from "../services/inventory.service.js";
+import { notifyPaymentSuccess } from "../services/notification.service.js";
 
 export const handleStripeWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
@@ -59,6 +61,16 @@ export const handleStripeWebhook = async (req, res) => {
             } catch (invErr) {
               console.error(`[Webhook Inventory Commit Error] Product ${item.product}:`, invErr);
             }
+          }
+
+          // Asynchronously notify user of successful payment
+          try {
+            const user = await User.findById(order.user);
+            if (user) {
+              notifyPaymentSuccess(payment, order, user);
+            }
+          } catch (notifErr) {
+            console.error("[Webhook Notification Error]", notifErr.message);
           }
         }
       }

@@ -7,6 +7,7 @@ import app from "../app.js";
 import config from "../config/index.js";
 import Payment from "../models/payment.model.js";
 import Order from "../models/order.model.js";
+import User from "../models/user.model.js";
 import Inventory from "../models/inventory.model.js";
 import { createOrGetPaymentIntent, processRefund } from "../services/payment.service.js";
 
@@ -114,6 +115,11 @@ describe("Phase 9: Stripe Payment Integration Tests", () => {
         return fakePayment;
       });
       mock.method(Order, "findById", async () => fakeOrder);
+      mock.method(User, "findById", async () => ({
+        _id: customerId,
+        fullname: "Test Customer",
+        email: "customer@example.com",
+      }));
 
       const eventPayload = {
         id: "evt_test_succeeded",
