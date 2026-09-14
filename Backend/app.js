@@ -18,6 +18,7 @@ import checkoutRoute from "./routes/checkout.route.js";
 import orderRoute from "./routes/order.route.js";
 import webhookRoute from "./routes/webhook.route.js";
 import reviewRoute from "./routes/review.route.js";
+import adminRoute from "./routes/admin.route.js";
 import errorHandler from "./middleware/errorHandler.js";
 import ApiError from "./utils/ApiError.js";
 
@@ -92,6 +93,9 @@ app.use("/api/coupons", couponRoute);
 app.use("/api/checkout", checkoutRoute);
 app.use("/api/orders", orderRoute);
 app.use("/api", reviewRoute);
+
+// Admin routes
+app.use("/api/admin", adminRoute);
 
 // User routes
 app.use("/api/user", userRoute);
