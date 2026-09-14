@@ -45,8 +45,9 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Webhook routes (requires raw body before JSON parsing)
-app.use("/api/webhooks", webhookRoute);
+// Webhook routes (requires raw body Buffer for Stripe signature verification)
+// Must be mounted BEFORE express.json() so the raw body is not consumed
+app.use("/api/webhooks", express.raw({ type: "application/json" }), webhookRoute);
 
 // Body parsers
 app.use(express.json({ limit: "10mb" }));

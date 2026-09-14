@@ -126,8 +126,8 @@ export const cancelOrder = asyncHandler(async (req, res) => {
     );
   }
 
-  if (["CANCELLED", "REFUND_INITIATED", "REFUNDED"].includes(order.status)) {
-    throw new ApiError(400, `Order is already cancelled or refunded.`);
+  if (["CANCELLED", "REFUND_INITIATED", "REFUNDED", "PAYMENT_FAILED"].includes(order.status)) {
+    throw new ApiError(400, `Order is already in a terminal state: '${order.status}'.`);
   }
 
   const previousStatus = order.status;

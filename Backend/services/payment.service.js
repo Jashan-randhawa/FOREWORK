@@ -19,7 +19,7 @@ export const createOrGetPaymentIntent = async (orderId, userId) => {
     throw new ApiError(403, "Forbidden: You can only pay for your own orders");
   }
 
-  if (order.paymentStatus === "PAID" || order.status === "PAID" || order.status === "PROCESSING") {
+  if (order.paymentStatus === "SUCCESS" || order.status === "PAID" || order.status === "PROCESSING") {
     throw new ApiError(402, "This order has already been paid for.");
   }
 
@@ -45,8 +45,10 @@ export const createOrGetPaymentIntent = async (orderId, userId) => {
   }
 
   // Create new PaymentIntent with Stripe
+  // Stripe expects amount in smallest currency unit (cents for USD)
+  const amountInCents = Math.round(order.total * 100);
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: order.total,
+    amount: amountInCents,
     currency: "usd",
     metadata: {
       orderId: order._id.toString(),
@@ -59,12 +61,13 @@ export const createOrGetPaymentIntent = async (orderId, userId) => {
       order: order._id,
       provider: "stripe",
       providerPaymentIntentId: paymentIntent.id,
-      amount: order.total,
+      amount: amountInCents,
       currency: "usd",
       status: "PENDING",
     });
   } else {
     payment.providerPaymentIntentId = paymentIntent.id;
+    payment.amount = amountInCents;
     payment.status = "PENDING";
     await payment.save();
   }
@@ -95,7 +98,8 @@ export const processRefund = async (orderId, requestedAmount = null) => {
   }
 
   const remainingPaid = payment.amount - payment.refundedAmount;
-  const refundAmount = requestedAmount ? Number(requestedAmount) : remainingPaid;
+  // requestedAmount from API is in dollars; payment.amount is stored in cents
+  const refundAmount = requestedAmount ? Math.round(Number(requestedAmount) * 100) : remainingPaid;
 
   if (refundAmount <= 0) {
     throw new ApiError(400, "Refund amount must be greater than zero");
@@ -104,11 +108,11 @@ export const processRefund = async (orderId, requestedAmount = null) => {
   if (refundAmount > remainingPaid) {
     throw new ApiError(
       400,
-      `Requested refund amount (${refundAmount}) exceeds remaining refundable amount (${remainingPaid})`
+      `Requested refund amount (${refundAmount / 100}) exceeds remaining refundable amount (${remainingPaid / 100})`
     );
   }
 
-  // Call Stripe refund API
+  // Call Stripe refund API (amount in cents)
   const stripeRefund = await stripe.refunds.create({
     payment_intent: payment.providerPaymentIntentId,
     amount: refundAmount,

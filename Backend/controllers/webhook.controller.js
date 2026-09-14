@@ -11,9 +11,9 @@ export const handleStripeWebhook = async (req, res) => {
   let event;
 
   try {
-    const rawPayload = req.rawBody || req.body;
+    // req.body is the raw Buffer set by express.raw() middleware in app.js
     event = stripe.webhooks.constructEvent(
-      rawPayload,
+      req.body,
       sig,
       config.stripe.webhookSecret
     );

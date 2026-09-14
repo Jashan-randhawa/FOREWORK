@@ -7,7 +7,6 @@ import asyncHandler from "../utils/asyncHandler.js";
 
 const COOKIE_OPTIONS = {
   maxAge: 1 * 24 * 60 * 60 * 1000,
-  httpsOnly: true,
   httpOnly: true,
   sameSite: config.isProduction ? "none" : "lax",
   secure: config.isProduction,

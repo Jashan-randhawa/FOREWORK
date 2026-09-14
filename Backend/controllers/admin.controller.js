@@ -53,11 +53,7 @@ export const getAdminStats = asyncHandler(async (req, res) => {
   };
 
   orderCountsAgg.forEach((item) => {
-    if (orderCountsByStatus[item._id] !== undefined) {
-      orderCountsByStatus[item._id] = item.count;
-    } else {
-      orderCountsByStatus[item._id] = item.count;
-    }
+    orderCountsByStatus[item._id] = item.count;
   });
 
   // 3. Find low-stock inventory (stock - reserved <= lowStockThreshold)
@@ -186,7 +182,7 @@ export const updateUserRole = asyncHandler(async (req, res, next) => {
   await targetUser.save();
 
   console.log(
-    `[ADMIN AUDIT] User ${targetUser._id} (${targetUser.email}) role changed from '${oldRole}' to '${role}' by Admin ${req.user._id} (${req.user.email})`
+    `[ADMIN AUDIT] User ${targetUser._id} (${targetUser.email}) role changed from '${oldRole}' to '${role}' by Admin ${req.user.userId}`
   );
 
   res.status(200).json({
