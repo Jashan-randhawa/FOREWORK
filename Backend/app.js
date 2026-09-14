@@ -16,6 +16,7 @@ import addressRoute from "./routes/address.route.js";
 import couponRoute from "./routes/coupon.route.js";
 import checkoutRoute from "./routes/checkout.route.js";
 import orderRoute from "./routes/order.route.js";
+import webhookRoute from "./routes/webhook.route.js";
 import errorHandler from "./middleware/errorHandler.js";
 import ApiError from "./utils/ApiError.js";
 
@@ -41,6 +42,9 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+// Webhook routes (requires raw body before JSON parsing)
+app.use("/api/webhooks", webhookRoute);
 
 // Body parsers
 app.use(express.json({ limit: "10mb" }));
