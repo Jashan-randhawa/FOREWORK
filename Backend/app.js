@@ -15,6 +15,7 @@ import wishlistRoute from "./routes/wishlist.route.js";
 import addressRoute from "./routes/address.route.js";
 import couponRoute from "./routes/coupon.route.js";
 import checkoutRoute from "./routes/checkout.route.js";
+import orderRoute from "./routes/order.route.js";
 import errorHandler from "./middleware/errorHandler.js";
 import ApiError from "./utils/ApiError.js";
 
@@ -84,6 +85,7 @@ app.use("/api/addresses", addressRoute);
 // Coupon & Checkout routes
 app.use("/api/coupons", couponRoute);
 app.use("/api/checkout", checkoutRoute);
+app.use("/api/orders", orderRoute);
 
 // User routes
 app.use("/api/user", userRoute);
