@@ -19,6 +19,9 @@ import orderRoute from "./routes/order.route.js";
 import webhookRoute from "./routes/webhook.route.js";
 import reviewRoute from "./routes/review.route.js";
 import adminRoute from "./routes/admin.route.js";
+import jobRoute from "./routes/job.route.js";
+import companyRoute from "./routes/company.route.js";
+import applicationRoute from "./routes/application.route.js";
 import errorHandler from "./middleware/errorHandler.js";
 import ApiError from "./utils/ApiError.js";
 
@@ -29,8 +32,9 @@ app.use(helmet());
 
 // CORS configuration
 const allowedOrigins = [
-  config.frontendUrl,
-  "http://localhost:5173",
+  "https://forework.vercel.app",   // production frontend
+  config.frontendUrl,              // override via FRONTEND_URL env var
+  "http://localhost:5173",         // local dev
 ].filter(Boolean);
 
 const corsOptions = {
@@ -100,6 +104,11 @@ app.use("/api/admin", adminRoute);
 
 // User routes
 app.use("/api/user", userRoute);
+
+// Job, Company & Application routes
+app.use("/api/job", jobRoute);
+app.use("/api/company", companyRoute);
+app.use("/api/application", applicationRoute);
 
 // 404 Handler
 app.use((req, res, next) => {
