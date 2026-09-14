@@ -4,6 +4,7 @@ import {
   getOrderById,
   updateOrderStatus,
   cancelOrder,
+  shipOrder,
 } from "../controllers/order.controller.js";
 import {
   createPayment,
@@ -18,6 +19,9 @@ router.get("/", isAuthenticated, getOrders);
 router.get("/:id", isAuthenticated, getOrderById);
 router.put("/:id/status", isAuthenticated, authorizeRoles("Admin"), updateOrderStatus);
 router.put("/:id/cancel", isAuthenticated, cancelOrder);
+
+// Shipping fulfillment (Phase 10)
+router.put("/:id/ship", isAuthenticated, authorizeRoles("Admin"), shipOrder);
 
 // Payment & Refund integration (Phase 9)
 router.post("/:id/pay", isAuthenticated, createPayment);

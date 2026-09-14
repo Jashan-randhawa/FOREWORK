@@ -161,3 +161,39 @@ export const cancelOrder = asyncHandler(async (req, res) => {
     order,
   });
 });
+
+export const shipOrder = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { trackingNumber, carrier } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, "Invalid order ID format");
+  }
+
+  if (!trackingNumber || !trackingNumber.trim()) {
+    throw new ApiError(400, "Tracking number is required");
+  }
+
+  const order = await Order.findById(id);
+  if (!order) {
+    throw new ApiError(404, "Order not found");
+  }
+
+  if (order.status !== "PROCESSING") {
+    throw new ApiError(
+      409,
+      `Cannot ship order with status '${order.status}'. Order must be in PROCESSING status to be marked as shipped.`
+    );
+  }
+
+  order.status = "SHIPPED";
+  order.trackingNumber = trackingNumber.trim();
+  order.carrier = carrier ? carrier.trim() : "Standard Carrier";
+  await order.save();
+
+  return res.status(200).json({
+    success: true,
+    message: "Order marked as shipped",
+    order,
+  });
+});
