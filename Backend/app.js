@@ -10,6 +10,9 @@ import userRoute from "./routes/user.route.js";
 import categoryRoute from "./routes/category.route.js";
 import productRoute from "./routes/product.route.js";
 import inventoryRoute from "./routes/inventory.route.js";
+import cartRoute from "./routes/cart.route.js";
+import wishlistRoute from "./routes/wishlist.route.js";
+import addressRoute from "./routes/address.route.js";
 import errorHandler from "./middleware/errorHandler.js";
 import ApiError from "./utils/ApiError.js";
 
@@ -71,7 +74,12 @@ app.use("/api/products", productRoute);
 // Inventory routes
 app.use("/api/inventory", inventoryRoute);
 
-// Existing User route (repurposed in Phase 3)
+// Cart, Wishlist, Address routes
+app.use("/api/cart", cartRoute);
+app.use("/api/wishlist", wishlistRoute);
+app.use("/api/addresses", addressRoute);
+
+// User routes
 app.use("/api/user", userRoute);
 
 // 404 Handler
