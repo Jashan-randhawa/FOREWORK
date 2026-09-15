@@ -5,6 +5,7 @@ const jobSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
+      trim: true,
     },
     description: {
       type: String,
@@ -13,37 +14,49 @@ const jobSchema = new mongoose.Schema(
     requirements: [
       {
         type: String,
+        trim: true,
       },
     ],
     salary: {
-      type: String,
+      type: Number,
       required: true,
+      min: 0,
+      index: true,
     },
     experienceLevel: {
       type: Number,
       required: true,
+      min: 0,
+      index: true,
     },
     location: {
       type: String,
       required: true,
+      trim: true,
+      index: true,
     },
     jobType: {
       type: String,
       required: true,
+      trim: true,
+      index: true,
     },
     position: {
       type: Number,
       required: true,
+      min: 1,
     },
     company: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
       required: true,
+      index: true,
     },
     created_by: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true,
     },
     applications: [
       {
@@ -54,4 +67,11 @@ const jobSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Search & Performance Indexes
+jobSchema.index({ title: "text", description: "text" });
+jobSchema.index({ company: 1, createdAt: -1 });
+jobSchema.index({ created_by: 1, createdAt: -1 });
+jobSchema.index({ createdAt: -1 });
+
 export const Job = mongoose.model("Job", jobSchema);

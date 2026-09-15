@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Job } from "../models/job.model.js";
 import { Company } from "../models/company.model.js";
 
@@ -21,15 +22,51 @@ export const postJob = async (req, res, next) => {
       !title ||
       !description ||
       !requirements ||
-      !salary ||
+      salary === undefined ||
       !location ||
       !jobType ||
-      !experience ||
-      !position ||
+      experience === undefined ||
+      position === undefined ||
       !companyId
     ) {
       return res.status(400).json({
         message: "All fields are required",
+        success: false,
+        status: false,
+      });
+    }
+
+    const numSalary = Number(salary);
+    const numExperience = Number(experience);
+    const numPosition = Number(position);
+
+    if (isNaN(numSalary) || numSalary < 0) {
+      return res.status(400).json({
+        message: "Salary must be a valid positive number",
+        success: false,
+        status: false,
+      });
+    }
+
+    if (isNaN(numExperience) || numExperience < 0) {
+      return res.status(400).json({
+        message: "Experience must be a valid non-negative number",
+        success: false,
+        status: false,
+      });
+    }
+
+    if (isNaN(numPosition) || numPosition < 1) {
+      return res.status(400).json({
+        message: "Position count must be at least 1",
+        success: false,
+        status: false,
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(companyId)) {
+      return res.status(400).json({
+        message: "Invalid company ID format",
         success: false,
         status: false,
       });
@@ -54,22 +91,25 @@ export const postJob = async (req, res, next) => {
     }
 
     const job = await Job.create({
-      title,
-      description,
-      requirements: Array.isArray(requirements) ? requirements : requirements.split(","),
-      salary: Number(salary),
-      location,
-      jobType,
-      experienceLevel: Number(experience),
-      position: Number(position),
+      title: title.trim(),
+      description: description.trim(),
+      requirements: Array.isArray(requirements)
+        ? requirements
+        : requirements.split(",").map((r) => r.trim()).filter(Boolean),
+      salary: numSalary,
+      location: location.trim(),
+      jobType: jobType.trim(),
+      experienceLevel: numExperience,
+      position: numPosition,
       company: companyId,
       created_by: userId,
     });
 
     return res.status(201).json({
-      message: "Job posted successfully.",
-      job,
       success: true,
+      message: "Job posted successfully.",
+      data: { job },
+      job,
       status: true,
     });
   } catch (error) {
@@ -77,25 +117,113 @@ export const postJob = async (req, res, next) => {
   }
 };
 
-// Public jobs listing
+// Public jobs listing with structured filters and pagination (JOB-011, JOB-013, API-001)
 export const getAllJobs = async (req, res, next) => {
   try {
-    const keyword = req.query.keyword || "";
-    const query = {
-      $or: [
-        { title: { $regex: keyword, $options: "i" } },
-        { description: { $regex: keyword, $options: "i" } },
-      ],
-    };
+    const {
+      keyword,
+      location,
+      jobType,
+      experienceMin,
+      experienceMax,
+      salaryMin,
+      salaryMax,
+      page = 1,
+      limit = 10,
+      sort = "latest",
+    } = req.query;
+
+    const query = {};
+
+    // Keyword search across title and description
+    if (keyword && keyword.trim()) {
+      const cleanKeyword = keyword.trim();
+      query.$or = [
+        { title: { $regex: cleanKeyword, $options: "i" } },
+        { description: { $regex: cleanKeyword, $options: "i" } },
+        { requirements: { $regex: cleanKeyword, $options: "i" } },
+      ];
+    }
+
+    // Location filter
+    if (location && location.trim()) {
+      query.location = { $regex: location.trim(), $options: "i" };
+    }
+
+    // Job Type filter
+    if (jobType && jobType.trim()) {
+      query.jobType = { $regex: jobType.trim(), $options: "i" };
+    }
+
+    // Experience range filter
+    if (experienceMin !== undefined && experienceMin !== "" || experienceMax !== undefined && experienceMax !== "") {
+      query.experienceLevel = {};
+      if (experienceMin !== undefined && experienceMin !== "" && !isNaN(Number(experienceMin))) {
+        query.experienceLevel.$gte = Number(experienceMin);
+      }
+      if (experienceMax !== undefined && experienceMax !== "" && !isNaN(Number(experienceMax))) {
+        query.experienceLevel.$lte = Number(experienceMax);
+      }
+    }
+
+    // Salary range filter
+    if (salaryMin !== undefined && salaryMin !== "" || salaryMax !== undefined && salaryMax !== "") {
+      query.salary = {};
+      if (salaryMin !== undefined && salaryMin !== "" && !isNaN(Number(salaryMin))) {
+        query.salary.$gte = Number(salaryMin);
+      }
+      if (salaryMax !== undefined && salaryMax !== "" && !isNaN(Number(salaryMax))) {
+        query.salary.$lte = Number(salaryMax);
+      }
+    }
+
+    // Pagination numbers
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 10));
+    const skip = (pageNum - 1) * limitNum;
+
+    // Sorting
+    let sortObj = { createdAt: -1 };
+    if (sort === "salary_desc") {
+      sortObj = { salary: -1, createdAt: -1 };
+    } else if (sort === "salary_asc") {
+      sortObj = { salary: 1, createdAt: -1 };
+    } else if (sort === "experience_asc") {
+      sortObj = { experienceLevel: 1, createdAt: -1 };
+    } else if (sort === "oldest") {
+      sortObj = { createdAt: 1 };
+    }
+
+    const total = await Job.countDocuments(query);
+    const totalPages = Math.ceil(total / limitNum) || 1;
+
     const jobs = await Job.find(query)
       .populate({
         path: "company",
       })
-      .sort({ createdAt: -1 });
+      .sort(sortObj)
+      .skip(skip)
+      .limit(limitNum);
+
+    const pagination = {
+      page: pageNum,
+      limit: limitNum,
+      total,
+      totalPages,
+      hasMore: pageNum < totalPages,
+    };
 
     return res.status(200).json({
-      jobs: jobs || [],
       success: true,
+      message: "Jobs fetched successfully",
+      data: {
+        jobs: jobs || [],
+        pagination,
+      },
+      // Backward compatibility aliases
+      jobs: jobs || [],
+      pagination,
+      total,
       status: true,
     });
   } catch (error) {
@@ -103,13 +231,26 @@ export const getAllJobs = async (req, res, next) => {
   }
 };
 
-// Public job by id
+// Public job by id with populated company & applications (JOB-014, API-001)
 export const getJobById = async (req, res, next) => {
   try {
     const jobId = req.params.id;
-    const job = await Job.findById(jobId).populate({
-      path: "applications",
-    });
+    if (!jobId || !mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({
+        message: "Invalid job ID format",
+        success: false,
+        status: false,
+      });
+    }
+
+    const job = await Job.findById(jobId)
+      .populate({
+        path: "company",
+      })
+      .populate({
+        path: "applications",
+      });
+
     if (!job) {
       return res.status(404).json({
         message: "Job not found",
@@ -117,9 +258,12 @@ export const getJobById = async (req, res, next) => {
         status: false,
       });
     }
+
     return res.status(200).json({
-      job,
       success: true,
+      message: "Job fetched successfully",
+      data: { job },
+      job,
       status: true,
     });
   } catch (error) {
@@ -127,18 +271,44 @@ export const getJobById = async (req, res, next) => {
   }
 };
 
-// Recruiter jobs
+// Recruiter jobs with pagination
 export const getAdminJobs = async (req, res, next) => {
   try {
     const adminId = req.id;
-    const jobs = await Job.find({ created_by: adminId }).populate({
-      path: "company",
-      options: { sort: { createdAt: -1 } },
-    });
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 20));
+    const skip = (page - 1) * limit;
+
+    const query = { created_by: adminId };
+    const total = await Job.countDocuments(query);
+    const totalPages = Math.ceil(total / limit) || 1;
+
+    const jobs = await Job.find(query)
+      .populate({
+        path: "company",
+      })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const pagination = {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasMore: page < totalPages,
+    };
 
     return res.status(200).json({
-      jobs: jobs || [],
       success: true,
+      message: "Recruiter jobs fetched successfully",
+      data: {
+        jobs: jobs || [],
+        pagination,
+      },
+      jobs: jobs || [],
+      pagination,
+      total,
       status: true,
     });
   } catch (error) {

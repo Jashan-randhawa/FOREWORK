@@ -1,65 +1,125 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Navbar from "./Navbar";
 import FilterCard from "./Filtercard";
 import Job1 from "./Job1";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { motion } from "framer-motion";
+import { Button } from "../ui/button";
+import { setPage, clearFilters } from "@/redux/jobSlice";
+import useGetAllJobs from "@/hooks/useGetAllJobs";
+import { ChevronLeft, ChevronRight, Loader2, Frown } from "lucide-react";
 
 const Jobs = () => {
-  const { allJobs, searchedQuery } = useSelector((store) => store.job);
-  const [filterJobs, setFilterJobs] = useState(allJobs);
+  const { loading } = useGetAllJobs();
+  const dispatch = useDispatch();
+  const { allJobs, pagination } = useSelector((store) => store.job);
 
-  useEffect(() => {
-    // If no search query is provided, reset to all jobs
-    //     if (searchedQuery)
-    if (!searchedQuery || searchedQuery.trim() === "") {
-      setFilterJobs(allJobs);
-      return;
+  const handlePrevPage = () => {
+    if (pagination?.page > 1) {
+      dispatch(setPage(pagination.page - 1));
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
+  };
 
-    // Filter based on the searched query across various fields (title, description, etc.)
-    const filteredJobs = allJobs.filter((job) => {
-      const query = searchedQuery.toLowerCase();
-      return (
-        job.title?.toLowerCase().includes(query) ||
-        job.description?.toLowerCase().includes(query) ||
-        job.location?.toLowerCase().includes(query) ||
-        job.experience?.toLowerCase().includes(query) ||
-        job.salary?.toLowerCase().includes(query)
-      );
-    });
-
-    setFilterJobs(filteredJobs);
-  }, [allJobs, searchedQuery]);
+  const handleNextPage = () => {
+    if (pagination?.page < pagination?.totalPages) {
+      dispatch(setPage(pagination.page + 1));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      <div className="max-w-7xl mx-auto mt-5">
-        <div className="flex gap-5">
-          <div className="w-1/5">
+      <div className="max-w-7xl mx-auto mt-6 px-4 flex-1 w-full pb-10">
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Left Sidebar: Filter Card */}
+          <div className="w-full md:w-1/4">
             <FilterCard />
           </div>
 
-          {filterJobs.length <= 0 ? (
-            <span>Job not found</span>
-          ) : (
-            <div className="flex-1 h-[88vh] overflow-y-auto pb-5">
-              <div className="grid grid-cols-3 gap-4">
-                {filterJobs.map((job) => (
-                  <motion.div
-                    initial={{ opacity: 0, x: 100 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -100 }}
-                    transition={{ duration: 0.4 }}
-                    key={job.id}
-                  >
-                    <Job1 job={job} />
-                  </motion.div>
-                ))}
-              </div>
+          {/* Right Main Content: Jobs Grid + Pagination */}
+          <div className="flex-1 flex flex-col">
+            {/* Header info */}
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm text-gray-600">
+                Found{" "}
+                <span className="font-semibold text-gray-900">
+                  {pagination?.total || allJobs?.length || 0}
+                </span>{" "}
+                jobs
+                {pagination?.totalPages > 1 &&
+                  ` (Page ${pagination.page} of ${pagination.totalPages})`}
+              </p>
             </div>
-          )}
+
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-purple-600 mb-2" />
+                <p className="text-gray-500 text-sm">Loading jobs...</p>
+              </div>
+            ) : allJobs.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 bg-white rounded-lg border border-dashed border-gray-300 p-8 text-center">
+                <Frown className="w-12 h-12 text-gray-400 mb-3" />
+                <h3 className="font-semibold text-gray-700 text-lg">No jobs found</h3>
+                <p className="text-gray-500 text-sm mt-1 max-w-sm">
+                  We couldn't find any job postings matching your current search criteria.
+                </p>
+                <Button
+                  onClick={() => dispatch(clearFilters())}
+                  className="mt-4 bg-[#6B3AC2] hover:bg-[#552d9b]"
+                  size="sm"
+                >
+                  Clear all filters
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {allJobs.map((job) => (
+                    <motion.div
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -15 }}
+                      transition={{ duration: 0.3 }}
+                      key={job._id || job.id}
+                    >
+                      <Job1 job={job} />
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                {pagination?.totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-3 mt-8 pt-4 border-t border-gray-200">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handlePrevPage}
+                      disabled={pagination.page <= 1}
+                      className="flex items-center gap-1"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Previous
+                    </Button>
+                    <span className="text-sm text-gray-600">
+                      Page {pagination.page} of {pagination.totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleNextPage}
+                      disabled={pagination.page >= pagination.totalPages}
+                      className="flex items-center gap-1"
+                    >
+                      Next
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
