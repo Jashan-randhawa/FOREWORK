@@ -89,3 +89,89 @@ export const sendInterviewInvitationEmail = async ({
   });
 };
 
+export const sendApplicationSubmittedEmail = async ({
+  email,
+  candidateName,
+  jobTitle,
+  companyName,
+}) => {
+  return sendEmail({
+    to: email,
+    subject: `Application Submitted: ${jobTitle} at ${companyName || "FOREWORK"}`,
+    text: `Hello ${candidateName},\n\nYour application for "${jobTitle}" at ${companyName || "the company"} has been successfully submitted.\n\nYou can track the status of your application from your profile.\n\nBest regards,\nFOREWORK Team`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px;">
+        <h2>Application Received</h2>
+        <p>Dear ${candidateName},</p>
+        <p>Your application for <strong>${jobTitle}</strong> at <strong>${companyName || "the company"}</strong> has been received by the hiring team.</p>
+        <div style="background-color: #f3f4f6; padding: 15px; border-radius: 6px; margin: 15px 0;">
+          <p><strong>Position:</strong> ${jobTitle}</p>
+          <p><strong>Company:</strong> ${companyName || "FOREWORK Partner"}</p>
+          <p><strong>Status:</strong> Under Review</p>
+        </div>
+        <p>You can track the progress of your application on your FOREWORK profile dashboard.</p>
+        <p>Best regards,<br/>FOREWORK Team</p>
+      </div>
+    `,
+  });
+};
+
+export const sendNewApplicantNotificationEmail = async ({
+  email,
+  recruiterName,
+  candidateName,
+  jobTitle,
+}) => {
+  return sendEmail({
+    to: email,
+    subject: `New Applicant for ${jobTitle}: ${candidateName}`,
+    text: `Hello ${recruiterName},\n\nA new candidate (${candidateName}) has applied for your job posting "${jobTitle}".\n\nLog in to your recruiter dashboard to review their resume and profile.\n\nBest regards,\nFOREWORK Team`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px;">
+        <h2>New Candidate Application</h2>
+        <p>Hello ${recruiterName},</p>
+        <p>Great news! A new candidate has submitted an application for your job posting:</p>
+        <div style="background-color: #f3f4f6; padding: 15px; border-radius: 6px; margin: 15px 0;">
+          <p><strong>Job Title:</strong> ${jobTitle}</p>
+          <p><strong>Applicant Name:</strong> ${candidateName}</p>
+        </div>
+        <p>Please log in to your recruiter dashboard to view the full application and applicant details.</p>
+        <p>Best regards,<br/>FOREWORK Recruiting System</p>
+      </div>
+    `,
+  });
+};
+
+export const sendApplicationStatusEmail = async ({
+  email,
+  candidateName,
+  jobTitle,
+  companyName,
+  status,
+}) => {
+  const isAccepted = status.toLowerCase() === "accepted";
+  const statusHeadline = isAccepted ? "Application Accepted!" : "Application Status Update";
+  const messageBody = isAccepted
+    ? `Congratulations! Your application for <strong>${jobTitle}</strong> at <strong>${companyName || "the company"}</strong> has been accepted. The recruiting team will follow up shortly with next steps.`
+    : `Thank you for your interest in <strong>${jobTitle}</strong> at <strong>${companyName || "the company"}</strong>. After careful review, the team has decided not to move forward with your application at this time.`;
+
+  return sendEmail({
+    to: email,
+    subject: `${statusHeadline} - ${jobTitle}`,
+    text: `Hello ${candidateName},\n\nYour application status for "${jobTitle}" at ${companyName || "the company"} has been updated to: ${status.toUpperCase()}.\n\nBest regards,\n${companyName || "Hiring Team"}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px;">
+        <h2>${statusHeadline}</h2>
+        <p>Dear ${candidateName},</p>
+        <p>${messageBody}</p>
+        <div style="background-color: #f3f4f6; padding: 15px; border-radius: 6px; margin: 15px 0;">
+          <p><strong>Job:</strong> ${jobTitle}</p>
+          <p><strong>Company:</strong> ${companyName || "Company"}</p>
+          <p><strong>Updated Status:</strong> <span style="font-weight: bold; color: ${isAccepted ? '#10B981' : '#EF4444'};">${status.toUpperCase()}</span></p>
+        </div>
+        <p>Best regards,<br/>${companyName || "Hiring Team"}</p>
+      </div>
+    `,
+  });
+};
+

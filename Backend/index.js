@@ -14,6 +14,7 @@ import companyRoute from "./routes/company.route.js";
 import jobRoute from "./routes/job.route.js";
 import applicationRoute from "./routes/application.route.js";
 import adminRoute from "./routes/admin.route.js";
+import notificationRoute from "./routes/notification.route.js";
 
 dotenv.config({});
 validateEnv();
@@ -109,12 +110,14 @@ app.use("/api/company", companyRoute);
 app.use("/api/job", jobRoute);
 app.use("/api/application", applicationRoute);
 app.use("/api/admin", adminRoute);
+app.use("/api/notification", notificationRoute);
 
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 app.use("/api/v1/admin", adminRoute);
+app.use("/api/v1/notification", notificationRoute);
 
 // 404 handler for undefined API routes
 app.use("/api/*", (req, res) => {

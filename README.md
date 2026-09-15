@@ -331,6 +331,22 @@ FOREWORK-main/
 }
 ```
 
+### Notification
+```js
+{
+  recipient: ObjectId → User (required, indexed)
+  sender:    ObjectId → User (default: null)
+  type:      Enum["APPLICATION_SUBMITTED", "NEW_APPLICANT", "APPLICATION_STATUS", "INTERVIEW_SCHEDULED", "JOB_ALERT", "SYSTEM"]
+  title:     String (required)
+  message:   String (required)
+  link:      String
+  isRead:    Boolean (default: false, indexed)
+  metadata:  Object (default: {})
+  createdAt, updatedAt (timestamps)
+}
+// Compound index: { recipient: 1, isRead: 1, createdAt: -1 }
+```
+
 ### Application
 ```js
 {
@@ -427,6 +443,18 @@ Base URL (production): `https://forework.onrender.com` (supports `/api/v1/*` ali
 | GET | `/companies` | ✅ | `Admin` | Paginated platform companies with verification and search filter |
 | PATCH | `/companies/:id/verify` | ✅ | `Admin` | Verify or un-verify company entity (creates audit log) |
 | GET | `/audit-logs` | ✅ | `Admin` | Query platform audit log trail with pagination and filters |
+
+---
+
+### Notifications — `/api/notification`
+
+| Method | Endpoint | Auth | Role | Description |
+|--------|----------|:---:|:----:|-------------|
+| GET | `/` | ✅ | Any | Paginated notifications for logged-in user (`?page=1&limit=15&unreadOnly=true`) |
+| GET | `/unread-count` | ✅ | Any | Quick unread notification count for badge rendering |
+| PATCH | `/:id/read` | ✅ | Any | Mark single notification as read (scoped to owner) |
+| PATCH | `/read-all` | ✅ | Any | Mark all notifications for logged-in user as read |
+| DELETE | `/:id` | ✅ | Any | Delete a notification (scoped to owner) |
 
 ---
 

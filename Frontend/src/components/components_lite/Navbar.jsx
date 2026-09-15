@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import API from "@/utils/axiosInstance";
 import { setUser } from "@/redux/authSlice";
 import { USER_API_ENDPOINT } from "@/utils/data";
+import NotificationDropdown from "./NotificationDropdown";
 
 const Navbar = () => {
   const { user } = useSelector((store) => store.auth);
@@ -100,81 +101,84 @@ const Navbar = () => {
               </Link>
             </div>
           ) : (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Avatar className="cursor-pointer">
-                  <AvatarImage
-                    src={user?.profile?.profilePhoto}
-                    alt="@shadcn"
-                  />
-                </Avatar>
-              </PopoverTrigger>
-              <PopoverContent className="w-80">
-                <div className="flex gap-4 space-y-2">
+            <div className="flex items-center gap-3">
+              <NotificationDropdown />
+              <Popover>
+                <PopoverTrigger asChild>
                   <Avatar className="cursor-pointer">
                     <AvatarImage
                       src={user?.profile?.profilePhoto}
                       alt="@shadcn"
                     />
                   </Avatar>
-                  <div>
-                    <h3 className="font-medium">{user?.fullname}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {user?.profile?.bio}
-                    </p>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <div className="flex gap-4 space-y-2">
+                    <Avatar className="cursor-pointer">
+                      <AvatarImage
+                        src={user?.profile?.profilePhoto}
+                        alt="@shadcn"
+                      />
+                    </Avatar>
+                    <div>
+                      <h3 className="font-medium">{user?.fullname}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {user?.profile?.bio}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex flex-col my-2 text-gray-600  ">
-                  {user && user.role === "Admin" && (
-                    <div className="flex w-fit items-center gap-2 cursor-pointer text-red-600 font-semibold">
-                      <Button variant="link" className="text-red-600 p-0">
-                        <Link to={"/admin/dashboard"}>Admin Dashboard</Link>
+                  <div className="flex flex-col my-2 text-gray-600  ">
+                    {user && user.role === "Admin" && (
+                      <div className="flex w-fit items-center gap-2 cursor-pointer text-red-600 font-semibold">
+                        <Button variant="link" className="text-red-600 p-0">
+                          <Link to={"/admin/dashboard"}>Admin Dashboard</Link>
+                        </Button>
+                      </div>
+                    )}
+
+                    {user && user.role === "Recruiter" && (
+                      <>
+                        <div className="flex w-fit items-center gap-2 cursor-pointer">
+                          <Button variant="link" className="p-0">
+                            <Link to={"/recruiter/companies"}>My Companies</Link>
+                          </Button>
+                        </div>
+                        <div className="flex w-fit items-center gap-2 cursor-pointer">
+                          <Button variant="link" className="p-0">
+                            <Link to={"/recruiter/jobs"}>My Jobs</Link>
+                          </Button>
+                        </div>
+                      </>
+                    )}
+
+                    {user && user.role === "Student" && (
+                      <>
+                        <div className="flex w-fit items-center gap-2 cursor-pointer">
+                          <User2 />
+                          <Button variant="link">
+                            <Link to={"/Profile"}> Profile</Link>
+                          </Button>
+                        </div>
+                        <div className="flex w-fit items-center gap-2 cursor-pointer">
+                          <Bookmark className="w-4 h-4" />
+                          <Button variant="link">
+                            <Link to={"/saved-jobs"}> Saved Jobs</Link>
+                          </Button>
+                        </div>
+                      </>
+                    )}
+
+                    <div className="flex w-fit items-center gap-2 cursor-pointer mt-2 pt-2 border-t">
+                      <LogOut></LogOut>
+                      <Button onClick={logoutHandler} variant="link" className="p-0">
+                        Logout
                       </Button>
                     </div>
-                  )}
-
-                  {user && user.role === "Recruiter" && (
-                    <>
-                      <div className="flex w-fit items-center gap-2 cursor-pointer">
-                        <Button variant="link" className="p-0">
-                          <Link to={"/recruiter/companies"}>My Companies</Link>
-                        </Button>
-                      </div>
-                      <div className="flex w-fit items-center gap-2 cursor-pointer">
-                        <Button variant="link" className="p-0">
-                          <Link to={"/recruiter/jobs"}>My Jobs</Link>
-                        </Button>
-                      </div>
-                    </>
-                  )}
-
-                  {user && user.role === "Student" && (
-                    <>
-                      <div className="flex w-fit items-center gap-2 cursor-pointer">
-                        <User2 />
-                        <Button variant="link">
-                          <Link to={"/Profile"}> Profile</Link>
-                        </Button>
-                      </div>
-                      <div className="flex w-fit items-center gap-2 cursor-pointer">
-                        <Bookmark className="w-4 h-4" />
-                        <Button variant="link">
-                          <Link to={"/saved-jobs"}> Saved Jobs</Link>
-                        </Button>
-                      </div>
-                    </>
-                  )}
-
-                  <div className="flex w-fit items-center gap-2 cursor-pointer mt-2 pt-2 border-t">
-                    <LogOut></LogOut>
-                    <Button onClick={logoutHandler} variant="link" className="p-0">
-                      Logout
-                    </Button>
                   </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+                </PopoverContent>
+              </Popover>
+            </div>
           )}
         </div>
       </div>
