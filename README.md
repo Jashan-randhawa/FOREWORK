@@ -666,11 +666,11 @@ chmod +x start.sh
 
 - **Render cold starts:** Free tier backend spins down after ~15 minutes of inactivity. The first request after idle may take 20–30 seconds to wake up.
 - **Cross-origin cookies:** Cookie-based auth may behave differently across browsers, especially in stricter privacy modes. The app uses `SameSite: None; Secure` in production to mitigate this.
-- **No email verification:** Accounts are activated immediately on registration without any email confirmation step.
 - **Single file uploads only:** Multer is configured with `.single("file")` — multiple file uploads in one request are not supported.
-- **No pagination:** All job listings and company records are fetched in a single request, which may slow down at large scale.
-- **Keyword search only:** Job search uses MongoDB `$regex` on title and description — no full-text indexing or fuzzy matching.
-- **No password reset flow:** There is currently no "forgot password" or email-based reset functionality.
+- **Keyword + structured search only:** Job search combines MongoDB `$regex` on title/description with structured filters (location, jobType, experience/salary range) — no full-text indexing or fuzzy matching.
+- **`FIELD_ENCRYPTION_KEY` must be a real secret:** the server refuses to start in production if this is missing or left as the placeholder value shown in `.env.example` — generate a unique key with `openssl rand -hex 32`.
+
+> Note: email verification, password reset, and pagination are implemented (see [API Reference](#api-reference)) — they were previously listed here as missing; that was stale.
 
 ---
 
