@@ -26,6 +26,7 @@ const Applicants = lazy(() => import("./components/admincomponent/Applicants"));
 const ProtectedRoute = lazy(() => import("./components/admincomponent/ProtectedRoute"));
 const Creator = lazy(() => import("./components/creator/Creator.jsx"));
 const SuspendedAccount = lazy(() => import("./components/components_lite/SuspendedAccount.jsx"));
+const NotificationsPage = lazy(() => import("./components/components_lite/NotificationsPage.jsx"));
 
 // Platform Admin components (ADMIN-004)
 const AdminRoute = lazy(() => import("./components/admin/AdminRoute"));
@@ -76,6 +77,10 @@ const appRouter = createBrowserRouter([
   {
     path: "/suspended",
     element: <SuspendedAccount />,
+  },
+  {
+    path: "/notifications",
+    element: <NotificationsPage />,
   },
   {
     path: "/PrivacyPolicy",

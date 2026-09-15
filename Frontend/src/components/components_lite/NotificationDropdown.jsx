@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Bell, Check, Trash2, ExternalLink } from "lucide-react";
@@ -223,6 +223,20 @@ const NotificationDropdown = () => {
               </div>
             ))
           )}
+        </div>
+
+        <div className="p-2 border-t bg-gray-50 dark:bg-gray-900 text-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setIsOpen(false);
+              navigate("/notifications");
+            }}
+            className="w-full text-xs text-[#6B3AC2] hover:text-[#522998] h-8 font-medium"
+          >
+            View all notifications
+          </Button>
         </div>
       </PopoverContent>
     </Popover>
