@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
+import ErrorBoundary from "./components/components_lite/ErrorBoundary";
 
 const Home = lazy(() => import("./components/components_lite/Home"));
 const Login = lazy(() => import("./components/authentication/Login"));
@@ -194,12 +195,14 @@ const appRouter = createBrowserRouter([
 
 function App() {
   return (
-    <div>
-      <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
-        <RouterProvider router={appRouter}></RouterProvider>
-      </Suspense>
-      <Analytics />
-    </div>
+    <ErrorBoundary>
+      <div>
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+          <RouterProvider router={appRouter}></RouterProvider>
+        </Suspense>
+        <Analytics />
+      </div>
+    </ErrorBoundary>
   );
 }
 

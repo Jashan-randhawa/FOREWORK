@@ -35,10 +35,19 @@ const Navbar = () => {
   };
   return (
     <div className="bg-white">
-      <div className="flex items-center justify-between mx-auto max-w-7xl h-16">
+      {/* A11Y Skip to content link */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#6B3AC2] focus:text-white focus:rounded-md focus:shadow-lg focus:outline-none"
+      >
+        Skip to main content
+      </a>
+      <div className="flex items-center justify-between mx-auto max-w-7xl h-16 px-4 sm:px-6 lg:px-8">
         <div>
           <h1 className="text-2xl font-bold">
-            <span className="text-[#6B3AC2]"> ForeWork </span>{" "}
+            <Link to="/" aria-label="ForeWork Home">
+              <span className="text-[#6B3AC2]"> ForeWork </span>
+            </Link>
           </h1>
         </div>
         <div className="flex items-center gap-10">

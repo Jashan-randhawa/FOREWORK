@@ -28,6 +28,9 @@ jobs:
       - name: Install Backend dependencies
         run: npm ci
 
+      - name: Run Backend security audit
+        run: npm audit --audit-level=critical
+
       - name: Run Backend test suite
         run: npm test
         env:
@@ -55,6 +58,9 @@ jobs:
 
       - name: Install Frontend dependencies
         run: npm ci
+
+      - name: Run Frontend security audit
+        run: npm audit --audit-level=critical
 
       - name: Run Frontend linting
         run: npm run lint

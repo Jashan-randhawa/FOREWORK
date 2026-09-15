@@ -55,74 +55,87 @@ const Login = () => {
 
   return (
     <div>
-      <Navbar></Navbar>
-      <div className="flex items-center justify-center max-w-7xl mx-auto">
+      <Navbar />
+      <main id="main-content" className="flex items-center justify-center max-w-7xl mx-auto px-4">
         <form
           onSubmit={submitHandler}
-          className="w-1/2 border border-gray-500 rounded-md p-4 my-10"
+          aria-labelledby="login-heading"
+          className="w-full max-w-md border border-gray-300 rounded-md p-6 my-10 shadow-sm bg-white"
         >
-          <h1 className="font-bold text-xl mb-5 text-center text-blue-600">
+          <h1 id="login-heading" className="font-bold text-xl mb-5 text-center text-blue-600">
             Login
           </h1>
-          <div className="my-2">
-            <Label>Email</Label>
+          <div className="my-3">
+            <Label htmlFor="login-email">Email</Label>
             <Input
+              id="login-email"
               type="email"
               value={input.email}
               name="email"
+              autoComplete="email"
+              required
+              aria-required="true"
               onChange={changeEventHandler}
               placeholder="johndoe@gmail.com"
-            ></Input>
+              className="mt-1"
+            />
           </div>
-          <div className="my-2">
+          <div className="my-3">
             <div className="flex items-center justify-between">
-              <Label>Password</Label>
+              <Label htmlFor="login-password">Password</Label>
               <Link
                 to="/forgot-password"
-                className="text-xs text-purple-600 hover:underline"
+                className="text-xs text-purple-600 hover:underline focus:outline-none focus:ring-2 focus:ring-purple-500 rounded"
               >
                 Forgot password?
               </Link>
             </div>
             <Input
+              id="login-password"
               type="password"
               value={input.password}
               name="password"
+              autoComplete="current-password"
+              required
+              aria-required="true"
               onChange={changeEventHandler}
               placeholder="********"
-            ></Input>
+              className="mt-1"
+            />
           </div>
-           
 
-          <div className="flex items-center justify-between">
-            <RadioGroup className="flex items-center gap-4 my-5 ">
+          <fieldset className="my-4">
+            <legend className="text-sm font-medium text-gray-700 mb-2">Select your role</legend>
+            <RadioGroup className="flex items-center gap-6">
               <div className="flex items-center space-x-2">
                 <Input
                   type="radio"
+                  id="role-student"
                   name="role"
                   value="Student"
                   checked={input.role === "Student"}
                   onChange={changeEventHandler}
                   className="cursor-pointer"
                 />
-                <Label htmlFor="r1">Student</Label>
+                <Label htmlFor="role-student" className="cursor-pointer">Student</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Input
                   type="radio"
+                  id="role-recruiter"
                   name="role"
                   value="Recruiter"
                   checked={input.role === "Recruiter"}
                   onChange={changeEventHandler}
                   className="cursor-pointer"
                 />
-                <Label htmlFor="r2">Recruiter</Label>
+                <Label htmlFor="role-recruiter" className="cursor-pointer">Recruiter</Label>
               </div>
             </RadioGroup>
-          </div>
+          </fieldset>
 
           {loading ? (
-            <div className="flex items-center justify-center my-10">
+            <div className="flex items-center justify-center my-6" aria-live="polite">
               <div className="spinner-border text-blue-600" role="status">
                 <span className="sr-only">Loading...</span>
               </div>
@@ -130,24 +143,22 @@ const Login = () => {
           ) : (
             <button
               type="submit"
-              className="w-3/4 py-3 my-3 text-white flex items-center justify-center max-w-7xl mx-auto bg-blue-600 hover:bg-blue-800/90 rounded-md"
+              className="w-full py-3 my-3 text-white flex items-center justify-center bg-blue-600 hover:bg-blue-700 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               Login
             </button>
           )}
 
-          <div className=" ">
-            <p className="text-gray-700  text-center my-2">
-              Create new Account{" "}
-              <Link to="/register" className="text-blue-700">
-                <button className=" w-1/2 py-3 my-3 text-white flex items-center justify-center max-w-7xl mx-auto bg-green-600 hover:bg-green-800/90 rounded-md">
-                  Register
-                </button>
+          <div className="mt-4 text-center">
+            <p className="text-gray-700 text-sm">
+              Don't have an account?{" "}
+              <Link to="/register" className="text-blue-600 font-semibold hover:underline">
+                Register here
               </Link>
             </p>
           </div>
         </form>
-      </div>
+      </main>
     </div>
   );
 };

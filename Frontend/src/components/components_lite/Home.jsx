@@ -27,11 +27,21 @@ const Home = () => {
   return (
     <div>
       <Navbar />
-      <Header />
-      <Categories />
-      {loading && <p>Loading jobs...</p>}
-      {error && <p>Error: {error}</p>}
-      {!loading && !error && <LatestJobs jobs={jobs} />}
+      <main id="main-content">
+        <Header />
+        <Categories />
+        {loading && (
+          <div className="flex justify-center my-8" aria-live="polite">
+            <p className="text-gray-500">Loading jobs...</p>
+          </div>
+        )}
+        {error && (
+          <div className="flex justify-center my-8" role="alert">
+            <p className="text-red-500">Error: {error}</p>
+          </div>
+        )}
+        {!loading && !error && <LatestJobs jobs={jobs} />}
+      </main>
       <Footer />
     </div>
   );

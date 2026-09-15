@@ -75,112 +75,148 @@ const Register = () => {
   }, []);
   return (
     <div>
-      <Navbar></Navbar>
-      <div className="flex items-center justify-center max-w-7xl mx-auto">
+      <Navbar />
+      <main id="main-content" className="flex items-center justify-center max-w-7xl mx-auto px-4">
         <form
           onSubmit={submitHandler}
-          className="w-1/2 border border-gray-500 rounded-md p-4 my-10"
+          aria-labelledby="register-heading"
+          className="w-full max-w-lg border border-gray-300 rounded-md p-6 my-10 shadow-sm bg-white"
         >
-          <h1 className="font-bold text-xl mb-5 text-center text-blue-600">
+          <h1 id="register-heading" className="font-bold text-xl mb-5 text-center text-blue-600">
             Register
           </h1>
-          <div className="my-2">
-            <Label>Fullname</Label>
+          <div className="my-3">
+            <Label htmlFor="reg-fullname">Full Name</Label>
             <Input
+              id="reg-fullname"
               type="text"
               value={input.fullname}
               name="fullname"
+              autoComplete="name"
+              required
+              aria-required="true"
               onChange={changeEventHandler}
               placeholder="John Doe"
-            ></Input>
+              className="mt-1"
+            />
           </div>
-          <div className="my-2">
-            <Label>Email</Label>
+          <div className="my-3">
+            <Label htmlFor="reg-email">Email</Label>
             <Input
+              id="reg-email"
               type="email"
               value={input.email}
               name="email"
+              autoComplete="email"
+              required
+              aria-required="true"
               onChange={changeEventHandler}
               placeholder="johndoe@gmail.com"
-            ></Input>
+              className="mt-1"
+            />
           </div>
-          <div className="my-2">
-            <Label>Password</Label>
+          <div className="my-3">
+            <Label htmlFor="reg-password">Password</Label>
             <Input
+              id="reg-password"
               type="password"
               value={input.password}
               name="password"
+              autoComplete="new-password"
+              required
+              aria-required="true"
               onChange={changeEventHandler}
               placeholder="********"
-            ></Input>
+              className="mt-1"
+            />
           </div>
-          <div>
-            <Label>PAN Card Number</Label>
+          <div className="my-3">
+            <Label htmlFor="reg-pancard">PAN Card Number</Label>
             <Input
+              id="reg-pancard"
               type="text"
               value={input.pancard}
               name="pancard"
+              required
+              aria-required="true"
               onChange={changeEventHandler}
-              placeholder="ABCDEF1234G"
-            ></Input>
+              placeholder="ABCDE1234F"
+              className="mt-1"
+            />
           </div>
-          <div>
-            <Label>Adhar Card Number</Label>
+          <div className="my-3">
+            <Label htmlFor="reg-adharcard">Aadhaar Card Number</Label>
             <Input
+              id="reg-adharcard"
               type="text"
               value={input.adharcard}
               name="adharcard"
+              required
+              aria-required="true"
               onChange={changeEventHandler}
               placeholder="123456789012"
-            ></Input>
+              className="mt-1"
+            />
           </div>
-          <div className="my-2">
-            <Label>Phone Number</Label>
+          <div className="my-3">
+            <Label htmlFor="reg-phone">Phone Number</Label>
             <Input
+              id="reg-phone"
               type="tel"
               value={input.phoneNumber}
               name="phoneNumber"
+              autoComplete="tel"
+              required
+              aria-required="true"
               onChange={changeEventHandler}
               placeholder="+1234567890"
-            ></Input>
+              className="mt-1"
+            />
           </div>
-          <div className="flex items-center justify-between">
-            <RadioGroup className="flex items-center gap-4 my-5 ">
+
+          <fieldset className="my-4">
+            <legend className="text-sm font-medium text-gray-700 mb-2">Select your role</legend>
+            <RadioGroup className="flex items-center gap-6">
               <div className="flex items-center space-x-2">
                 <Input
                   type="radio"
+                  id="reg-role-student"
                   name="role"
                   value="Student"
                   checked={input.role === "Student"}
                   onChange={changeEventHandler}
                   className="cursor-pointer"
                 />
-                <Label htmlFor="r1">Student</Label>
+                <Label htmlFor="reg-role-student" className="cursor-pointer">Student</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Input
                   type="radio"
+                  id="reg-role-recruiter"
                   name="role"
                   value="Recruiter"
                   checked={input.role === "Recruiter"}
                   onChange={changeEventHandler}
                   className="cursor-pointer"
                 />
-                <Label htmlFor="r2">Recruiter</Label>
+                <Label htmlFor="reg-role-recruiter" className="cursor-pointer">Recruiter</Label>
               </div>
             </RadioGroup>
-          </div>
-          <div className="flex items-center gap-2">
-            <Label>Profile Photo</Label>
+          </fieldset>
+
+          <div className="my-3">
+            <Label htmlFor="reg-file">Profile Photo</Label>
             <Input
+              id="reg-file"
               type="file"
               accept="image/*"
               onChange={ChangeFilehandler}
-              className="cursor-pointer"
+              className="cursor-pointer mt-1"
             />
           </div>
+
           {loading ? (
-            <div className="flex items-center justify-center my-10">
+            <div className="flex items-center justify-center my-6" aria-live="polite">
               <div className="spinner-border text-blue-600" role="status">
                 <span className="sr-only">Loading...</span>
               </div>
@@ -188,20 +224,20 @@ const Register = () => {
           ) : (
             <button
               type="submit"
-              className="block w-full py-3 my-3 text-white bg-primary hover:bg-primary/90 rounded-md"
+              className="block w-full py-3 my-3 text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               Register
             </button>
           )}
 
-          <p className="text-gray-500 text-md my-2">
+          <p className="text-gray-600 text-sm my-2 text-center">
             Already have an account?{" "}
-            <Link to="/login" className="text-blue-700 font-semibold">
-              Login
+            <Link to="/login" className="text-blue-600 font-semibold hover:underline">
+              Login here
             </Link>
           </p>
         </form>
-      </div>
+      </main>
     </div>
   );
 };

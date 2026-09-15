@@ -58,13 +58,14 @@ Authentication is handled via **JWT tokens stored in HTTP-only cookies**, and fi
 - Review the full list of applicants for each job
 - Update individual applicant status (Accepted / Rejected)
 
-### 🔒 Security
+### 🔒 Security, Performance & Accessibility
 - Passwords hashed with **bcryptjs** (salt rounds: 10)
+- AES-256-GCM encryption with blind indexing for sensitive PII (PAN, Aadhaar)
 - JWT tokens with 1-day expiry, stored in HTTP-only cookies
-- Cookie settings adapt for environment: `SameSite: None; Secure` in production, `SameSite: Lax` in development
-- Recruiter-only admin routes protected by `<ProtectedRoute>` on the frontend
-- All sensitive API routes protected by `authenticateToken` JWT middleware on the backend
-- Duplicate checks on email, PAN card, and Aadhaar card during registration
+- Cookie posture: `HttpOnly`, `SameSite: Lax` / `None` in production with `Secure: true`
+- Gzip response compression (`compression` middleware) and Cloudinary delivery optimization (`f_auto,q_auto`)
+- Automated CI vulnerability scans (`npm audit`) and weekly Dependabot dependency management
+- Route-level React Error Boundary and WCAG accessibility improvements (skip links, ARIA labels, semantic landmarks)
 
 ---
 

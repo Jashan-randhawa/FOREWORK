@@ -36,9 +36,11 @@ Phase 1 establishes authoritative server-side access controls, data minimization
    - `requireJobOwnership`: Asserts `job.created_by == req.id`.
    - `requireApplicationOwnership`: Asserts `application.job.created_by == req.id`.
 
-### Cross-Site Request Forgery (CSRF) Mitigation
-- Application submission (`/api/application/apply/:id`) was converted from `GET` to `POST`.
-- Third-party embeds (`<img>`, `<link>`) can no longer trigger state mutations.
+### Cross-Site Request Forgery (CSRF) & Cookie Security (SEC-021)
+- **Safe HTTP Verbs**: Application submission (`/api/application/apply/:id`) and mutation operations use strictly state-changing HTTP verbs (`POST`, `PUT`, `DELETE`). Third-party GET embeds (`<img>`, `<link>`, `<iframe>`) cannot trigger state mutations.
+- **Strict SameSite / Secure Cookie Attributes**: Authentication JWT tokens are issued with `HttpOnly: true` (inaccessible to JavaScript) and `SameSite: Lax` in production (`SameSite: None` with `Secure: true` when cross-site origin deployment is explicitly configured).
+- **Origin & Custom Headers Validation**: CORS middleware strictly whitelists trusted client origins (`FRONTEND_URL`, localhost development ports). All mutating client requests originate via `axiosInstance` sending explicit headers (`Content-Type: application/json` or `multipart/form-data`) which trigger preflight `OPTIONS` checks, thwarting simple cross-origin CSRF forms.
+- **Defense-in-Depth Layering**: In combination with server-side role validation, IDOR checks on all protected resources, and HMAC blind indexing, malicious third-party contexts cannot forge requests on behalf of authenticated users.
 
 ## 4. Input & Upload Validation
 - `Backend/middleware/multer.js` enforces a 5MB maximum file size.

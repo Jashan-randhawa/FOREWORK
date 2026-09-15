@@ -31,15 +31,15 @@ const Jobs = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      <div className="max-w-7xl mx-auto mt-6 px-4 flex-1 w-full pb-10">
+      <main id="main-content" className="max-w-7xl mx-auto mt-6 px-4 flex-1 w-full pb-10">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Left Sidebar: Filter Card */}
-          <div className="w-full md:w-1/4">
+          <aside aria-label="Job filters" className="w-full md:w-1/4">
             <FilterCard />
-          </div>
+          </aside>
 
           {/* Right Main Content: Jobs Grid + Pagination */}
-          <div className="flex-1 flex flex-col">
+          <section aria-label="Job listings" className="flex-1 flex flex-col">
             {/* Header info */}
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-gray-600">
@@ -91,18 +91,19 @@ const Jobs = () => {
 
                 {/* Pagination Controls */}
                 {pagination?.totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-3 mt-8 pt-4 border-t border-gray-200">
+                  <nav aria-label="Pagination Navigation" className="flex items-center justify-center gap-3 mt-8 pt-4 border-t border-gray-200">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handlePrevPage}
                       disabled={pagination.page <= 1}
+                      aria-label="Go to previous page"
                       className="flex items-center gap-1"
                     >
-                      <ChevronLeft className="w-4 h-4" />
+                      <ChevronLeft className="w-4 h-4" aria-hidden="true" />
                       Previous
                     </Button>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-gray-600" aria-current="page">
                       Page {pagination.page} of {pagination.totalPages}
                     </span>
                     <Button
@@ -110,18 +111,19 @@ const Jobs = () => {
                       size="sm"
                       onClick={handleNextPage}
                       disabled={pagination.page >= pagination.totalPages}
+                      aria-label="Go to next page"
                       className="flex items-center gap-1"
                     >
                       Next
-                      <ChevronRight className="w-4 h-4" />
+                      <ChevronRight className="w-4 h-4" aria-hidden="true" />
                     </Button>
-                  </div>
+                  </nav>
                 )}
               </>
             )}
-          </div>
+          </section>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
