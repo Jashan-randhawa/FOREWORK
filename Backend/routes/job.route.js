@@ -7,6 +7,7 @@ import {
   getJobById,
   postJob,
   updateJobStatus,
+  getJobStats,
 } from "../controllers/job.controller.js";
 import {
   saveJob,
@@ -34,6 +35,11 @@ router
   .route("/:id/status")
   .put(authenticateToken, requireRole("Recruiter"), updateJobStatus)
   .post(authenticateToken, requireRole("Recruiter"), updateJobStatus);
+
+// Per-job analytics endpoint (ANALYTICS-001)
+router
+  .route("/:id/stats")
+  .get(authenticateToken, requireRole("Recruiter", "Admin"), getJobStats);
 
 // Candidate Saved Jobs endpoints (CAND-001)
 router

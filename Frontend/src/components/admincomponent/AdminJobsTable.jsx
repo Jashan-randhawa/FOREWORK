@@ -9,13 +9,14 @@ import {
   TableRow,
 } from "../ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Edit2, Eye, MoreHorizontal, CheckCircle, PauseCircle, XCircle, FileText } from "lucide-react";
+import { Edit2, Eye, MoreHorizontal, CheckCircle, PauseCircle, XCircle, FileText, TrendingUp } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import API from "@/utils/axiosInstance";
 import { JOB_API_ENDPOINT } from "@/utils/data";
 import { setAllAdminJobs } from "@/redux/jobSlice";
+import JobAnalyticsModal from "./JobAnalyticsModal";
 
 const STATUS_BADGES = {
   published: "bg-green-100 text-green-800 border-green-200",
@@ -32,6 +33,8 @@ const AdminJobsTable = () => {
   const navigate = useNavigate();
 
   const [filterJobs, setFilterJobs] = useState(allAdminJobs);
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
+  const [selectedJobForAnalytics, setSelectedJobForAnalytics] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
 
   useEffect(() => {
@@ -144,6 +147,16 @@ const AdminJobsTable = () => {
                           <Eye className="w-4 h-4" />
                           <span>Applicants</span>
                         </div>
+                        <div
+                          onClick={() => {
+                            setSelectedJobForAnalytics(job);
+                            setAnalyticsOpen(true);
+                          }}
+                          className="flex items-center gap-2 px-2 py-1.5 hover:bg-purple-50 rounded cursor-pointer text-purple-700 font-medium"
+                        >
+                          <TrendingUp className="w-4 h-4" />
+                          <span>Analytics</span>
+                        </div>
 
                         <div className="border-t my-1"></div>
                         <div className="text-xs font-semibold text-gray-400 px-2 py-1 uppercase tracking-wider">
@@ -194,6 +207,16 @@ const AdminJobsTable = () => {
           )}
         </TableBody>
       </Table>
+
+      <JobAnalyticsModal
+        isOpen={analyticsOpen}
+        onClose={() => {
+          setAnalyticsOpen(false);
+          setSelectedJobForAnalytics(null);
+        }}
+        jobId={selectedJobForAnalytics?._id || selectedJobForAnalytics?.id}
+        jobTitle={selectedJobForAnalytics?.title}
+      />
     </div>
   );
 };

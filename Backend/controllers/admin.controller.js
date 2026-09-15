@@ -422,37 +422,109 @@ export const getAuditLogs = async (req, res, next) => {
   }
 };
 
-// 9. Overview Platform Statistics
+// 9. Overview Platform Statistics (ANALYTICS-002)
 export const getStats = async (req, res, next) => {
   try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
     const [
       totalUsers,
       totalStudents,
       totalRecruiters,
+      totalAdmins,
       totalJobs,
       totalCompanies,
       totalApplications,
       recentAuditLogs,
+      jobStatusGroups,
+      roleGroups,
+      signupsDaily,
+      applicationsDaily,
+      totalViewsAgg,
     ] = await Promise.all([
       User.countDocuments(),
       User.countDocuments({ role: "Student" }),
       User.countDocuments({ role: "Recruiter" }),
+      User.countDocuments({ role: "Admin" }),
       Job.countDocuments(),
       Company.countDocuments(),
       Application.countDocuments(),
       AuditLog.find().sort({ createdAt: -1 }).limit(5).populate("actor", "fullname email"),
+      Job.aggregate([
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+      ]),
+      User.aggregate([
+        { $group: { _id: "$role", count: { $sum: 1 } } },
+      ]),
+      User.aggregate([
+        { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } },
+        { $sort: { _id: 1 } },
+      ]),
+      Application.aggregate([
+        { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } },
+        { $sort: { _id: 1 } },
+      ]),
+      Job.aggregate([
+        { $group: { _id: null, totalViews: { $sum: "$views" } } },
+      ]),
     ]);
+
+    const jobsByStatus = {
+      published: 0,
+      draft: 0,
+      paused: 0,
+      expired: 0,
+      closed: 0,
+    };
+    jobStatusGroups.forEach((g) => {
+      if (g._id) jobsByStatus[g._id.toLowerCase()] = g.count;
+    });
+
+    const usersByRole = {
+      Student: totalStudents,
+      Recruiter: totalRecruiters,
+      Admin: totalAdmins,
+    };
+    roleGroups.forEach((g) => {
+      if (g._id) usersByRole[g._id] = g.count;
+    });
+
+    const totalViews = totalViewsAgg.length > 0 ? totalViewsAgg[0].totalViews : 0;
+    const conversionRate =
+      totalViews > 0
+        ? Number(((totalApplications / totalViews) * 100).toFixed(2))
+        : 0;
+
+    const signupsTimeline = signupsDaily.map((s) => ({
+      date: s._id,
+      signups: s.count,
+    }));
+
+    const applicationsTimeline = applicationsDaily.map((a) => ({
+      date: a._id,
+      applications: a.count,
+    }));
 
     const statsPayload = {
       totalUsers,
       totalStudents,
       totalRecruiters,
+      totalAdmins,
       totalJobs,
       totalCompanies,
       totalApplications,
+      totalViews,
+      conversionRate,
       usersCount: totalUsers,
       jobsCount: totalJobs,
       companiesCount: totalCompanies,
+      jobsByStatus,
+      usersByRole,
+      signupsTimeline,
+      applicationsTimeline,
     };
 
     return res.status(200).json({

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Job } from "../models/job.model.js";
 import { Company } from "../models/company.model.js";
+import { Application } from "../models/application.model.js";
 
 // Admin job posting (Recruiter only)
 export const postJob = async (req, res, next) => {
@@ -279,6 +280,9 @@ export const getJobById = async (req, res, next) => {
       });
     }
 
+    // Increment views counter asynchronously
+    Job.findByIdAndUpdate(jobId, { $inc: { views: 1 } }).exec();
+
     return res.status(200).json({
       success: true,
       message: "Job fetched successfully",
@@ -392,6 +396,109 @@ export const updateJobStatus = async (req, res, next) => {
       message: `Job status updated to ${normalizedStatus}`,
       data: { job },
       job,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Per-job aggregation statistics (ANALYTICS-001)
+export const getJobStats = async (req, res, next) => {
+  try {
+    const jobId = req.params.id;
+
+    if (!jobId || !mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid job ID format",
+      });
+    }
+
+    const job = await Job.findById(jobId).populate("company", "name logo");
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found",
+      });
+    }
+
+    // Role & ownership check: Requester must be creator of the job or Admin
+    const isOwner = job.created_by.toString() === req.id.toString();
+    const isAdmin = req.user?.role === "Admin";
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: You do not have permission to view stats for this job",
+      });
+    }
+
+    const totalViews = job.views || 0;
+    const totalApplications = await Application.countDocuments({ job: jobId });
+    const conversionRate =
+      totalViews > 0
+        ? Number(((totalApplications / totalViews) * 100).toFixed(2))
+        : 0;
+
+    // Status breakdown via aggregation
+    const statusGroups = await Application.aggregate([
+      { $match: { job: new mongoose.Types.ObjectId(jobId) } },
+      { $group: { _id: "$status", count: { $sum: 1 } } },
+    ]);
+
+    const statusBreakdown = {
+      pending: 0,
+      accepted: 0,
+      rejected: 0,
+    };
+    statusGroups.forEach((g) => {
+      if (g._id) {
+        statusBreakdown[g._id.toLowerCase()] = g.count;
+      }
+    });
+
+    // 30-day timeline of applications
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const timelineGroups = await Application.aggregate([
+      {
+        $match: {
+          job: new mongoose.Types.ObjectId(jobId),
+          createdAt: { $gte: thirtyDaysAgo },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const applicationsTimeline = timelineGroups.map((t) => ({
+      date: t._id,
+      applications: t.count,
+    }));
+
+    const stats = {
+      jobId: job._id,
+      title: job.title,
+      company: job.company?.name,
+      views: totalViews,
+      totalApplications,
+      conversionRate,
+      statusBreakdown,
+      applicationsTimeline,
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "Job statistics retrieved successfully",
+      data: { stats },
+      stats,
     });
   } catch (error) {
     next(error);

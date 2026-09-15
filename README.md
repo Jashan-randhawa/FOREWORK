@@ -277,6 +277,7 @@ FOREWORK-main/
   company:         ObjectId → Company (required)
   created_by:      ObjectId → User (required)
   status:          Enum["draft", "published", "paused", "expired", "closed"] // default: "published"
+  views:           Number (default: 0)
   applications:    [ObjectId → Application]
   createdAt, updatedAt (timestamps)
 }
@@ -401,6 +402,7 @@ Base URL (production): `https://forework.onrender.com` (supports `/api/v1/*` ali
 | POST | `/alerts` | ✅ | `Student` | Create search / job alert criteria |
 | GET | `/alerts` | ✅ | `Student` | List candidate's active job alerts |
 | DELETE | `/alerts/:id` | ✅ | `Student` | Delete a job alert |
+| GET | `/:id/stats` | ✅ | `Recruiter` | Per-job funnel analytics (views, applications, conversion rate %, status breakdown) |
 
 **Post job body fields:** `title`, `description`, `requirements`, `salary`, `location`, `jobType`, `experience`, `position`, `companyId`, `status`
 
@@ -434,7 +436,7 @@ Base URL (production): `https://forework.onrender.com` (supports `/api/v1/*` ali
 
 | Method | Endpoint | Auth | Role | Description |
 |--------|----------|:---:|:----:|-------------|
-| GET | `/stats` | ✅ | `Admin` | Platform summary statistics (users, jobs, companies, applications, recent logs) |
+| GET | `/stats` | ✅ | `Admin` | Platform analytics: volume metrics, conversion rates, 30-day growth timelines, role/status distributions |
 | GET | `/users` | ✅ | `Admin` | Paginated platform users list with search and role filter |
 | PATCH | `/users/:id/status` | ✅ | `Admin` | Suspend or unsuspend user account (creates audit log) |
 | GET | `/jobs` | ✅ | `Admin` | Paginated platform jobs list with search and status filter |

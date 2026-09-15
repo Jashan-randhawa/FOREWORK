@@ -64,6 +64,11 @@ const jobSchema = new mongoose.Schema(
       default: "published",
       index: true,
     },
+    views: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     applications: [
       {
         type: mongoose.Schema.Types.ObjectId,
