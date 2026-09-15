@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "../ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Edit2, Eye, MoreHorizontal, CheckCircle, PauseCircle, XCircle, FileText, TrendingUp } from "lucide-react";
+import { Edit2, Eye, MoreHorizontal, CheckCircle, PauseCircle, XCircle, FileText, TrendingUp, Clock } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -196,6 +196,15 @@ const AdminJobsTable = () => {
                           >
                             <FileText className="w-4 h-4" />
                             <span>Draft</span>
+                          </div>
+                        )}
+                        {currentStatus !== "expired" && (
+                          <div
+                            onClick={() => handleStatusChange(job._id, "expired")}
+                            className="flex items-center gap-2 px-2 py-1.5 hover:bg-amber-50 text-amber-700 rounded cursor-pointer"
+                          >
+                            <Clock className="w-4 h-4" />
+                            <span>Expire</span>
                           </div>
                         )}
                       </PopoverContent>

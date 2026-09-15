@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AdminNavbar from "./AdminNavbar";
 import API from "@/utils/axiosInstance";
 import { ADMIN_API_ENDPOINT } from "@/utils/data";
@@ -12,6 +12,14 @@ import {
 } from "../ui/table";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "../ui/dialog";
 import { toast } from "sonner";
 import { Search, Loader2, UserCheck, UserX, Shield } from "lucide-react";
 
@@ -21,6 +29,7 @@ const AdminUsers = () => {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [actionId, setActionId] = useState(null);
+  const [suspendTargetUser, setSuspendTargetUser] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
 
   const fetchUsers = async (page = 1) => {
@@ -190,7 +199,13 @@ const AdminUsers = () => {
                             size="sm"
                             variant={u.isSuspended ? "outline" : "destructive"}
                             disabled={actionId === u._id}
-                            onClick={() => handleToggleStatus(u)}
+                            onClick={() => {
+                              if (u.isSuspended) {
+                                handleToggleStatus(u);
+                              } else {
+                                setSuspendTargetUser(u);
+                              }
+                            }}
                             className="h-7 text-xs"
                           >
                             {actionId === u._id ? (
@@ -246,6 +261,55 @@ const AdminUsers = () => {
             </div>
           )}
         </div>
+
+        {/* Suspend Confirmation Dialog */}
+        <Dialog
+          open={!!suspendTargetUser}
+          onOpenChange={(open) => {
+            if (!open) setSuspendTargetUser(null);
+          }}
+        >
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Confirm Account Suspension</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to suspend{" "}
+                <span className="font-semibold text-gray-900">
+                  {suspendTargetUser?.fullname}
+                </span>{" "}
+                ({suspendTargetUser?.email})? This user will immediately be blocked from
+                accessing their account and jobs.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex gap-2 justify-end mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSuspendTargetUser(null)}
+                disabled={actionId === suspendTargetUser?._id}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                disabled={actionId === suspendTargetUser?._id}
+                onClick={async () => {
+                  const target = suspendTargetUser;
+                  await handleToggleStatus(target);
+                  setSuspendTargetUser(null);
+                }}
+              >
+                {actionId === suspendTargetUser?._id ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+                ) : (
+                  <UserX className="w-3.5 h-3.5 mr-1" />
+                )}
+                Confirm Suspension
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

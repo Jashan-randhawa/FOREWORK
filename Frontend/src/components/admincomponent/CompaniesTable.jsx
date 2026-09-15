@@ -35,7 +35,6 @@ const CompaniesTable = () => {
     setFilterCompany(filteredCompany);
   }, [companies, searchCompanyByText]);
 
-  console.log("COMPANIES", companies);
   if (!companies) {
     return <div>Loading...</div>;
   }
@@ -55,10 +54,14 @@ const CompaniesTable = () => {
 
         <TableBody>
           {filterCompany.length === 0 ? (
-            <span>No Companies Added</span>
+            <TableRow>
+              <TableCell colSpan={4} className="text-center py-6 text-gray-500">
+                No Companies Added
+              </TableCell>
+            </TableRow>
           ) : (
             filterCompany?.map((company) => (
-              <TableRow key={company.id}>
+              <TableRow key={company._id || company.id}>
                 <TableCell>
                   <Avatar>
                     <AvatarImage

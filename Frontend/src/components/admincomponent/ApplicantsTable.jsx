@@ -72,16 +72,17 @@ const ApplicantsTable = () => {
     );
   };
 
-  // Status handler (Accepted, Rejected)
+  // Status handler (accepted, rejected, pending)
   const statusHandler = async (status, id) => {
     try {
+      const normalizedStatus = status.toLowerCase();
       const res = await API.post(
         `${APPLICATION_API_ENDPOINT}/status/${id}/update`,
-        { status }
+        { status: normalizedStatus }
       );
       if (res.data?.success) {
-        toast.success(res.data.message || `Status updated to ${status}`);
-        updateApplicationInStore(id, { status: status.toLowerCase() });
+        toast.success(res.data.message || `Status updated to ${normalizedStatus}`);
+        updateApplicationInStore(id, { status: normalizedStatus });
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update status");
@@ -293,18 +294,30 @@ const ApplicantsTable = () => {
                         <div className="text-xs font-semibold text-gray-400 px-2 py-1 uppercase tracking-wider">
                           Update Status
                         </div>
-                        <button
-                          onClick={() => statusHandler("Accepted", item._id)}
-                          className="w-full text-left px-2 py-1.5 hover:bg-green-50 text-green-700 rounded text-xs font-medium"
-                        >
-                          Accept Candidate
-                        </button>
-                        <button
-                          onClick={() => statusHandler("Rejected", item._id)}
-                          className="w-full text-left px-2 py-1.5 hover:bg-red-50 text-red-700 rounded text-xs font-medium"
-                        >
-                          Reject Candidate
-                        </button>
+                        {currentStatus !== "accepted" && (
+                          <button
+                            onClick={() => statusHandler("accepted", item._id)}
+                            className="w-full text-left px-2 py-1.5 hover:bg-green-50 text-green-700 rounded text-xs font-medium"
+                          >
+                            Accept Candidate
+                          </button>
+                        )}
+                        {currentStatus !== "rejected" && (
+                          <button
+                            onClick={() => statusHandler("rejected", item._id)}
+                            className="w-full text-left px-2 py-1.5 hover:bg-red-50 text-red-700 rounded text-xs font-medium"
+                          >
+                            Reject Candidate
+                          </button>
+                        )}
+                        {currentStatus !== "pending" && (
+                          <button
+                            onClick={() => statusHandler("pending", item._id)}
+                            className="w-full text-left px-2 py-1.5 hover:bg-yellow-50 text-yellow-700 rounded text-xs font-medium"
+                          >
+                            Reset to Pending
+                          </button>
+                        )}
                       </PopoverContent>
                     </Popover>
                   </TableCell>

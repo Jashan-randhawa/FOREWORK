@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AdminNavbar from "./AdminNavbar";
 import API from "@/utils/axiosInstance";
 import { ADMIN_API_ENDPOINT } from "@/utils/data";
@@ -12,6 +12,14 @@ import {
 } from "../ui/table";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "../ui/dialog";
 import { toast } from "sonner";
 import { Search, Loader2, Trash2, CheckCircle, PauseCircle, XCircle } from "lucide-react";
 
@@ -29,6 +37,7 @@ const AdminJobs = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [actionId, setActionId] = useState(null);
+  const [jobToDelete, setJobToDelete] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
 
   const fetchJobs = async (page = 1) => {
@@ -80,10 +89,9 @@ const AdminJobs = () => {
     }
   };
 
-  const handleDeleteJob = async (jobId) => {
-    if (!window.confirm("Are you sure you want to permanently delete this job listing?")) {
-      return;
-    }
+  const confirmDeleteJob = async () => {
+    if (!jobToDelete) return;
+    const jobId = jobToDelete._id;
     try {
       setActionId(jobId);
       const res = await API.delete(`${ADMIN_API_ENDPOINT}/jobs/${jobId}`);
@@ -95,6 +103,7 @@ const AdminJobs = () => {
       toast.error(err.response?.data?.message || "Failed to delete job");
     } finally {
       setActionId(null);
+      setJobToDelete(null);
     }
   };
 
@@ -229,7 +238,7 @@ const AdminJobs = () => {
                               size="sm"
                               variant="ghost"
                               disabled={actionId === job._id}
-                              onClick={() => handleDeleteJob(job._id)}
+                              onClick={() => setJobToDelete(job)}
                               className="h-7 px-2 text-xs text-gray-400 hover:text-red-600 hover:bg-red-50"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -274,6 +283,50 @@ const AdminJobs = () => {
             </div>
           )}
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={!!jobToDelete}
+          onOpenChange={(open) => {
+            if (!open) setJobToDelete(null);
+          }}
+        >
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Confirm Job Deletion</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to permanently delete{" "}
+                <span className="font-semibold text-gray-900">
+                  {jobToDelete?.title}
+                </span>{" "}
+                at {jobToDelete?.company?.name || "the company"}? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex gap-2 justify-end mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setJobToDelete(null)}
+                disabled={actionId === jobToDelete?._id}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                disabled={actionId === jobToDelete?._id}
+                onClick={confirmDeleteJob}
+              >
+                {actionId === jobToDelete?._id ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+                ) : (
+                  <Trash2 className="w-3.5 h-3.5 mr-1" />
+                )}
+                Delete Job
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
