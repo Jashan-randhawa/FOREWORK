@@ -48,15 +48,16 @@ Authentication is handled via **JWT tokens stored in HTTP-only cookies**, and fi
 - Explore jobs by category using a carousel-based browser (14 tech categories)
 - View detailed job descriptions including requirements, salary, job type, and location
 - Apply for jobs with an uploaded resume (PDF via Cloudinary)
-- Track all applied jobs and view live application status (Pending / Accepted / Rejected)
+- Track all applied jobs with live status updates, scheduled interview times, and meeting links
+- Save jobs for later review and share job opportunities via 1-click clipboard / Web Share
 - Edit profile: update name, bio, skills, phone number, and resume
 
 ### 🏢 Recruiters
 - Register and manage company profiles (name, description, website, location, logo)
 - Post new job listings with full details (title, description, requirements, salary, location, job type, experience level, number of open positions)
-- View all jobs posted under their account in a management table
-- Review the full list of applicants for each job
-- Update individual applicant status (Accepted / Rejected)
+- View all jobs posted under their account with real-time conversion rates and candidate analytics
+- Review applicants, download resumes, record recruiter notes, and schedule video interviews
+- Update individual applicant status (Accepted / Rejected / Interview)
 
 ### 🔒 Security, Performance & Accessibility
 - Passwords hashed with **bcryptjs** (salt rounds: 10)

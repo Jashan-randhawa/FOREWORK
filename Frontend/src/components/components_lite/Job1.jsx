@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
-import { Bookmark, BookmarkCheck } from "lucide-react";
+import { Bookmark, BookmarkCheck, Share2 } from "lucide-react";
 import { useSelector } from "react-redux";
 import API from "@/utils/axiosInstance";
 import { JOB_API_ENDPOINT } from "@/utils/data";
@@ -61,6 +61,32 @@ const Job1 = ({ job, isSavedInitial = false, onUnsaved = null }) => {
     }
   };
 
+  const handleShare = async (e) => {
+    if (e) e.stopPropagation();
+    const shareUrl = `${window.location.origin}/description/${job?._id}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: job?.title || "Job Opportunity at ForeWork",
+          text: `Check out this opening for ${job?.title} at ${job?.company?.name}!`,
+          url: shareUrl,
+        });
+        return;
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.warn("Error sharing:", err);
+        }
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Job link copied to clipboard!");
+    } catch {
+      toast.error("Could not copy link to clipboard");
+    }
+  };
+
   return (
     <div className="p-5 rounded-lg shadow-sm hover:shadow-md transition-shadow bg-white border border-gray-100 flex flex-col justify-between h-full">
       <div>
@@ -68,20 +94,33 @@ const Job1 = ({ job, isSavedInitial = false, onUnsaved = null }) => {
           <p className="text-xs text-gray-500">
             {daysAgoFunction(job?.createdAt)}
           </p>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full hover:bg-purple-50"
-            disabled={saving}
-            onClick={handleToggleSave}
-            title={isSaved ? "Remove from saved jobs" : "Save job for later"}
-          >
-            {isSaved ? (
-              <BookmarkCheck className="w-5 h-5 text-[#6B3AC2] fill-[#6B3AC2]" />
-            ) : (
-              <Bookmark className="w-5 h-5 text-gray-400 hover:text-[#6B3AC2]" />
-            )}
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full hover:bg-gray-100 w-8 h-8"
+              onClick={handleShare}
+              title="Share job link"
+              aria-label="Share job"
+            >
+              <Share2 className="w-4 h-4 text-gray-500 hover:text-blue-600" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full hover:bg-purple-50 w-8 h-8"
+              disabled={saving}
+              onClick={handleToggleSave}
+              title={isSaved ? "Remove from saved jobs" : "Save job for later"}
+              aria-label={isSaved ? "Remove from saved jobs" : "Save job for later"}
+            >
+              {isSaved ? (
+                <BookmarkCheck className="w-4 h-4 text-[#6B3AC2] fill-[#6B3AC2]" />
+              ) : (
+                <Bookmark className="w-4 h-4 text-gray-400 hover:text-[#6B3AC2]" />
+              )}
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-center gap-3 my-3">

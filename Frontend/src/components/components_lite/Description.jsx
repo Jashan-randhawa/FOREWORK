@@ -7,7 +7,7 @@ import API from "@/utils/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import { setSingleJob } from "@/redux/jobSlice";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Share2 } from "lucide-react";
 
 const Description = () => {
   const params = useParams();
@@ -63,6 +63,31 @@ const Description = () => {
       toast.error(errMsg);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: singleJob?.title || "Job Opening on ForeWork",
+          text: `Check out this opening for ${singleJob?.title} at ${singleJob?.company?.name || "ForeWork"}!`,
+          url: shareUrl,
+        });
+        return;
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.warn("Share failed:", err);
+        }
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Job link copied to clipboard!");
+    } catch {
+      toast.error("Could not copy link to clipboard");
     }
   };
 
@@ -134,7 +159,16 @@ const Description = () => {
               </Badge>
             </div>
           </div>
-          <div>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={handleShare}
+              className="flex items-center gap-2 border-gray-300 hover:bg-gray-50"
+              title="Share job opening"
+            >
+              <Share2 className="w-4 h-4 text-gray-600" />
+              <span>Share</span>
+            </Button>
             <Button
               onClick={isApplied || submitting || isRecruiter ? null : applyJobHandler}
               disabled={isApplied || submitting || isRecruiter}
