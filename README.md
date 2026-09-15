@@ -466,7 +466,7 @@ chmod +x start.sh && ./start.sh
 | Role | Email | Password |
 |------|-------|----------|
 | Job Seeker (Student) | `jashan@gmail.com` | `password123` |
-| Recruiter | `ankit@company.com` | `password123` |
+| Recruiter | `recruiter@company.com` | `password123` |
 
 ---
 
@@ -492,16 +492,9 @@ Pull requests are welcome. For major changes, please open an issue first.
 
 ---
 
-## Team
+## Creator & Maintainer
 
-| Name | Role |
-|------|------|
-| **Jashan Randhawa** | Full Stack Developer & Project Lead |
-| **Ankit** | Contributor |
-| **Ritik** | Contributor |
-| **Gaurav** | Contributor |
-
-Special thanks to **Amresh Sir** for guidance and mentorship.
+**Jashanpreet Singh** — Full Stack Developer & Project Lead ([@Jashan-randhawa](https://github.com/Jashan-randhawa))
 
 ---
 

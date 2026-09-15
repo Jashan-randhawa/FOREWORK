@@ -10,7 +10,7 @@
     "start": "node index.js",
     "seed": "node scripts/seed.js"
   },
-  "author": "",
+  "author": "Jashanpreet Singh",
   "license": "ISC",
   "description": "",
   "dependencies": {

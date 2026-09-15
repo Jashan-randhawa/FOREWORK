@@ -93,12 +93,12 @@ npm test    # 133 tests across 10 Vitest suites (all passing)
 | Role | Email | Password |
 |------|-------|----------|
 | Job Seeker | `jashan@gmail.com` | `password123` |
-| Recruiter | `ankit@company.com` | `password123` |
+| Recruiter | `recruiter@company.com` | `password123` |
 
 ---
 
-## 👨‍💻 Team
+## 👨‍💻 Creator & Maintainer
 
-**Jashan Randhawa** (Lead) · Ankit · Ritik · Gaurav · Mentored by Amresh Sir
+**Jashanpreet Singh** — Full Stack Developer & Project Lead ([@Jashan-randhawa](https://github.com/Jashan-randhawa))
 
 **License:** MIT · [github.com/Jashan-randhawa/FOREWORK](https://github.com/Jashan-randhawa/FOREWORK)
