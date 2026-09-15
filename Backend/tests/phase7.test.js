@@ -1,4 +1,4 @@
-﻿import { describe, it, beforeAll, afterAll, beforeEach, expect } from "vitest";
+import { describe, it, beforeAll, afterAll, beforeEach, expect } from "vitest";
 import request from "supertest";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
@@ -159,8 +159,8 @@ describe("Phase 7: Analytics & Reporting", () => {
 
       await request(app).get(`/api/job/get/${job1._id}`);
 
-      // Allow async increment to write
-      await new Promise((r) => setTimeout(r, 100));
+      // Allow increment to write to DB
+      await new Promise((r) => setTimeout(r, 500));
 
       const updatedJob = await Job.findById(job1._id);
       expect(updatedJob.views).toBe(beforeViews + 1);

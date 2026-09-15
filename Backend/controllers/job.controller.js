@@ -280,8 +280,8 @@ export const getJobById = async (req, res, next) => {
       });
     }
 
-    // Increment views counter asynchronously
-    Job.findByIdAndUpdate(jobId, { $inc: { views: 1 } }).exec();
+    // Increment views counter
+    await Job.findByIdAndUpdate(jobId, { $inc: { views: 1 } });
 
     return res.status(200).json({
       success: true,
