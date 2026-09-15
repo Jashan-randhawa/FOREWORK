@@ -7,9 +7,11 @@ import { motion } from "framer-motion";
 import { Button } from "../ui/button";
 import { setPage, clearFilters } from "@/redux/jobSlice";
 import useGetAllJobs from "@/hooks/useGetAllJobs";
+import useFilterUrlSync from "@/hooks/useFilterUrlSync";
 import { ChevronLeft, ChevronRight, Loader2, Frown } from "lucide-react";
 
 const Jobs = () => {
+  useFilterUrlSync();
   const { loading } = useGetAllJobs();
   const dispatch = useDispatch();
   const { allJobs, pagination } = useSelector((store) => store.job);

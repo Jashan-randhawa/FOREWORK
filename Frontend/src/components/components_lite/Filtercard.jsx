@@ -5,39 +5,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { setFilter, clearFilters } from "@/redux/jobSlice";
 import { RotateCcw } from "lucide-react";
 
-const locations = [
-  "Delhi",
-  "Mumbai",
-  "Bangalore",
-  "Pune",
-  "Hyderabad",
-  "Chennai",
-  "Remote",
-];
-
-const technologies = [
-  "React",
-  "Node",
-  "Python",
-  "Java",
-  "Fullstack",
-  "Frontend",
-  "Backend",
-];
-
-const experienceRanges = [
-  { label: "0-2 Years", min: 0, max: 2 },
-  { label: "3-5 Years", min: 3, max: 5 },
-  { label: "6-8 Years", min: 6, max: 8 },
-  { label: "8+ Years", min: 8, max: "" },
-];
-
-const salaryRanges = [
-  { label: "0-5 LPA", min: 0, max: 5 },
-  { label: "5-10 LPA", min: 5, max: 10 },
-  { label: "10-20 LPA", min: 10, max: 20 },
-  { label: "20+ LPA", min: 20, max: "" },
-];
+import {
+  LOCATIONS as locations,
+  TECHNOLOGIES as technologies,
+  EXPERIENCE_RANGES as experienceRanges,
+  SALARY_RANGES as salaryRanges,
+  JOB_TYPES as jobTypes,
+} from "@/utils/filterConstants";
 
 const Filtercard = () => {
   const dispatch = useDispatch();
@@ -49,6 +23,10 @@ const Filtercard = () => {
 
   const handleTechnologyChange = (val) => {
     dispatch(setFilter({ key: "technology", value: val === filters?.technology ? "" : val }));
+  };
+
+  const handleJobTypeChange = (val) => {
+    dispatch(setFilter({ key: "jobType", value: val === filters?.jobType ? "" : val }));
   };
 
   const handleExperienceChange = (label) => {
@@ -88,8 +66,9 @@ const Filtercard = () => {
   const hasActiveFilters =
     Boolean(filters?.location) ||
     Boolean(filters?.technology) ||
-    filters?.experienceMin !== "" ||
-    filters?.salaryMin !== "";
+    Boolean(filters?.jobType) ||
+    (filters?.experienceMin !== "" && filters?.experienceMin !== undefined) ||
+    (filters?.salaryMin !== "" && filters?.salaryMin !== undefined);
 
   return (
     <div className="w-full bg-white p-4 rounded-lg shadow-sm border border-gray-100 space-y-6">
@@ -142,6 +121,26 @@ const Filtercard = () => {
                 <RadioGroupItem value={tech} id={id} />
                 <label htmlFor={id} className="text-sm cursor-pointer text-gray-700">
                   {tech}
+                </label>
+              </div>
+            );
+          })}
+        </RadioGroup>
+      </div>
+
+      {/* Job Type Filter */}
+      <div>
+        <h2 className="font-semibold text-sm uppercase text-gray-500 tracking-wider mb-2">
+          Job Type
+        </h2>
+        <RadioGroup value={filters?.jobType || ""} onValueChange={handleJobTypeChange}>
+          {jobTypes.map((type, idx) => {
+            const id = `type-${idx}`;
+            return (
+              <div key={id} className="flex items-center space-x-2 py-1">
+                <RadioGroupItem value={type} id={id} />
+                <label htmlFor={id} className="text-sm cursor-pointer text-gray-700">
+                  {type}
                 </label>
               </div>
             );

@@ -14,6 +14,7 @@ const TermsofService = lazy(() => import("./components/components_lite/TermsofSe
 const Jobs = lazy(() => import("./components/components_lite/Jobs.jsx"));
 const Browse = lazy(() => import("./components/components_lite/Browse.jsx"));
 const SavedJobs = lazy(() => import("./components/components_lite/SavedJobs.jsx"));
+const JobAlerts = lazy(() => import("./components/components_lite/JobAlerts.jsx"));
 const Profile = lazy(() => import("./components/components_lite/Profile.jsx"));
 const Description = lazy(() => import("./components/components_lite/Description.jsx"));
 const Companies = lazy(() => import("./components/admincomponent/Companies"));
@@ -66,6 +67,10 @@ const appRouter = createBrowserRouter([
   {
     path: "/saved-jobs",
     element: <SavedJobs />,
+  },
+  {
+    path: "/job-alerts",
+    element: <JobAlerts />,
   },
   {
     path: "/PrivacyPolicy",

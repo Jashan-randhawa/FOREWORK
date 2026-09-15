@@ -4,10 +4,12 @@ import Job1 from "./Job1";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchedQuery, setPage, clearFilters } from "@/redux/jobSlice";
 import useGetAllJobs from "@/hooks/useGetAllJobs";
+import useFilterUrlSync from "@/hooks/useFilterUrlSync";
 import { Button } from "../ui/button";
 import { ChevronLeft, ChevronRight, Loader2, Frown } from "lucide-react";
 
 const Browse = () => {
+  useFilterUrlSync();
   const { loading } = useGetAllJobs();
   const { allJobs, pagination, searchedQuery } = useSelector((store) => store.job);
   const dispatch = useDispatch();
