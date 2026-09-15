@@ -27,6 +27,13 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
+    if (user.isSuspended) {
+      return res.status(403).json({
+        message: "Your account has been suspended. Please contact support.",
+        success: false,
+      });
+    }
+
     req.id = user._id.toString();
     req.user = user;
     next();

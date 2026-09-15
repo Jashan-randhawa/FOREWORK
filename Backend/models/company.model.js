@@ -22,6 +22,11 @@ const companySchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'User',
         required:true
+    },
+    isVerified:{
+        type:Boolean,
+        default:false,
+        index:true
     }
 },{timestamps:true})
 export const Company = mongoose.model("Company", companySchema);

@@ -24,6 +24,14 @@ const Applicants = lazy(() => import("./components/admincomponent/Applicants"));
 const ProtectedRoute = lazy(() => import("./components/admincomponent/ProtectedRoute"));
 const Creator = lazy(() => import("./components/creator/Creator.jsx"));
 
+// Platform Admin components (ADMIN-004)
+const AdminRoute = lazy(() => import("./components/admin/AdminRoute"));
+const AdminDashboard = lazy(() => import("./components/admin/AdminDashboard"));
+const AdminUsers = lazy(() => import("./components/admin/AdminUsers"));
+const AdminPlatformJobs = lazy(() => import("./components/admin/AdminJobs"));
+const AdminCompanies = lazy(() => import("./components/admin/AdminCompanies"));
+const AdminAuditLogs = lazy(() => import("./components/admin/AdminAuditLogs"));
+
 const appRouter = createBrowserRouter([
   { path: "/", element: <Home /> },
   {
@@ -83,9 +91,9 @@ const appRouter = createBrowserRouter([
     element: <Creator />,
   },
 
-  // /admin
+  // Recruiter route tree (/recruiter/*)
   {
-    path: "/admin/companies",
+    path: "/recruiter/companies",
     element: (
       <ProtectedRoute>
         <Companies />
@@ -93,7 +101,7 @@ const appRouter = createBrowserRouter([
     ),
   },
   {
-    path: "/admin/companies/create",
+    path: "/recruiter/companies/create",
     element: (
       <ProtectedRoute>
         <CompanyCreate />
@@ -101,7 +109,7 @@ const appRouter = createBrowserRouter([
     ),
   },
   {
-    path: "/admin/companies/:id",
+    path: "/recruiter/companies/:id",
     element: (
       <ProtectedRoute>
         <CompanySetup />
@@ -109,7 +117,7 @@ const appRouter = createBrowserRouter([
     ),
   },
   {
-    path: "/admin/jobs",
+    path: "/recruiter/jobs",
     element: (
       <ProtectedRoute>
         <AdminJobs />
@@ -117,7 +125,7 @@ const appRouter = createBrowserRouter([
     ),
   },
   {
-    path: "/admin/jobs/create",
+    path: "/recruiter/jobs/create",
     element: (
       <ProtectedRoute>
         <PostJob />
@@ -125,11 +133,61 @@ const appRouter = createBrowserRouter([
     ),
   },
   {
-    path: "/admin/jobs/:id/applicants",
+    path: "/recruiter/jobs/:id/applicants",
     element: (
       <ProtectedRoute>
         <Applicants />
       </ProtectedRoute>
+    ),
+  },
+
+  // Platform Admin route tree (/admin/*) (ADMIN-004)
+  {
+    path: "/admin",
+    element: (
+      <AdminRoute>
+        <AdminDashboard />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: "/admin/dashboard",
+    element: (
+      <AdminRoute>
+        <AdminDashboard />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: "/admin/users",
+    element: (
+      <AdminRoute>
+        <AdminUsers />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: "/admin/jobs",
+    element: (
+      <AdminRoute>
+        <AdminPlatformJobs />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: "/admin/companies",
+    element: (
+      <AdminRoute>
+        <AdminCompanies />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: "/admin/audit-logs",
+    element: (
+      <AdminRoute>
+        <AdminAuditLogs />
+      </AdminRoute>
     ),
   },
 ]);

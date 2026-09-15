@@ -25,6 +25,13 @@ export const register = async (req, res, next) => {
       });
     }
 
+    if (role === "Admin" || role?.toLowerCase() === "admin") {
+      return res.status(403).json({
+        message: "Admin accounts cannot be created via public registration",
+        success: false,
+      });
+    }
+
     const existingEmail = await User.findOne({ email });
     if (existingEmail) {
       return res.status(400).json({
@@ -127,6 +134,13 @@ export const login = async (req, res, next) => {
     if (!isMatch) {
       return res.status(400).json({
         message: "Incorrect email or password",
+        success: false,
+      });
+    }
+
+    if (user.isSuspended) {
+      return res.status(403).json({
+        message: "Your account has been suspended. Please contact support.",
         success: false,
       });
     }

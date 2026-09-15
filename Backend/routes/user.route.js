@@ -20,6 +20,12 @@ router.route("/logout").post(logout);
 router
   .route("/profile/update")
   .post(authenticateToken, resumeUpload, updateProfile);
+router.route("/profile").get(authenticateToken, (req, res) => {
+  return res.status(200).json({
+    success: true,
+    user: req.user,
+  });
+});
 
 // Candidate Experience: Email verification & Password recovery (AUTH-010, AUTH-011)
 router.route("/verify-email/:token?").get(verifyEmail).post(verifyEmail);

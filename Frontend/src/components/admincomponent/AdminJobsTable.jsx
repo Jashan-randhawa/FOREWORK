@@ -130,7 +130,7 @@ const AdminJobsTable = () => {
                         </div>
                         {job.company?._id && (
                           <div
-                            onClick={() => navigate(`/admin/companies/${job.company._id}`)}
+                            onClick={() => navigate(`/recruiter/companies/${job.company._id}`)}
                             className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-100 rounded cursor-pointer text-gray-700"
                           >
                             <Edit2 className="w-4 h-4" />
@@ -138,7 +138,7 @@ const AdminJobsTable = () => {
                           </div>
                         )}
                         <div
-                          onClick={() => navigate(`/admin/jobs/${job._id}/applicants`)}
+                          onClick={() => navigate(`/recruiter/jobs/${job._id}/applicants`)}
                           className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-100 rounded cursor-pointer text-gray-700"
                         >
                           <Eye className="w-4 h-4" />

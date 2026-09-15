@@ -244,7 +244,8 @@ FOREWORK-main/
   password:                String (required, bcrypt hashed)
   pancard:                 String (encrypted, pancardHash indexed)
   adharcard:               String (encrypted, adharcardHash indexed)
-  role:                    Enum["Student", "Recruiter"]  // default: "Student"
+  role:                    Enum["Student", "Recruiter", "Admin"]  // default: "Student"
+  isSuspended:             Boolean (default: false)
   isEmailVerified:         Boolean (default: false)
   emailVerificationToken:  String (SHA-256 hashed)
   emailVerificationExpires: Date
@@ -313,7 +314,20 @@ FOREWORK-main/
   location:    String
   logo:        String     // Cloudinary URL
   userId:      ObjectId → User (required)
+  isVerified:  Boolean (default: false)
   createdAt, updatedAt (timestamps)
+}
+```
+
+### AuditLog
+```js
+{
+  actor:      ObjectId → User (required)
+  action:     String (required, indexed)
+  targetType: Enum["User", "Job", "Company", "Application"] (required, indexed)
+  targetId:   ObjectId (required, indexed)
+  details:    Object (default: {})
+  createdAt:  Date (default: Date.now, indexed)
 }
 ```
 
@@ -400,6 +414,22 @@ Base URL (production): `https://forework.onrender.com` (supports `/api/v1/*` ali
 
 ---
 
+### Administration & Moderation — `/api/admin`
+
+| Method | Endpoint | Auth | Role | Description |
+|--------|----------|:---:|:----:|-------------|
+| GET | `/stats` | ✅ | `Admin` | Platform summary statistics (users, jobs, companies, applications, recent logs) |
+| GET | `/users` | ✅ | `Admin` | Paginated platform users list with search and role filter |
+| PATCH | `/users/:id/status` | ✅ | `Admin` | Suspend or unsuspend user account (creates audit log) |
+| GET | `/jobs` | ✅ | `Admin` | Paginated platform jobs list with search and status filter |
+| PATCH | `/jobs/:id/status` | ✅ | `Admin` | Moderate job status (creates audit log) |
+| DELETE | `/jobs/:id` | ✅ | `Admin` | Remove job posting and associated applications (creates audit log) |
+| GET | `/companies` | ✅ | `Admin` | Paginated platform companies with verification and search filter |
+| PATCH | `/companies/:id/verify` | ✅ | `Admin` | Verify or un-verify company entity (creates audit log) |
+| GET | `/audit-logs` | ✅ | `Admin` | Query platform audit log trail with pagination and filters |
+
+---
+
 ## Frontend Routes
 
 | Path | Component | Access |
@@ -418,12 +448,17 @@ Base URL (production): `https://forework.onrender.com` (supports `/api/v1/*` ali
 | `/PrivacyPolicy` | `PrivacyPolicy` | Public |
 | `/TermsofService` | `TermsofService` | Public |
 | `/Creator` | `Creator` | Public |
-| `/admin/companies` | `Companies` | 🔒 Recruiter only |
-| `/admin/companies/create` | `CompanyCreate` | 🔒 Recruiter only |
-| `/admin/companies/:id` | `CompanySetup` | 🔒 Recruiter only |
-| `/admin/jobs` | `AdminJobs` | 🔒 Recruiter only |
-| `/admin/jobs/create` | `PostJob` | 🔒 Recruiter only |
-| `/admin/jobs/:id/applicants` | `Applicants` | 🔒 Recruiter only |
+| `/recruiter/companies` | `Companies` | 🔒 Recruiter only |
+| `/recruiter/companies/create` | `CompanyCreate` | 🔒 Recruiter only |
+| `/recruiter/companies/:id` | `CompanySetup` | 🔒 Recruiter only |
+| `/recruiter/jobs` | `AdminJobs` | 🔒 Recruiter only |
+| `/recruiter/jobs/create` | `PostJob` | 🔒 Recruiter only |
+| `/recruiter/jobs/:id/applicants` | `Applicants` | 🔒 Recruiter only |
+| `/admin/dashboard` | `AdminDashboard` | 🔒 Admin only |
+| `/admin/users` | `AdminUsers` | 🔒 Admin only |
+| `/admin/jobs` | `AdminJobs` | 🔒 Admin only |
+| `/admin/companies` | `AdminCompanies` | 🔒 Admin only |
+| `/admin/audit-logs` | `AdminAuditLogs` | 🔒 Admin only |
 
 All routes use **React.lazy** for code-splitting and are wrapped in a `<Suspense>` fallback.
 

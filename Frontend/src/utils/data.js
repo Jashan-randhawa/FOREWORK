@@ -3,4 +3,5 @@ export const USER_API_ENDPOINT = `${BASE}/api/user`;
 export const JOB_API_ENDPOINT = `${BASE}/api/job`;
 export const APPLICATION_API_ENDPOINT = `${BASE}/api/application`;
 export const COMPANY_API_ENDPOINT = `${BASE}/api/company`;
+export const ADMIN_API_ENDPOINT = `${BASE}/api/admin`;
 

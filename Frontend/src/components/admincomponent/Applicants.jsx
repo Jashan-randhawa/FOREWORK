@@ -69,7 +69,7 @@ const Applicants = () => {
           </h2>
           <p className="text-gray-600 mb-6">{error.message}</p>
           <Button
-            onClick={() => navigate("/admin/jobs")}
+            onClick={() => navigate("/recruiter/jobs")}
             className="bg-[#6A38C2] hover:bg-[#5b30a6] text-white"
           >
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to My Jobs
@@ -86,7 +86,7 @@ const Applicants = () => {
         <div className="flex items-center justify-between my-5">
           <div className="flex items-center gap-4">
             <Button
-              onClick={() => navigate("/admin/jobs")}
+              onClick={() => navigate("/recruiter/jobs")}
               variant="outline"
               size="sm"
               className="flex items-center gap-2 text-gray-600"

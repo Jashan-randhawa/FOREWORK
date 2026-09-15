@@ -95,7 +95,7 @@ const CompanySetup = () => {
 
       if (res.status === 200 && res.data.message) {
         toast.success(res.data.message);
-        navigate("/admin/companies");
+        navigate("/recruiter/companies");
       } else {
         throw new Error("Unexpected API response.");
       }
@@ -137,7 +137,7 @@ const CompanySetup = () => {
             {fetchError.message}
           </p>
           <Button
-            onClick={() => navigate("/admin/companies")}
+            onClick={() => navigate("/recruiter/companies")}
             className="bg-[#6A38C2] hover:bg-[#5b30a6] text-white"
           >
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to My Companies
@@ -154,7 +154,7 @@ const CompanySetup = () => {
         <form onSubmit={submitHandler}>
           <div className="flex items-center gap-5 p-8">
             <Button
-              onClick={() => navigate("/admin/companies")}
+              onClick={() => navigate("/recruiter/companies")}
               variant="outline"
               className="flex items-center gap-2 text-gray-500 font-semibold"
             >

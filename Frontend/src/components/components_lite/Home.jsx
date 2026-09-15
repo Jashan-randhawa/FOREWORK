@@ -18,9 +18,11 @@ const Home = () => {
 
   useEffect(() => {
     if (user?.role === "Recruiter") {
-      navigate("/admin/companies");
+      navigate("/recruiter/companies");
+    } else if (user?.role === "Admin") {
+      navigate("/admin/dashboard");
     }
-  }, []);
+  }, [user, navigate]);
 
   return (
     <div>

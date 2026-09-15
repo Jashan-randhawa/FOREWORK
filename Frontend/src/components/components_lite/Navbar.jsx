@@ -42,31 +42,47 @@ const Navbar = () => {
         </div>
         <div className="flex items-center gap-10">
           <ul className="flex font-medium items-center gap-6">
-            {user && user.role === "Recruiter" ? (
+            {user && user.role === "Admin" ? (
               <>
+                <li>
+                  <Link to={"/admin/dashboard"} className="text-red-600 font-semibold hover:text-red-700">
+                    Admin Portal
+                  </Link>
+                </li>
+                <li>
+                  <Link to={"/admin/users"}>Users</Link>
+                </li>
+                <li>
+                  <Link to={"/admin/jobs"}>Jobs</Link>
+                </li>
                 <li>
                   <Link to={"/admin/companies"}>Companies</Link>
                 </li>
                 <li>
-                  <Link to={"/admin/jobs"}>Jobs</Link>
+                  <Link to={"/admin/audit-logs"}>Audit Logs</Link>
+                </li>
+              </>
+            ) : user && user.role === "Recruiter" ? (
+              <>
+                <li>
+                  <Link to={"/recruiter/companies"}>Companies</Link>
+                </li>
+                <li>
+                  <Link to={"/recruiter/jobs"}>Jobs</Link>
                 </li>
               </>
             ) : (
               <>
                 <li>
-                  {" "}
                   <Link to={"/Home"}>Home</Link>
                 </li>
                 <li>
-                  {" "}
-                  <Link to={"/Browse"}>Browse</Link>{" "}
+                  <Link to={"/Browse"}>Browse</Link>
                 </li>
                 <li>
-                  {" "}
                   <Link to={"/Jobs"}>Jobs</Link>
                 </li>
                 <li>
-                  {" "}
                   <Link to={"/Creator"}>About</Link>
                 </li>
               </>
@@ -75,13 +91,11 @@ const Navbar = () => {
           {!user ? (
             <div className=" flex items-center gap-2">
               <Link to={"/login"}>
-                {" "}
                 <Button variant="outline">Login</Button>
               </Link>
               <Link to={"/register"}>
-                {" "}
-                <Button className="bg-red-600  hover:bg-red-700">
-                  Register
+                <Button className="bg-[#6B3AC2] hover:bg-[#522998]">
+                  Signup
                 </Button>
               </Link>
             </div>
@@ -96,7 +110,7 @@ const Navbar = () => {
                 </Avatar>
               </PopoverTrigger>
               <PopoverContent className="w-80">
-                <div className="flex items-center gap-4 space-y-2">
+                <div className="flex gap-4 space-y-2">
                   <Avatar className="cursor-pointer">
                     <AvatarImage
                       src={user?.profile?.profilePhoto}
@@ -112,6 +126,29 @@ const Navbar = () => {
                 </div>
 
                 <div className="flex flex-col my-2 text-gray-600  ">
+                  {user && user.role === "Admin" && (
+                    <div className="flex w-fit items-center gap-2 cursor-pointer text-red-600 font-semibold">
+                      <Button variant="link" className="text-red-600 p-0">
+                        <Link to={"/admin/dashboard"}>Admin Dashboard</Link>
+                      </Button>
+                    </div>
+                  )}
+
+                  {user && user.role === "Recruiter" && (
+                    <>
+                      <div className="flex w-fit items-center gap-2 cursor-pointer">
+                        <Button variant="link" className="p-0">
+                          <Link to={"/recruiter/companies"}>My Companies</Link>
+                        </Button>
+                      </div>
+                      <div className="flex w-fit items-center gap-2 cursor-pointer">
+                        <Button variant="link" className="p-0">
+                          <Link to={"/recruiter/jobs"}>My Jobs</Link>
+                        </Button>
+                      </div>
+                    </>
+                  )}
+
                   {user && user.role === "Student" && (
                     <>
                       <div className="flex w-fit items-center gap-2 cursor-pointer">
@@ -129,9 +166,9 @@ const Navbar = () => {
                     </>
                   )}
 
-                  <div className="flex w-fit items-center gap-2 cursor-pointer">
+                  <div className="flex w-fit items-center gap-2 cursor-pointer mt-2 pt-2 border-t">
                     <LogOut></LogOut>
-                    <Button onClick={logoutHandler} variant="link">
+                    <Button onClick={logoutHandler} variant="link" className="p-0">
                       Logout
                     </Button>
                   </div>

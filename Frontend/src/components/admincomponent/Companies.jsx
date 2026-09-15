@@ -29,7 +29,7 @@ const Companies = () => {
             placeholder="Filter by Name"
             onChange={(e) => setInput(e.target.value)}
           ></Input>
-          <Button onClick={() => navigate("/admin/companies/create")}>
+          <Button onClick={() => navigate("/recruiter/companies/create")}>
             Add Company
           </Button>
         </div>
