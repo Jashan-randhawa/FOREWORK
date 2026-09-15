@@ -177,8 +177,8 @@ const ApplicantsTable = () => {
   };
 
   return (
-    <div>
-      <Table>
+    <div className="w-full overflow-x-auto">
+      <Table className="min-w-[850px]">
         <TableCaption>A list of applicants for this job</TableCaption>
         <TableHeader>
           <TableRow>
@@ -286,7 +286,7 @@ const ApplicantsTable = () => {
                   <TableCell className="text-right">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <button className="p-1 hover:bg-gray-100 rounded cursor-pointer">
+                        <button aria-label="Candidate actions menu" className="p-1 hover:bg-gray-100 rounded cursor-pointer">
                           <MoreHorizontal className="w-5 h-5" />
                         </button>
                       </PopoverTrigger>

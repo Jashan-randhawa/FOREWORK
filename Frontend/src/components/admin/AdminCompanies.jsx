@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AdminNavbar from "./AdminNavbar";
 import API from "@/utils/axiosInstance";
 import { ADMIN_API_ENDPOINT } from "@/utils/data";
@@ -89,6 +89,7 @@ const AdminCompanies = () => {
             <select
               value={verifiedFilter}
               onChange={(e) => setVerifiedFilter(e.target.value)}
+              aria-label="Filter by verification status"
               className="text-xs border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
             >
               <option value="">All Verification</option>
@@ -98,13 +99,15 @@ const AdminCompanies = () => {
 
             <form onSubmit={handleSearch} className="flex gap-1.5 w-full sm:w-64">
               <Input
+                id="admin-company-search"
                 type="text"
                 placeholder="Search company name or location..."
+                aria-label="Search company name or location"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="h-9 text-xs"
               />
-              <Button type="submit" size="sm" className="h-9 bg-gray-900 text-white">
+              <Button type="submit" size="sm" aria-label="Search companies" className="h-9 bg-gray-900 text-white">
                 <Search className="w-3.5 h-3.5" />
               </Button>
             </form>
@@ -117,7 +120,7 @@ const AdminCompanies = () => {
               <Loader2 className="w-8 h-8 animate-spin text-red-600" />
             </div>
           ) : (
-            <Table>
+            <Table className="min-w-[700px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Company</TableHead>

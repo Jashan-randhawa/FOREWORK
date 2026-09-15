@@ -40,8 +40,8 @@ const CompaniesTable = () => {
   }
 
   return (
-    <div>
-      <Table>
+    <div className="w-full overflow-x-auto">
+      <Table className="min-w-[550px]">
         <TableCaption>Your recent registered Companies</TableCaption>
         <TableHeader>
           <TableRow>
@@ -74,15 +74,17 @@ const CompaniesTable = () => {
                 <TableCell>{company.createdAt.split("T")[0]}</TableCell>
                 <TableCell className="text-right cursor-pointer">
                   <Popover>
-                    <PopoverTrigger>
-                      <MoreHorizontal />
+                    <PopoverTrigger asChild>
+                      <button aria-label="Open company actions menu" className="p-1 hover:bg-gray-100 rounded">
+                        <MoreHorizontal className="w-5 h-5" />
+                      </button>
                     </PopoverTrigger>
                     <PopoverContent className="w-32">
                       <div
                         onClick={() => navigate(`/recruiter/companies/${company._id}`)}
                         className="flex items-center gap-2 w-fit cursor-pointer"
                       >
-                        <Edit2 className="w-4" />
+                        <Edit2 className="w-4 h-4" />
                         <span>Edit</span>
                       </div>
                     </PopoverContent>

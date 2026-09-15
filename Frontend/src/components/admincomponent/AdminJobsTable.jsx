@@ -83,8 +83,8 @@ const AdminJobsTable = () => {
   }
 
   return (
-    <div>
-      <Table>
+    <div className="w-full overflow-x-auto">
+      <Table className="min-w-[650px]">
         <TableCaption>Your recent Posted Jobs</TableCaption>
         <TableHeader>
           <TableRow>
@@ -123,7 +123,7 @@ const AdminJobsTable = () => {
                   <TableCell className="text-right cursor-pointer">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <button className="p-1 hover:bg-gray-100 rounded">
+                        <button aria-label="Open job actions menu" className="p-1 hover:bg-gray-100 rounded">
                           <MoreHorizontal className="w-5 h-5" />
                         </button>
                       </PopoverTrigger>

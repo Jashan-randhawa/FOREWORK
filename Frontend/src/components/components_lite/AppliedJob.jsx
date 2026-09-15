@@ -19,7 +19,7 @@ const AppliedJob = () => {
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-      <Table>
+      <Table className="min-w-[600px]">
         <TableCaption className="py-4 text-xs text-gray-500">
           Showing all your submitted applications and interview updates
         </TableCaption>

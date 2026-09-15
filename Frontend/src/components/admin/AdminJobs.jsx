@@ -123,6 +123,7 @@ const AdminJobs = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
+              aria-label="Filter by status"
               className="text-xs border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
             >
               <option value="">All Statuses</option>
@@ -135,13 +136,15 @@ const AdminJobs = () => {
 
             <form onSubmit={handleSearch} className="flex gap-1.5 w-full sm:w-64">
               <Input
+                id="admin-job-search"
                 type="text"
                 placeholder="Search job title or details..."
+                aria-label="Search job title or details"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="h-9 text-xs"
               />
-              <Button type="submit" size="sm" className="h-9 bg-gray-900 text-white">
+              <Button type="submit" size="sm" aria-label="Search jobs" className="h-9 bg-gray-900 text-white">
                 <Search className="w-3.5 h-3.5" />
               </Button>
             </form>
@@ -154,7 +157,7 @@ const AdminJobs = () => {
               <Loader2 className="w-8 h-8 animate-spin text-red-600" />
             </div>
           ) : (
-            <Table>
+            <Table className="min-w-[750px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Job Title</TableHead>
@@ -237,6 +240,7 @@ const AdminJobs = () => {
                             <Button
                               size="sm"
                               variant="ghost"
+                              aria-label="Delete job listing"
                               disabled={actionId === job._id}
                               onClick={() => setJobToDelete(job)}
                               className="h-7 px-2 text-xs text-gray-400 hover:text-red-600 hover:bg-red-50"

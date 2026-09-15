@@ -90,18 +90,19 @@ const Browse = () => {
 
             {/* Pagination Controls */}
             {pagination?.totalPages > 1 && (
-              <div className="flex items-center justify-center gap-3 mt-10 pt-6 border-t border-gray-200">
+              <nav aria-label="Browse Pagination" className="flex items-center justify-center gap-3 mt-10 pt-6 border-t border-gray-200">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handlePrevPage}
                   disabled={pagination.page <= 1}
+                  aria-label="Go to previous page"
                   className="flex items-center gap-1"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   Previous
                 </Button>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600" aria-current="page">
                   Page {pagination.page} of {pagination.totalPages}
                 </span>
                 <Button
@@ -109,12 +110,13 @@ const Browse = () => {
                   size="sm"
                   onClick={handleNextPage}
                   disabled={pagination.page >= pagination.totalPages}
+                  aria-label="Go to next page"
                   className="flex items-center gap-1"
                 >
                   Next
                   <ChevronRight className="w-4 h-4" />
                 </Button>
-              </div>
+              </nav>
             )}
           </>
         )}

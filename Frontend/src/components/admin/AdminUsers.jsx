@@ -98,6 +98,7 @@ const AdminUsers = () => {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
+              aria-label="Filter by role"
               className="text-xs border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
             >
               <option value="">All Roles</option>
@@ -108,13 +109,15 @@ const AdminUsers = () => {
 
             <form onSubmit={handleSearch} className="flex gap-1.5 w-full sm:w-64">
               <Input
+                id="admin-user-search"
                 type="text"
                 placeholder="Search name or email..."
+                aria-label="Search name or email"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="h-9 text-xs"
               />
-              <Button type="submit" size="sm" className="h-9 bg-gray-900 text-white">
+              <Button type="submit" size="sm" aria-label="Search users" className="h-9 bg-gray-900 text-white">
                 <Search className="w-3.5 h-3.5" />
               </Button>
             </form>
@@ -127,7 +130,7 @@ const AdminUsers = () => {
               <Loader2 className="w-8 h-8 animate-spin text-red-600" />
             </div>
           ) : (
-            <Table>
+            <Table className="min-w-[700px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>User</TableHead>

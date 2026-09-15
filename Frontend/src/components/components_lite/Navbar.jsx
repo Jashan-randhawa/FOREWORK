@@ -50,8 +50,8 @@ const Navbar = () => {
             </Link>
           </h1>
         </div>
-        <div className="flex items-center gap-10">
-          <ul className="flex font-medium items-center gap-6">
+        <div className="flex items-center gap-6 md:gap-10">
+          <ul className="hidden md:flex font-medium items-center gap-6">
             {user && user.role === "Admin" ? (
               <>
                 <li>
@@ -114,19 +114,25 @@ const Navbar = () => {
               <NotificationDropdown />
               <Popover>
                 <PopoverTrigger asChild>
-                  <Avatar className="cursor-pointer">
-                    <AvatarImage
-                      src={user?.profile?.profilePhoto}
-                      alt="@shadcn"
-                    />
-                  </Avatar>
+                  <button
+                    type="button"
+                    aria-label="User profile menu"
+                    className="rounded-full focus:outline-none focus:ring-2 focus:ring-[#6B3AC2]"
+                  >
+                    <Avatar className="cursor-pointer">
+                      <AvatarImage
+                        src={user?.profile?.profilePhoto}
+                        alt={user?.fullname || "User avatar"}
+                      />
+                    </Avatar>
+                  </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-80">
                   <div className="flex gap-4 space-y-2">
                     <Avatar className="cursor-pointer">
                       <AvatarImage
                         src={user?.profile?.profilePhoto}
-                        alt="@shadcn"
+                        alt={user?.fullname || "User avatar"}
                       />
                     </Avatar>
                     <div>
@@ -135,6 +141,14 @@ const Navbar = () => {
                         {user?.profile?.bio}
                       </p>
                     </div>
+                  </div>
+
+                  {/* Mobile Navigation Links inside Popover */}
+                  <div className="flex flex-col md:hidden border-b border-gray-100 py-2 my-1 text-sm font-medium">
+                    <Link to="/Home" className="py-1 px-2 hover:bg-gray-50 rounded">Home</Link>
+                    <Link to="/Browse" className="py-1 px-2 hover:bg-gray-50 rounded">Browse</Link>
+                    <Link to="/Jobs" className="py-1 px-2 hover:bg-gray-50 rounded">Jobs</Link>
+                    <Link to="/Creator" className="py-1 px-2 hover:bg-gray-50 rounded">About</Link>
                   </div>
 
                   <div className="flex flex-col my-2 text-gray-600  ">

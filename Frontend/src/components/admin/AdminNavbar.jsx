@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Button } from "../ui/button";
@@ -104,6 +104,28 @@ const AdminNavbar = () => {
             </div>
           </div>
         </div>
+
+        {/* Mobile Navigation Row (375px - 768px) */}
+        <nav className="flex md:hidden overflow-x-auto pb-2 pt-1 gap-1 border-t border-gray-100 px-1 scrollbar-none" aria-label="Admin mobile navigation">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${
+                  isActive
+                    ? "bg-red-50 text-red-700 font-semibold"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
       </div>
     </header>
   );
