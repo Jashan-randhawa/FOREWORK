@@ -1,10 +1,12 @@
 import { v2 as cloudinary } from "cloudinary";
-import config from "../config/index.js";
+
+import dotenv from "dotenv";
+dotenv.config();
 
 cloudinary.config({
-  cloud_name: config.cloudinary.cloudName,
-  api_key: config.cloudinary.apiKey,
-  api_secret: config.cloudinary.apiSecret,
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API,
+  api_secret: process.env.API_SECRET,
 });
 
 export default cloudinary;

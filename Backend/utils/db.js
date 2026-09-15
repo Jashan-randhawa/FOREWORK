@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
-import config from "../config/index.js";
 
 // Connect to MongoDB
 const connectDB = async () => {
   try {
-    await mongoose.connect(config.mongoUri);
+    await mongoose.connect(process.env.MONGO_URI);
     console.log("MongoDB Connected...");
   } catch (error) {
     console.error("Error connecting to MongoDB:", error.message);

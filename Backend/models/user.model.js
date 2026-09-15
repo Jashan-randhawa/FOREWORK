@@ -1,63 +1,62 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
-
 const userSchema = new mongoose.Schema(
   {
     fullname: {
       type: String,
-      required: [true, "Full name is required"],
-      trim: true,
+      required: true,
     },
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: true,
       unique: true,
-      trim: true,
-      lowercase: true,
-      match: [/^\S+@\S+\.\S+$/, "Please provide a valid email address"],
     },
     phoneNumber: {
       type: String,
-      required: [true, "Phone number is required"],
+      required: true,
       unique: true,
-      trim: true,
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
-      minlength: [6, "Password must be at least 6 characters"],
+      required: true,
+    },
+    pancard: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    adharcard: {
+      type: String,
+      required: true,
+      unique: true,
     },
     role: {
       type: String,
-      enum: ["Customer", "Admin"],
-      default: "Customer",
-    },
-    addresses: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Address",
-      },
-    ],
-    defaultAddressId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Address",
-      default: null,
+      enum: ["Student", "Recruiter"],
+      default: "Student",
+      required: true,
     },
     profile: {
-      avatarUrl: {
+      bio: {
         type: String,
+      },
+      skills: [{ type: String }],
+      resume: {
+        type: String, // URL to resume file
+      },
+      resumeOriginalname: {
+        type: String, // Original name of resume file
+      },
+      company: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Company",
+      },
+      profilePhoto: {
+        type: String, // URL to profile photo file
         default: "",
-        trim: true,
       },
     },
   },
   { timestamps: true }
 );
 
-// Method to compare candidate password with stored hash
-userSchema.methods.comparePassword = async function (candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
-};
-
 export const User = mongoose.model("User", userSchema);
-export default User;
