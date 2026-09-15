@@ -1,4 +1,4 @@
-﻿import API from "@/utils/axiosInstance";
+import API from "@/utils/axiosInstance";
 import { parseApiError } from "@/lib/errors";
 import store from "@/redux/store";
 import { setUser } from "@/redux/authSlice";
@@ -77,47 +77,49 @@ export function unwrapPagination(res) {
 }
 
 // Attach response interceptor for error classification and 401 handling
-API.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const normalized = parseApiError(error);
+if (API && API.interceptors && API.interceptors.response) {
+  API.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      const normalized = parseApiError(error);
 
-    // Handle 401 Unauthorized
-    if (normalized.status === 401) {
-      try {
-        store.dispatch(setUser(null));
-      } catch (dispatchErr) {
-        console.warn("Could not dispatch setUser(null) on 401:", dispatchErr);
-      }
+      // Handle 401 Unauthorized
+      if (normalized.status === 401) {
+        try {
+          store.dispatch(setUser(null));
+        } catch (dispatchErr) {
+          console.warn("Could not dispatch setUser(null) on 401:", dispatchErr);
+        }
 
-      if (typeof window !== "undefined" && window.location) {
-        const pathname = window.location.pathname;
-        const search = window.location.search;
-        const currentPath = pathname + search;
-        const isAuthScreen =
-          pathname === "/login" ||
-          pathname === "/register" ||
-          pathname === "/forgot-password" ||
-          pathname === "/reset-password";
+        if (typeof window !== "undefined" && window.location) {
+          const pathname = window.location.pathname;
+          const search = window.location.search;
+          const currentPath = pathname + search;
+          const isAuthScreen =
+            pathname === "/login" ||
+            pathname === "/register" ||
+            pathname === "/forgot-password" ||
+            pathname === "/reset-password";
 
-        const requestUrl = error?.config?.url || "";
-        const isAuthRequest =
-          requestUrl.includes("/login") ||
-          requestUrl.includes("/register") ||
-          requestUrl.includes("/forgot-password") ||
-          requestUrl.includes("/reset-password");
+          const requestUrl = error?.config?.url || "";
+          const isAuthRequest =
+            requestUrl.includes("/login") ||
+            requestUrl.includes("/register") ||
+            requestUrl.includes("/forgot-password") ||
+            requestUrl.includes("/reset-password");
 
-        // Avoid infinite redirect loops on auth pages or failed login attempts
-        if (!isAuthScreen && !isAuthRequest) {
-          const redirectUrl = `/login?redirect=${encodeURIComponent(currentPath)}`;
-          window.location.href = redirectUrl;
+          // Avoid infinite redirect loops on auth pages or failed login attempts
+          if (!isAuthScreen && !isAuthRequest) {
+            const redirectUrl = `/login?redirect=${encodeURIComponent(currentPath)}`;
+            window.location.href = redirectUrl;
+          }
         }
       }
-    }
 
-    return Promise.reject(normalized);
-  }
-);
+      return Promise.reject(normalized);
+    }
+  );
+}
 
 export const http = {
   get: (url, config) => API.get(url, config),

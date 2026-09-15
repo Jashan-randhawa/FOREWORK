@@ -124,13 +124,15 @@ const Description = () => {
         const res = await API.get(`${JOB_API_ENDPOINT}/get/${jobId}`);
         if (res.data.success || res.data.status) {
           dispatch(setSingleJob(res.data.job));
-          setIsApplied(
-            res.data.job?.applications?.some(
-              (application) =>
-                application?.applicant === user?._id ||
-                application?.applicant?._id === user?._id
-            ) || false
+          const appliedInSingleJob = res.data.job?.applications?.some(
+            (application) =>
+              application?.applicant === user?._id ||
+              application?.applicant?._id === user?._id
           );
+          const appliedInAppliedList = allAppliedJobs?.some(
+            (applied) => (applied?.job?._id || applied?.job) === jobId
+          );
+          setIsApplied(Boolean(appliedInSingleJob || appliedInAppliedList));
         } else {
           setError("Failed to fetch job details.");
         }
