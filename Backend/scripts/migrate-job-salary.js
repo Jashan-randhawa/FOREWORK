@@ -38,7 +38,8 @@ const migrateJobSalary = async () => {
     await mongoose.connect(mongoUri);
     console.log("Connected to MongoDB.");
 
-    const jobs = await Job.find({});
+    const collection = mongoose.connection.db.collection("jobs");
+    const jobs = await collection.find({}).toArray();
     console.log(`Found ${jobs.length} jobs to inspect for salary migration.`);
 
     let migratedCount = 0;
@@ -48,7 +49,7 @@ const migrateJobSalary = async () => {
       if (typeof job.salary === "string") {
         const numericSalary = parseSalary(job.salary);
         if (numericSalary !== null) {
-          await Job.updateOne(
+          await collection.updateOne(
             { _id: job._id },
             { $set: { salary: numericSalary } }
           );

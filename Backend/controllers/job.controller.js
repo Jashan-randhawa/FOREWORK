@@ -153,7 +153,7 @@ export const getAllJobs = async (req, res, next) => {
     if (status) {
       query.status = status.toLowerCase();
     } else {
-      query.status = "published";
+      query.status = { $in: ["published", null] };
     }
 
     // Keyword search across title and description
