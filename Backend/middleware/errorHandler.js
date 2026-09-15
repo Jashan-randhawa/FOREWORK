@@ -25,10 +25,15 @@ const errorHandler = (err, req, res, next) => {
   // Handle Mongoose duplicate key error (code 11000)
   if (err.code === 11000) {
     statusCode = 409;
-    const field = Object.keys(err.keyValue || {})[0];
-    message = field
-      ? `${field.charAt(0).toUpperCase() + field.slice(1)} already exists.`
-      : "Duplicate field value entered.";
+    const keys = Object.keys(err.keyPattern || err.keyValue || {});
+    if (keys.includes("job") && keys.includes("applicant")) {
+      message = "You have already applied for this job.";
+    } else {
+      const field = Object.keys(err.keyValue || {})[0];
+      message = field
+        ? `${field.charAt(0).toUpperCase() + field.slice(1)} already exists.`
+        : "Duplicate field value entered.";
+    }
   }
 
   // Handle Mongoose ValidationError
