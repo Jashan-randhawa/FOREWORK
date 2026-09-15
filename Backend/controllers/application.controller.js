@@ -28,7 +28,7 @@ export const applyJob = async (req, res, next) => {
       applicant: userId,
     });
     if (existingApplication) {
-      return res.status(409).json({
+      return res.status(400).json({
         message: "You have already applied for this job",
         success: false,
       });
