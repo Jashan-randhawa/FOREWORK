@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import compression from "compression";
+import mongoose from "mongoose";
 
 import validateEnv from "./utils/validateEnv.js";
 import connectDB from "./utils/db.js";
@@ -147,12 +148,42 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5001;
 
+let server;
+
 // Only start the HTTP listener if not running in test mode
 if (process.env.NODE_ENV !== "test") {
-  app.listen(PORT, () => {
+  server = app.listen(PORT, () => {
     connectDB();
     console.log(`Server is running on port ${PORT}`);
   });
+
+  const gracefulShutdown = (signal) => {
+    console.log(`[Shutdown] Received ${signal}. Starting graceful shutdown...`);
+    if (server) {
+      server.close(async () => {
+        console.log("[Shutdown] HTTP server closed. Closing database connection...");
+        try {
+          await mongoose.connection.close(false);
+          console.log("[Shutdown] Database connection closed. Exiting process.");
+          process.exit(0);
+        } catch (err) {
+          console.error("[Shutdown] Error while closing database connection:", err);
+          process.exit(1);
+        }
+      });
+
+      // Force shutdown after 10 seconds if lingering connections remain
+      setTimeout(() => {
+        console.error("[Shutdown] Could not close connections in time, forcefully shutting down");
+        process.exit(1);
+      }, 10000).unref();
+    } else {
+      process.exit(0);
+    }
+  };
+
+  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 }
 
 export default app;

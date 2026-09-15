@@ -105,13 +105,16 @@ Authentication is handled via **JWT tokens stored in HTTP-only cookies**, and fi
 | dotenv | 16.4.7 | Environment variable management |
 | nodemon | 3.1.7 | Auto-reload in development |
 
-### DevOps & Deployment
+### DevOps, Testing & Production Readiness
 
-| Tool | Purpose |
-|------|---------|
-| Docker | Backend containerization (Node 20 Alpine) |
-| Render | Backend hosting |
-| Vercel | Frontend hosting with SPA rewrite config |
+| Tool / Practice | Purpose |
+|-----------------|---------|
+| Docker (Multi-stage) | Hardened Node 20 Alpine containerization with unprivileged appuser & health check |
+| Vitest (9 Suites, 127 Tests) | Unit, security, and end-to-end integration test automation |
+| GitHub Actions CI | Automated linting, test suite execution, and critical security audits |
+| Graceful Shutdown | SIGTERM/SIGINT connection draining for HTTP and MongoDB connections |
+| Render / Railway | Containerized backend hosting with health monitoring |
+| Vercel | Frontend hosting with SPA rewrite configuration |
 
 ---
 
