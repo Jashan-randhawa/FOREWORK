@@ -14,20 +14,29 @@ const Description = () => {
   const jobId = params.id;
   const navigate = useNavigate();
 
-  const { singleJob } = useSelector((store) => store.job);
+  const { singleJob, allAppliedJobs } = useSelector((store) => store.job);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const { user } = useSelector((store) => store.auth);
 
-  const isIntiallyApplied =
+  const hasAlreadyApplied = Boolean(
     singleJob?.applications?.some(
       (application) =>
         application?.applicant === user?._id ||
         application?.applicant?._id === user?._id
-    ) || false;
-  const [isApplied, setIsApplied] = useState(isIntiallyApplied);
+    ) ||
+      allAppliedJobs?.some(
+        (applied) => (applied?.job?._id || applied?.job) === jobId
+      )
+  );
+
+  const [isApplied, setIsApplied] = useState(hasAlreadyApplied);
+
+  useEffect(() => {
+    setIsApplied(hasAlreadyApplied);
+  }, [hasAlreadyApplied]);
 
   const isRecruiter = user?.role === "Recruiter";
 
@@ -40,6 +49,12 @@ const Description = () => {
 
     if (isRecruiter) {
       toast.error("Recruiter accounts cannot apply to jobs");
+      return;
+    }
+
+    if (isApplied || hasAlreadyApplied) {
+      setIsApplied(true);
+      toast.info("You have already applied for this job.");
       return;
     }
 
@@ -58,9 +73,19 @@ const Description = () => {
         toast.success(res.data.message || "Application submitted successfully!");
       }
     } catch (err) {
-      const errMsg =
-        err.response?.data?.message || err.message || "Failed to submit application";
-      toast.error(errMsg);
+      const isDuplicate =
+        err.status === 409 ||
+        err.response?.status === 409 ||
+        err.message?.toLowerCase().includes("already applied");
+
+      if (isDuplicate) {
+        setIsApplied(true);
+        toast.error("You have already applied for this job.");
+      } else {
+        const errMsg =
+          err.response?.data?.message || err.message || "Failed to submit application";
+        toast.error(errMsg);
+      }
     } finally {
       setSubmitting(false);
     }

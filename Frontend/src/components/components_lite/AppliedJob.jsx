@@ -103,19 +103,25 @@ const AppliedJob = () => {
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Badge
-                    className={`capitalize font-medium text-xs px-2.5 py-0.5 rounded-full ${
-                      appliedJob?.status === "rejected"
-                        ? "bg-red-100 text-red-700 border-red-200 hover:bg-red-200"
-                        : appliedJob?.status === "accepted"
-                        ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200"
-                        : appliedJob?.status === "interview"
-                        ? "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200"
-                        : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
-                    }`}
-                  >
-                    {appliedJob?.status || "pending"}
-                  </Badge>
+                  <div className="flex flex-col items-end gap-1">
+                    <Badge
+                      className={`capitalize font-medium text-xs px-2.5 py-0.5 rounded-full ${
+                        appliedJob?.status === "rejected"
+                          ? "bg-red-100 text-red-700 border-red-200"
+                          : appliedJob?.status === "accepted"
+                          ? "bg-green-100 text-green-700 border-green-200"
+                          : "bg-gray-100 text-gray-700 border-gray-200"
+                      }`}
+                    >
+                      {appliedJob?.status || "pending"}
+                    </Badge>
+                    {(appliedJob?.scheduledAt || appliedJob?.interviewSchedule?.scheduledAt) &&
+                      appliedJob?.status !== "rejected" && (
+                        <span className="text-[11px] font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded px-1.5 py-0.5">
+                          Interview Scheduled
+                        </span>
+                      )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))
