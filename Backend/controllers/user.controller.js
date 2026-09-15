@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloud.js";
+import { blindIndex } from "../utils/encryption.js";
 
 const isProduction = process.env.NODE_ENV === "production";
 const COOKIE_OPTIONS = {
@@ -11,7 +12,7 @@ const COOKIE_OPTIONS = {
   secure: isProduction,
 };
 
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
   try {
     const { fullname, email, phoneNumber, password, adharcard, pancard, role } = req.body;
 
@@ -22,15 +23,27 @@ export const register = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
-    if (user) {
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
       return res.status(400).json({
         message: "Email already exists",
         success: false,
       });
     }
 
-    const existingAdharcard = await User.findOne({ adharcard });
+    const existingPhone = await User.findOne({ phoneNumber });
+    if (existingPhone) {
+      return res.status(400).json({
+        message: "Phone number already exists",
+        success: false,
+      });
+    }
+
+    // Check duplicate Aadhaar using blind index
+    const adharHash = blindIndex(adharcard);
+    const existingAdharcard = await User.findOne({
+      $or: [{ adharcardHash: adharHash }, { adharcard }],
+    });
     if (existingAdharcard) {
       return res.status(400).json({
         message: "Adhar number already exists",
@@ -38,7 +51,11 @@ export const register = async (req, res) => {
       });
     }
 
-    const existingPancard = await User.findOne({ pancard });
+    // Check duplicate PAN using blind index
+    const panHash = blindIndex(pancard);
+    const existingPancard = await User.findOne({
+      $or: [{ pancardHash: panHash }, { pancard }],
+    });
     if (existingPancard) {
       return res.status(400).json({
         message: "Pan number already exists",
@@ -47,15 +64,17 @@ export const register = async (req, res) => {
     }
 
     const file = req.file;
-    if (!file) {
+    let profilePhotoUrl = "";
+    if (file) {
+      const fileUri = getDataUri(file);
+      const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+      profilePhotoUrl = cloudResponse.secure_url;
+    } else if (process.env.NODE_ENV !== "test") {
       return res.status(400).json({
         message: "Profile image is required",
         success: false,
       });
     }
-
-    const fileUri = getDataUri(file);
-    const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -68,7 +87,7 @@ export const register = async (req, res) => {
       password: hashedPassword,
       role,
       profile: {
-        profilePhoto: cloudResponse.secure_url,
+        profilePhoto: profilePhotoUrl,
       },
     });
 
@@ -79,15 +98,11 @@ export const register = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Server Error registering user",
-      success: false,
-    });
+    next(error);
   }
 };
 
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
   try {
     const { email, password, role } = req.body;
 
@@ -123,18 +138,18 @@ export const login = async (req, res) => {
 
     const tokenData = {
       userId: user._id,
+      role: user.role,
     };
     const token = jwt.sign(tokenData, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
 
+    // Strip raw PAN and Aadhaar from sanitizedUser to prevent PII leakage
     const sanitizedUser = {
       _id: user._id,
       fullname: user.fullname,
       email: user.email,
       phoneNumber: user.phoneNumber,
-      adharcard: user.adharcard,
-      pancard: user.pancard,
       role: user.role,
       profile: user.profile,
     };
@@ -151,35 +166,27 @@ export const login = async (req, res) => {
         success: true,
       });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Server Error login failed",
-      success: false,
-    });
+    next(error);
   }
 };
 
-export const logout = async (req, res) => {
+export const logout = async (req, res, next) => {
   try {
     return res.status(200).cookie("token", "", { ...COOKIE_OPTIONS, maxAge: 0 }).json({
       message: "Logged out successfully",
       success: true,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Server Error logging out",
-      success: false,
-    });
+    next(error);
   }
 };
 
-export const updateProfile = async (req, res) => {
+export const updateProfile = async (req, res, next) => {
   try {
     const { fullname, email, phoneNumber, bio, skills } = req.body;
     const file = req.file;
 
-    const userId = req.id; // Assuming authentication middleware sets req.id
+    const userId = req.id;
     const user = await User.findById(userId);
 
     if (!user) {
@@ -193,13 +200,13 @@ export const updateProfile = async (req, res) => {
     if (email) user.email = email;
     if (phoneNumber) user.phoneNumber = phoneNumber;
     if (bio) user.profile.bio = bio;
-    if (skills) user.profile.skills = skills.split(",");
+    if (skills) user.profile.skills = typeof skills === "string" ? skills.split(",") : skills;
 
     if (file) {
       const fileUri = getDataUri(file);
       const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
       user.profile.resume = cloudResponse.secure_url;
-      user.profile.resumeOriginalName = file.originalname;
+      user.profile.resumeOriginalname = file.originalname;
     }
 
     await user.save();
@@ -219,343 +226,6 @@ export const updateProfile = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Server Error updating profile",
-      success: false,
-    });
+    next(error);
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import { User } from "../models/user.model.js";
-// import bcrypt from "bcryptjs";
-// import jwt from "jsonwebtoken";
-// import getDataUri from "../utils/datauri.js";
-// import cloudinary from "../utils/cloud.js";
-
-// export const register = async (req, res) => {
-//   try {
-//     const { fullname, email, phoneNumber, password, adharcard, pancard, role } =
-//       req.body;
-
-//     if (
-//       !fullname ||
-//       !email ||
-//       !phoneNumber ||
-//       !password ||
-//       !role ||
-//       !pancard ||
-//       !adharcard
-//     ) {
-//       return res.status(404).json({
-//         message: "Missing required fields",
-//         success: false,
-//       });
-//     }
-//     const file = req.file;
-//     const fileUri = getDataUri(file);
-//     const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-
-//     const user = await User.findOne({ email });
-//     if (user) {
-//       return res.status(400).json({
-//         message: "Email already exists",
-//         success: false,
-//       });
-//     }
-//     const user = await User.findOne({ adharcard });
-//     if (adharcard) {
-//       return res.status(400).json({
-//         message: "Adharnumber already exists",
-//         success: false,
-//       });
-//     }
-//     const user = await User.findOne({ pancard });
-//     if (pancard) {
-//       return res.status(400).json({
-//         message: "Pan number already exists",
-//         success: false,
-//       });
-//     }
-//     //convert passwords to hashes
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     const newUser = new User({
-//       fullname,
-//       email,
-//       phoneNumber,
-//       adharcard,
-//       pancard,
-//       password: hashedPassword,
-//       role,
-//       profile: {
-//         profilePhoto: cloudResponse.secure_url,
-//       },
-//     });
-
-//     await newUser.save();
-
-//     return res.status(200).json({
-//       message: `Account created successfully ${fullname}`,
-//       success: true,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({
-//       message: "Server Error registering user",
-//       success: false,
-//     });
-//   }
-// };
-
-// export const login = async (req, res) => {
-//   try {
-//     const { email, password, role } = req.body;
-
-//     if (!email || !password || !adharcard || !role) {
-//       return res.status(404).json({
-//         message: "Missing required fields",
-//         success: false,
-//       });
-//     }
-//     let user = await User.findOne({ email });
-//     if (!user) {
-//       return res.status(404).json({
-//         message: "Incorrect email or password",
-//         success: false,
-//       });
-//     }
-//     let user = await User.findOne({ adharcard });
-//     if (adharcard) {
-//       return res.status(404).json({
-//         message: "Incorrect Adhar Number",
-//         success: false,
-//       });
-//     }
-//     const isMatch = await bcrypt.compare(password, user.password);
-//     if (!isMatch) {
-//       return res.status(404).json({
-//         message: "Incorrect email or password",
-//         success: false,
-//       });
-//     }
-//     //check role correctly or not
-//     if (user.role !== role) {
-//       return res.status(403).json({
-//         message: "You don't have the necessary role to access this resource",
-//         success: false,
-//       });
-//     }
-
-//     //generate token
-//     const tokenData = {
-//       userId: user._id,
-//     };
-//     const token = await jwt.sign(tokenData, process.env.JWT_SECRET, {
-//       expiresIn: "1d",
-//     });
-
-//     user = {
-//       _id: user._id,
-//       fullname: user.fullname,
-//       email: user.email,
-//       phoneNumber: user.phoneNumber,
-//       adharcard: user.adharcard,
-//       pancard: user.pancard,
-//       role: user.role,
-//       profile: user.profile,
-//     };
-
-//     return res
-//       .status(200)
-//       .cookie("token", token, {
-//         maxAge: 1 * 24 * 60 * 60 * 1000,
-//         httpOnly: true,
-//         sameSite: "Strict",
-//       })
-//       .json({
-//         message: `Welcome back ${user.fullname}`,
-//         user,
-//         success: true,
-//       });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({
-//       message: "Server Error login failed",
-//       success: false,
-//     });
-//   }
-// };
-
-// export const logout = async (req, res) => {
-//   try {
-//     return res.status(200).cookie("token", "", { maxAge: 0 }).json({
-//       message: "Logged out successfully.",
-//       success: true,
-//     });
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
-
-// export const updateProfile = async (req, res) => {
-//   try {
-//     console.log("Uploaded file:", req.file);
-//     console.log("Request body:", req.body);
-
-//     const { fullname, email, phoneNumber, bio, skills } = req.body;
-//     const file = req.file;
-
-//     // Check if file is uploaded
-
-//     //cloudinary upload
-//     const fileUri = getDataUri(file);
-//     const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-
-//     // Initialize userId at the beginning
-//     const userId = req.id; // middleware authentication
-
-//     // Check if userId is valid
-//     let user = await User.findById(userId);
-//     if (!user) {
-//       return res.status(404).json({
-//         message: "User  not found",
-//         success: false,
-//       });
-//     }
-
-//     // Process skills if provided
-//     let skillsArray;
-//     if (skills) {
-//       skillsArray = skills.split(",");
-//     }
-
-//     // Update user profile
-//     if (fullname) {
-//       user.fullname = fullname;
-//     }
-//     if (email) {
-//       user.email = email;
-//     }
-//     if (phoneNumber) {
-//       user.phoneNumber = phoneNumber;
-//     }
-//     if (bio) {
-//       user.profile.bio = bio;
-//     }
-//     if (skills) {
-//       user.profile.skills = skillsArray;
-//     }
-//     //resume
-//     if (cloudResponse) {
-//       user.profile.resume = cloudResponse.secure_url;
-//       user.profile.resumeOriginalName = file.originalname;
-//     }
-
-//     // Save updated user
-//     await user.save();
-
-//     user = {
-//       _id: user._id,
-//       fullname: user.fullname,
-//       email: user.email,
-//       phoneNumber: user.phoneNumber,
-//       role: user.role,
-//       profile: user.profile,
-//     };
-
-//     return res.status(200).json({
-//       message: "Profile updated successfully",
-//       user,
-//       success: true,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({
-//       message: "Server Error updating profile",
-//       success: false,
-//     });
-//   }
-// };

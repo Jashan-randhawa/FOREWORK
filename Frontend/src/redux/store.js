@@ -1,14 +1,12 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import authReducer from "./authSlice";
-import jobSlice from "./jobSlice";
 import jobReducer from "./jobSlice";
-import { createRoot } from "react-dom/client";
-import { companySlice } from "./companyslice";
 import companyReducer from "./companyslice";
+import applicationSlice from "./applicationSlice";
 
 import {
-  persistStore,
   persistReducer,
+  createTransform,
   FLUSH,
   REHYDRATE,
   PAUSE,
@@ -17,18 +15,36 @@ import {
   REGISTER,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import applicationSlice from "./applicationSlice";
+
+// Transform to strip sensitive identity numbers (PAN, Aadhaar) before saving auth to localStorage
+const authTransform = createTransform(
+  (inboundState) => {
+    if (inboundState?.user) {
+      const safeUser = { ...inboundState.user };
+      delete safeUser.pancard;
+      delete safeUser.adharcard;
+      return {
+        ...inboundState,
+        user: safeUser,
+      };
+    }
+    return inboundState;
+  },
+  (outboundState) => outboundState,
+  { whitelist: ["auth"] }
+);
+
 const persistConfig = {
   key: "root",
   version: 1,
   storage,
+  transforms: [authTransform],
 };
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  job: jobSlice,
+  job: jobReducer,
   jobs: jobReducer,
-  company: companySlice,
   company: companyReducer,
   application: applicationSlice,
 });

@@ -1,16 +1,20 @@
+import mongoose from "mongoose";
 import { Application } from "../models/application.model.js";
 import { Job } from "../models/job.model.js";
 
-export const applyJob = async (req, res) => {
+export const applyJob = async (req, res, next) => {
   try {
     const userId = req.id;
     const jobId = req.params.id;
-    if (!jobId) {
-      return res
-        .status(400)
-        .json({ message: "Invalid job id", success: false });
+
+    if (!jobId || !mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({
+        message: "Invalid job ID",
+        success: false,
+      });
     }
-    // check if the user already has applied for this job
+
+    // Check if the user has already applied for this job
     const existingApplication = await Application.findOne({
       job: jobId,
       applicant: userId,
@@ -21,100 +25,152 @@ export const applyJob = async (req, res) => {
         success: false,
       });
     }
-    //check if the job exists or not
+
+    // Check if the job exists
     const job = await Job.findById(jobId);
     if (!job) {
-      return res.status(404).json({ message: "Job not found", success: false });
+      return res.status(404).json({
+        message: "Job not found",
+        success: false,
+      });
     }
-    // create a new application
 
+    // Create a new application
     const newApplication = await Application.create({
       job: jobId,
       applicant: userId,
     });
+
     job.applications.push(newApplication._id);
     await job.save();
 
-    return res
-      .status(201)
-      .json({ message: "Application submitted", success: true });
+    return res.status(201).json({
+      message: "Application submitted successfully",
+      application: newApplication,
+      success: true,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error", success: false });
+    next(error);
   }
 };
 
-export const getAppliedJobs = async (req, res) => {
+export const getAppliedJobs = async (req, res, next) => {
   try {
     const userId = req.id;
-    const application = await Application.find({ applicant: userId })
+    const applications = await Application.find({ applicant: userId })
       .sort({ createdAt: -1 })
       .populate({
         path: "job",
         options: { sort: { createdAt: -1 } },
         populate: { path: "company", options: { sort: { createdAt: -1 } } },
       });
-    if (!application) {
-      return res
-        .status(404)
-        .json({ message: "No applications found", success: false });
-    }
 
-    return res.status(200).json({ application, success: true });
+    return res.status(200).json({
+      application: applications || [],
+      success: true,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error", success: false });
+    next(error);
   }
 };
 
-export const getApplicants = async (req, res) => {
+export const getApplicants = async (req, res, next) => {
   try {
     const jobId = req.params.id;
-    const job = await Job.findById(jobId).populate({
+    if (!jobId || !mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({
+        message: "Invalid job ID format",
+        success: false,
+      });
+    }
+
+    const job = req.job || (await Job.findById(jobId));
+    if (!job) {
+      return res.status(404).json({
+        message: "Job not found",
+        success: false,
+      });
+    }
+
+    // Enforce ownership: only the recruiter who created this job can view applicants
+    if (job.created_by.toString() !== req.id.toString()) {
+      return res.status(403).json({
+        message: "Forbidden: you do not have permission to view applicants for this job",
+        success: false,
+      });
+    }
+
+    const populatedJob = await Job.findById(jobId).populate({
       path: "applications",
       options: { sort: { createdAt: -1 } },
       populate: { path: "applicant", options: { sort: { createdAt: -1 } } },
     });
-    if (!job) {
-      return res.status(404).json({ message: "Job not found", success: false });
-    }
 
-    return res.status(200).json({ job, success: true });
+    return res.status(200).json({
+      job: populatedJob,
+      success: true,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error", success: false });
+    next(error);
   }
 };
 
-export const updateStatus = async (req, res) => {
+export const updateStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
     const applicationId = req.params.id;
+
     if (!status) {
       return res.status(400).json({
-        message: "status is required",
+        message: "Status is required",
         success: false,
       });
     }
 
-    // find the application by applicantion id
-    const application = await Application.findOne({ _id: applicationId });
+    const validStatuses = ["pending", "accepted", "rejected"];
+    if (!validStatuses.includes(status.toLowerCase())) {
+      return res.status(400).json({
+        message: `Invalid status. Allowed values: ${validStatuses.join(", ")}`,
+        success: false,
+      });
+    }
+
+    if (!applicationId || !mongoose.Types.ObjectId.isValid(applicationId)) {
+      return res.status(400).json({
+        message: "Invalid application ID format",
+        success: false,
+      });
+    }
+
+    const application =
+      req.application || (await Application.findById(applicationId).populate("job"));
+
     if (!application) {
       return res.status(404).json({
-        message: "Application not found.",
+        message: "Application not found",
         success: false,
       });
     }
 
-    // update the status
+    // Enforce ownership: only the recruiter who posted the job can update candidate status
+    if (
+      !application.job ||
+      application.job.created_by.toString() !== req.id.toString()
+    ) {
+      return res.status(403).json({
+        message: "Forbidden: you do not have permission to update this application",
+        success: false,
+      });
+    }
+
     application.status = status.toLowerCase();
     await application.save();
 
-    return res
-      .status(200)
-      .json({ message: "Application status updated", success: true });
+    return res.status(200).json({
+      message: "Application status updated successfully",
+      success: true,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error", success: false });
+    next(error);
   }
 };

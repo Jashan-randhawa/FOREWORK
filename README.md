@@ -306,12 +306,12 @@ Base URL (production): `https://forework.onrender.com`
 
 ### User — `/api/user`
 
-| Method | Endpoint | Auth Required | Description |
-|--------|----------|:---:|-------------|
-| POST | `/register` | ❌ | Register new user. Send as `multipart/form-data` with `file` field for profile photo |
-| POST | `/login` | ❌ | Login. Returns JWT in HTTP-only cookie |
-| POST | `/logout` | ❌ | Clears JWT cookie |
-| POST | `/profile/update` | ✅ | Update profile. Optionally send `file` field for new resume |
+| Method | Endpoint | Auth | Role | Description |
+|--------|----------|:---:|:----:|-------------|
+| POST | `/register` | ❌ | Any | Register new user. Rate-limited. Sanitized file upload (photo). PII encrypted at rest. |
+| POST | `/login` | ❌ | Any | Login. Rate-limited. Returns JWT in HTTP-only cookie. PII excluded from payload. |
+| POST | `/logout` | ❌ | Any | Clears JWT cookie |
+| POST | `/profile/update` | ✅ | Any | Update profile. Scoped to authenticated user. Sanitized PDF resume upload. |
 
 **Register body fields:** `fullname`, `email`, `phoneNumber`, `password`, `role`, `pancard`, `adharcard`, `file`
 
@@ -321,12 +321,12 @@ Base URL (production): `https://forework.onrender.com`
 
 ### Jobs — `/api/job`
 
-| Method | Endpoint | Auth Required | Description |
-|--------|----------|:---:|-------------|
-| GET | `/get` | ❌ | Get all jobs. Optional `?keyword=` query for title/description search |
-| GET | `/get/:id` | ❌ | Get single job by ID (populates applications) |
-| POST | `/post` | ✅ | Post a new job (recruiter only) |
-| GET | `/getadminjobs` | ✅ | Get all jobs created by the authenticated recruiter |
+| Method | Endpoint | Auth | Role | Description |
+|--------|----------|:---:|:----:|-------------|
+| GET | `/get` | ❌ | Any | Get all jobs. Optional `?keyword=` query |
+| GET | `/get/:id` | ❌ | Any | Get single job by ID (populates applications) |
+| POST | `/post` | ✅ | `Recruiter` | Post a new job. Requester must own `companyId` |
+| GET | `/getadminjobs` | ✅ | `Recruiter` | Get all jobs created by authenticated recruiter |
 
 **Post job body fields:** `title`, `description`, `requirements`, `salary`, `location`, `jobType`, `experience`, `position`, `companyId`
 
@@ -334,23 +334,23 @@ Base URL (production): `https://forework.onrender.com`
 
 ### Companies — `/api/company`
 
-| Method | Endpoint | Auth Required | Description |
-|--------|----------|:---:|-------------|
-| POST | `/register` | ✅ | Register a new company (requires `companyName`) |
-| GET | `/get` | ✅ | Get all companies owned by logged-in recruiter |
-| GET | `/get/:id` | ✅ | Get single company by ID |
-| PUT | `/update/:id` | ✅ | Update company details + logo. Send as `multipart/form-data` with `file` for logo |
+| Method | Endpoint | Auth | Role | Description |
+|--------|----------|:---:|:----:|-------------|
+| POST | `/register` | ✅ | `Recruiter` | Register a new company |
+| GET | `/get` | ✅ | `Recruiter` | Get all companies owned by logged-in recruiter |
+| GET | `/get/:id` | ✅ | `Recruiter` | Get company by ID (ownership verified) |
+| PUT | `/update/:id` | ✅ | `Recruiter` | Update company details + logo (ownership verified, image-only upload) |
 
 ---
 
 ### Applications — `/api/application`
 
-| Method | Endpoint | Auth Required | Description |
-|--------|----------|:---:|-------------|
-| GET | `/apply/:id` | ✅ | Apply to a job by job ID |
-| GET | `/get` | ✅ | Get all applications submitted by the logged-in user |
-| GET | `/:id/applicants` | ✅ | Get all applicants for a job (recruiter) |
-| POST | `/status/:id/update` | ✅ | Update application status (`{ status: "accepted" \| "rejected" \| "pending" }`) |
+| Method | Endpoint | Auth | Role | Description |
+|--------|----------|:---:|:----:|-------------|
+| POST | `/apply/:id` | ✅ | `Student` | Apply to a job by ID (POST verb, duplicate prevented, rate-limited) |
+| GET | `/get` | ✅ | `Student` | Get all applications submitted by logged-in candidate |
+| GET | `/:id/applicants` | ✅ | `Recruiter` | Get applicants for job (job ownership verified) |
+| POST | `/status/:id/update` | ✅ | `Recruiter` | Update applicant status (job ownership verified) |
 
 ---
 
