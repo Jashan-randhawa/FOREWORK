@@ -24,6 +24,9 @@ validateEnv();
 
 const app = express();
 
+// Trust reverse proxy (Render, Heroku, etc.) so express-rate-limit can detect client IP
+app.set("trust proxy", 1);
+
 // Security headers
 app.use(
   helmet({
