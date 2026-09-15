@@ -10,6 +10,7 @@ import mongoose from "mongoose";
 import validateEnv from "./utils/validateEnv.js";
 import connectDB from "./utils/db.js";
 import errorHandler from "./middleware/errorHandler.js";
+import { startJobAlertScheduler } from "./utils/jobAlertScheduler.js";
 
 import userRoute from "./routes/user.route.js";
 import companyRoute from "./routes/company.route.js";
@@ -154,6 +155,7 @@ let server;
 if (process.env.NODE_ENV !== "test") {
   server = app.listen(PORT, () => {
     connectDB();
+    startJobAlertScheduler();
     console.log(`Server is running on port ${PORT}`);
   });
 

@@ -10,6 +10,14 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { toast } from "sonner";
@@ -22,6 +30,7 @@ const AdminCompanies = () => {
   const [verifiedFilter, setVerifiedFilter] = useState("");
   const [actionId, setActionId] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const [confirmCompany, setConfirmCompany] = useState(null); // company pending verify/unverify
 
   const fetchCompanies = async (page = 1) => {
     try {
@@ -53,7 +62,15 @@ const AdminCompanies = () => {
     fetchCompanies(1);
   };
 
-  const handleToggleVerify = async (company) => {
+  const handleToggleVerify = (company) => {
+    // Open the confirm dialog instead of firing immediately
+    setConfirmCompany(company);
+  };
+
+  const confirmToggleVerify = async () => {
+    if (!confirmCompany) return;
+    const company = confirmCompany;
+    setConfirmCompany(null);
     try {
       setActionId(company._id);
       const newStatus = !company.isVerified;
@@ -264,6 +281,37 @@ const AdminCompanies = () => {
           )}
         </div>
       </main>
+
+      {/* Confirm verify/unverify dialog */}
+      <Dialog
+        open={!!confirmCompany}
+        onOpenChange={(open) => { if (!open) setConfirmCompany(null); }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {confirmCompany?.isVerified ? "Unverify Company?" : "Verify Company?"}
+            </DialogTitle>
+            <DialogDescription>
+              {confirmCompany?.isVerified
+                ? `Are you sure you want to remove verification from "${confirmCompany?.name}"? Recruiters from this company may lose trusted-employer status.`
+                : `Are you sure you want to verify "${confirmCompany?.name}"? This will mark the company as a trusted employer on the platform.`}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setConfirmCompany(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant={confirmCompany?.isVerified ? "destructive" : "default"}
+              className={!confirmCompany?.isVerified ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}
+              onClick={confirmToggleVerify}
+            >
+              {confirmCompany?.isVerified ? "Yes, Unverify" : "Yes, Verify"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
