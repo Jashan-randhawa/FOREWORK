@@ -1,8 +1,8 @@
 # 💼 FOREWORK — Job Portal
 
-A full-stack **Job Portal Web Application** built with the MERN stack (MongoDB, Express, React, Node.js). FOREWORK connects job seekers and recruiters in one unified platform, featuring secure authentication, resume upload, company management, job listings, and applicant tracking.
+A full-stack **Job Portal Web Application** built with the MERN stack (MongoDB, Express, React, Node.js). FOREWORK connects job seekers, recruiters, and platform admins in one unified platform, featuring secure authentication, resume upload, company management, job listings, real-time notifications, analytics dashboards, and full applicant tracking.
 
-> 🌐 **Live Demo:** [https://forework.vercel.app](https://forework.vercel.app)  
+> 🌐 **Live Demo:** [https://forework.vercel.app](https://forework.vercel.app)
 > ⚙️ **Backend API:** [https://forework.onrender.com](https://forework.onrender.com)
 
 ---
@@ -30,12 +30,13 @@ A full-stack **Job Portal Web Application** built with the MERN stack (MongoDB, 
 
 ## Overview
 
-FOREWORK is a role-based job portal that serves two types of users:
+FOREWORK is a role-based job portal that serves three types of users:
 
-- **Students / Job Seekers** — browse job listings, apply with a resume, track application status, and manage their profile
-- **Recruiters** — register companies, post jobs, review applicants, and update application statuses
+- **Students / Job Seekers** — browse and search job listings, apply with a resume, track application status, save jobs, receive in-app notifications, and manage their profile
+- **Recruiters** — register companies, post jobs, review applicants, schedule interviews, add recruiter notes, and view per-job analytics dashboards
+- **Admins** — moderate users, jobs, and companies across the platform with full audit logging
 
-Authentication is handled via **JWT tokens stored in HTTP-only cookies**, and file uploads (profile photos, resumes, company logos) are managed through **Multer + Cloudinary**.
+Authentication is handled via **JWT tokens stored in HTTP-only cookies**. Sensitive PII (PAN, Aadhaar) is encrypted at rest using **AES-256-GCM** with blind indexing. File uploads (profile photos, resumes, company logos) are managed through **Multer + Cloudinary**.
 
 ---
 
@@ -44,29 +45,43 @@ Authentication is handled via **JWT tokens stored in HTTP-only cookies**, and fi
 ### 👩‍💼 Job Seekers
 - Register and login securely with role-based access
 - Upload a profile photo during registration (stored on Cloudinary)
-- Browse, search, and filter job listings by location, technology, experience, and salary
+- Browse, search, and filter job listings by keyword, location, technology, experience, and salary
 - Explore jobs by category using a carousel-based browser (14 tech categories)
 - View detailed job descriptions including requirements, salary, job type, and location
 - Apply for jobs with an uploaded resume (PDF via Cloudinary)
 - Track all applied jobs with live status updates, scheduled interview times, and meeting links
-- Save jobs for later review and share job opportunities via 1-click clipboard / Web Share
+- Save jobs for later review and share job opportunities via 1-click clipboard / Web Share API
+- Set custom job alerts (daily / weekly) to receive notifications when matching jobs are posted
 - Edit profile: update name, bio, skills, phone number, and resume
+- Receive in-app notifications (application status updates, interview scheduling, job alerts)
+- Email verification flow and password reset via tokenized email links
 
 ### 🏢 Recruiters
 - Register and manage company profiles (name, description, website, location, logo)
 - Post new job listings with full details (title, description, requirements, salary, location, job type, experience level, number of open positions)
-- View all jobs posted under their account with real-time conversion rates and candidate analytics
-- Review applicants, download resumes, record recruiter notes, and schedule video interviews
-- Update individual applicant status (Accepted / Rejected / Interview)
+- Manage job lifecycle: `draft → published → paused → expired → closed`
+- View all jobs posted under their account with real-time conversion rates and candidate analytics (Recharts-powered dashboards)
+- Review applicants, download resumes, record recruiter notes, and schedule video interviews with email notifications
+- Update individual applicant status: Accepted / Rejected / Interview
+
+### 🛡️ Admin
+- Platform-wide analytics dashboard: volume metrics, 30-day growth timelines, role/status distributions
+- Paginated user management with search, role filter, and suspend/unsuspend actions
+- Paginated job management with moderation (publish, pause, close, delete)
+- Company management with verification workflow
+- Full immutable audit log trail (actor, action, target, timestamp)
 
 ### 🔒 Security, Performance & Accessibility
 - Passwords hashed with **bcryptjs** (salt rounds: 10)
-- AES-256-GCM encryption with blind indexing for sensitive PII (PAN, Aadhaar)
+- **AES-256-GCM** encryption with blind indexing for sensitive PII (PAN, Aadhaar)
+- `FIELD_ENCRYPTION_KEY` guard: server refuses to start in production if the key is missing or matches the known placeholder — generate with `openssl rand -hex 32`
 - JWT tokens with 1-day expiry, stored in HTTP-only cookies
 - Cookie posture: `HttpOnly`, `SameSite: Lax` / `None` in production with `Secure: true`
 - Gzip response compression (`compression` middleware) and Cloudinary delivery optimization (`f_auto,q_auto`)
 - Automated CI vulnerability scans (`npm audit`) and weekly Dependabot dependency management
 - Route-level React Error Boundary and WCAG accessibility improvements (skip links, ARIA labels, semantic landmarks)
+- Docker multi-stage build with unprivileged `appuser` and HTTP health check
+- Graceful shutdown: SIGTERM/SIGINT connection draining for HTTP and MongoDB
 
 ---
 
@@ -85,6 +100,7 @@ Authentication is handled via **JWT tokens stored in HTTP-only cookies**, and fi
 | Tailwind CSS | 3.4.17 | Utility-first styling |
 | shadcn/ui + Radix UI | — | Accessible UI components |
 | Framer Motion | 12.0.3 | Page and component animations |
+| Recharts | 2.x | Analytics charts and dashboards |
 | Lucide React + React Icons | — | Icon sets |
 | Sonner | 1.7.1 | Toast notifications |
 | Embla Carousel | 8.5.1 | Job category carousel |
@@ -94,7 +110,7 @@ Authentication is handled via **JWT tokens stored in HTTP-only cookies**, and fi
 
 | Technology | Version | Purpose |
 |-----------|---------|---------|
-| Node.js + Express | 4.21.2 | REST API server |
+| Node.js + Express | 4.21.2 | REST API server (ESM) |
 | MongoDB + Mongoose | 8.8.4 | Database and ODM |
 | bcryptjs | 2.4.3 | Password hashing |
 | jsonwebtoken | 9.0.2 | JWT token generation and verification |
@@ -103,16 +119,18 @@ Authentication is handled via **JWT tokens stored in HTTP-only cookies**, and fi
 | datauri | 4.1.0 | Convert file buffer to data URI for Cloudinary |
 | cookie-parser | 1.4.7 | Parse cookies from requests |
 | cors | 2.8.5 | Cross-origin resource sharing |
+| compression | — | Gzip response compression |
 | dotenv | 16.4.7 | Environment variable management |
 | nodemon | 3.1.7 | Auto-reload in development |
+| nodemailer | — | Transactional email (email verify, password reset, interview notifications) |
 
 ### DevOps, Testing & Production Readiness
 
 | Tool / Practice | Purpose |
 |-----------------|---------|
-| Docker (Multi-stage) | Hardened Node 20 Alpine containerization with unprivileged appuser & health check |
-| Vitest (9 Suites, 127 Tests) | Unit, security, and end-to-end integration test automation |
-| GitHub Actions CI | Automated linting, test suite execution, and critical security audits |
+| Docker (Multi-stage) | Hardened Node 20 Alpine containerization with unprivileged `appuser` & health check |
+| Vitest (10 suites, 133 tests) | Unit, security, and end-to-end integration test automation — all passing |
+| GitHub Actions CI | Automated linting, test suite execution, and critical security audits on every push |
 | Graceful Shutdown | SIGTERM/SIGINT connection draining for HTTP and MongoDB connections |
 | Render / Railway | Containerized backend hosting with health monitoring |
 | Vercel | Frontend hosting with SPA rewrite configuration |
@@ -122,117 +140,63 @@ Authentication is handled via **JWT tokens stored in HTTP-only cookies**, and fi
 ## Project Structure
 
 ```
-FOREWORK-main/
+FOREWORK/
 │
 ├── Backend/
 │   ├── controllers/
-│   │   ├── user.controller.js        # Register, login, logout, update profile
-│   │   ├── job.controller.js         # Post job, get all jobs, get by ID, admin jobs
-│   │   ├── company.controller.js     # Register, get all, get by ID, update company
-│   │   └── application.controller.js # Apply, get applied jobs, get applicants, update status
+│   │   ├── user.controller.js          # Register, login, logout, update profile, email verify, password reset
+│   │   ├── job.controller.js           # Post job, get all jobs, get by ID, admin jobs, saved jobs, alerts, stats
+│   │   ├── company.controller.js       # Register, get all, get by ID, update company
+│   │   ├── application.controller.js   # Apply, get applied jobs, get applicants, update status, notes, schedule
+│   │   ├── admin.controller.js         # Platform stats, user/job/company moderation, audit logs
+│   │   └── notification.controller.js  # CRUD for in-app notifications
 │   ├── models/
-│   │   ├── user.model.js             # User schema (Student/Recruiter roles, PAN, Aadhaar)
-│   │   ├── job.model.js              # Job schema with company ref and applications array
-│   │   ├── company.model.js          # Company schema with Cloudinary logo URL
-│   │   └── application.model.js      # Application schema (job + applicant + status)
+│   │   ├── user.model.js               # User schema (Student/Recruiter/Admin, AES-256 PII, email verify)
+│   │   ├── job.model.js                # Job schema with status lifecycle, views counter, applications array
+│   │   ├── company.model.js            # Company schema with Cloudinary logo URL, verification flag
+│   │   ├── application.model.js        # Application schema (status, recruiterNotes, scheduledAt, meetingLink)
+│   │   ├── savedJob.model.js           # User bookmark (unique compound index)
+│   │   ├── jobAlert.model.js           # Job alert criteria with frequency and lastSentAt
+│   │   ├── notification.model.js       # In-app notifications with type enum and isRead flag
+│   │   └── auditLog.model.js           # Immutable admin audit trail
 │   ├── routes/
-│   │   ├── user.route.js             # /api/user/*
-│   │   ├── job.route.js              # /api/job/*
-│   │   ├── company.route.js          # /api/company/*
-│   │   └── application.route.js      # /api/application/*
+│   │   ├── user.route.js  job.route.js  company.route.js
+│   │   ├── application.route.js  admin.route.js  notification.route.js
 │   ├── middleware/
-│   │   ├── isAuthenticated.js        # JWT cookie verification, sets req.id
-│   │   └── multer.js                 # Memory-storage single file upload
+│   │   ├── isAuthenticated.js          # JWT cookie verification, sets req.id
+│   │   └── multer.js                   # Memory-storage single file upload
 │   ├── utils/
-│   │   ├── db.js                     # MongoDB connection via Mongoose
-│   │   ├── cloud.js                  # Cloudinary SDK setup
-│   │   └── datauri.js                # Buffer → data URI converter
+│   │   ├── db.js          cloud.js     datauri.js
+│   │   ├── validateEnv.js              # Required env var guard + production encryption key check
+│   │   └── mailer.js                   # Nodemailer transactional email dispatcher
+│   ├── tests/
+│   │   └── phase1–phase10.test.js      # 133 tests across 10 Vitest suites
 │   ├── .env.example
-│   ├── index.js                      # Express app entry point, route mounting, CORS
+│   ├── index.js                        # Express app: routes, CORS, compression, graceful shutdown
 │   └── package.json
 │
 ├── Frontend/
 │   ├── src/
-│   │   ├── App.jsx                   # All route definitions with React.lazy loading
-│   │   ├── main.jsx                  # Entry point — Redux Provider + PersistGate
-│   │   ├── index.css                 # Global Tailwind styles
-│   │   │
+│   │   ├── App.jsx                     # All routes (React.lazy) + ErrorBoundary
+│   │   ├── main.jsx                    # Redux Provider + PersistGate
 │   │   ├── components/
-│   │   │   ├── authentication/
-│   │   │   │   ├── Login.jsx             # Role-based login form (Student/Recruiter toggle)
-│   │   │   │   └── Register.jsx          # Registration form with profile photo upload
-│   │   │   │
-│   │   │   ├── components_lite/          # Core user-facing pages and UI
-│   │   │   │   ├── Home.jsx              # Landing page
-│   │   │   │   ├── Navbar.jsx            # Nav bar with auth-aware menu
-│   │   │   │   ├── Footer.jsx            # Site footer
-│   │   │   │   ├── Header.jsx            # Hero section with keyword search
-│   │   │   │   ├── Jobs.jsx              # Job listings page with filter sidebar
-│   │   │   │   ├── Browse.jsx            # Search results page
-│   │   │   │   ├── Description.jsx       # Full job detail with apply button
-│   │   │   │   ├── Profile.jsx           # User profile display page
-│   │   │   │   ├── EditProfileModal.jsx  # Profile editing modal dialog
-│   │   │   │   ├── AppliedJob.jsx        # Table of user's applied jobs + status
-│   │   │   │   ├── Job1.jsx              # Expanded job card component
-│   │   │   │   ├── JobCards.jsx          # Compact job card component
-│   │   │   │   ├── LatestJobs.jsx        # Latest jobs section (homepage)
-│   │   │   │   ├── Categories.jsx        # Job category carousel (14 categories)
-│   │   │   │   ├── Filtercard.jsx        # Filter panel (location/tech/exp/salary)
-│   │   │   │   ├── PrivacyPolicy.jsx     # Privacy policy page
-│   │   │   │   └── TermsofService.jsx    # Terms of service page
-│   │   │   │
-│   │   │   ├── admincomponent/           # Recruiter-only views (protected)
-│   │   │   │   ├── ProtectedRoute.jsx        # Guards all /admin/* routes
-│   │   │   │   ├── Companies.jsx             # Recruiter's company list page
-│   │   │   │   ├── CompaniesTable.jsx         # Company management table
-│   │   │   │   ├── CompanyCreate.jsx          # New company registration form
-│   │   │   │   ├── CompanySetup.jsx           # Company profile update form + logo upload
-│   │   │   │   ├── AdminJobs.jsx              # Recruiter's job listings page
-│   │   │   │   ├── AdminJobsTable.jsx         # Job management table with actions
-│   │   │   │   ├── PostJob.jsx                # Create new job listing form
-│   │   │   │   ├── Applicants.jsx             # Applicants list for a specific job
-│   │   │   │   └── ApplicantsTable.jsx        # Applicant table with status update dropdown
-│   │   │   │
-│   │   │   ├── creator/                  # About/team page with creator photos
-│   │   │   │   ├── Creator.jsx
-│   │   │   │   ├── amreshsir.jpg
-│   │   │   │   ├── Ankit.jpg
-│   │   │   │   ├── ritik.jpg
-│   │   │   │   └── gaurav.jpg
-│   │   │   │
-│   │   │   └── ui/                       # shadcn/ui primitive components
-│   │   │       └── avatar, badge, button, carousel, dialog, input, label,
-│   │   │           popover, radio-group, select, sonner, table
-│   │   │
-│   │   ├── hooks/                        # Custom data-fetching hooks (auto-dispatch to Redux)
-│   │   │   ├── useGetAllJobs.jsx
-│   │   │   ├── useGetAllJAdminobs.jsx
-│   │   │   ├── useGetAllAppliedJobs.jsx
-│   │   │   ├── usegetAllCompanies.jsx
-│   │   │   └── useGetCompanyById.jsx
-│   │   │
-│   │   ├── redux/
-│   │   │   ├── store.js                  # Combined store with redux-persist
-│   │   │   ├── authSlice.js              # user, loading
-│   │   │   ├── jobSlice.js               # allJobs, singleJob, filters, appliedJobs
-│   │   │   ├── companyslice.js           # companies, singleCompany
-│   │   │   └── applicationSlice.js       # applicants
-│   │   │
-│   │   ├── utils/
-│   │   │   ├── data.js                   # API endpoint constants (uses VITE_API_URL)
-│   │   │   └── axiosInstance.js          # Axios instance with withCredentials: true
-│   │   │
-│   │   └── lib/utils.js                  # clsx + tailwind-merge utility
-│   │
-│   ├── vercel.json                       # SPA rewrite: all routes → /index.html
-│   ├── vite.config.js                    # @ path alias for /src
-│   ├── tailwind.config.js
-│   ├── components.json                   # shadcn/ui config
+│   │   │   ├── authentication/         # Login.jsx, Register.jsx
+│   │   │   ├── components_lite/        # Home, Jobs, Browse, Description, Profile, AppliedJob,
+│   │   │   │                           # SavedJobs, ForgotPassword, ResetPassword, VerifyEmail, ...
+│   │   │   ├── admincomponent/         # Recruiter & Admin dashboards, job/user/company moderation
+│   │   │   ├── creator/                # About/team page
+│   │   │   └── ui/                     # shadcn/ui primitives
+│   │   ├── hooks/                      # Custom data-fetching hooks (auto-dispatch to Redux)
+│   │   ├── redux/                      # store, authSlice, jobSlice, companySlice, applicationSlice
+│   │   └── utils/                      # API endpoint constants, Axios instance
+│   ├── vercel.json                     # SPA rewrite → /index.html
 │   └── package.json
 │
-├── Dockerfile                            # Backend Docker image (node:20-alpine)
-├── start.sh                              # Quick start script (install + run backend)
-├── .dockerignore
+├── docs/                               # Extended reference documentation
+│   ├── api/  architecture/  deployment/  features/
+│
+├── Dockerfile                          # Backend: node:20-alpine multi-stage
+├── start.sh                            # Quick start script
 └── README.md
 ```
 
@@ -243,225 +207,105 @@ FOREWORK-main/
 ### User
 ```js
 {
-  fullname:                String (required)
-  email:                   String (required, unique)
-  phoneNumber:             String (required, unique)
-  password:                String (required, bcrypt hashed)
-  pancard:                 String (encrypted, pancardHash indexed)
-  adharcard:               String (encrypted, adharcardHash indexed)
-  role:                    Enum["Student", "Recruiter", "Admin"]  // default: "Student"
-  isSuspended:             Boolean (default: false)
-  isEmailVerified:         Boolean (default: false)
-  emailVerificationToken:  String (SHA-256 hashed)
-  emailVerificationExpires: Date
-  passwordResetToken:      String (SHA-256 hashed)
-  passwordResetExpires:    Date
-  profile: {
-    bio:                String
-    skills:             [String]
-    resume:             String    // Cloudinary URL
-    resumeOriginalName: String
-    company:            ObjectId → Company
-    profilePhoto:       String    // Cloudinary URL, default: ""
-  }
-  createdAt, updatedAt (timestamps)
+  fullname, email, phoneNumber,
+  password (bcrypt hashed),
+  pancard (AES-256-GCM encrypted, pancardHash blind-indexed),
+  adharcard (AES-256-GCM encrypted, adharcardHash blind-indexed),
+  role: Enum["Student", "Recruiter", "Admin"],
+  isSuspended, isEmailVerified,
+  emailVerificationToken, emailVerificationExpires,
+  passwordResetToken, passwordResetExpires,
+  profile: { bio, skills[], resume (Cloudinary URL), resumeOriginalName, company (ref), profilePhoto (Cloudinary URL) }
 }
 ```
 
 ### Job
 ```js
 {
-  title:           String (required)
-  description:     String (required)
-  requirements:    [String]           // comma-separated on input, stored as array
-  salary:          Number (required)  // migrated to numeric
-  experienceLevel: Number (required)
-  location:        String (required)
-  jobType:         String (required)  // e.g. "Full-time", "Part-time", "Remote"
-  position:        Number (required)  // number of open positions
-  company:         ObjectId → Company (required)
-  created_by:      ObjectId → User (required)
-  status:          Enum["draft", "published", "paused", "expired", "closed"] // default: "published"
-  views:           Number (default: 0)
-  applications:    [ObjectId → Application]
-  createdAt, updatedAt (timestamps)
+  title, description, requirements[],
+  salary, experienceLevel, location, jobType, position,
+  company (ref → Company), created_by (ref → User),
+  status: Enum["draft", "published", "paused", "expired", "closed"],
+  views: Number,     // incremented (awaited) on every getJobById call
+  applications: [ref → Application]
 }
-```
-
-### SavedJob
-```js
-{
-  user:      ObjectId → User (required)
-  job:       ObjectId → Job (required)
-  createdAt, updatedAt (timestamps)
-}
-// Unique compound index: { user: 1, job: 1 }
-```
-
-### JobAlert
-```js
-{
-  user:        ObjectId → User (required)
-  title:       String
-  criteria:    Object (keyword, location, jobType, minSalary, maxSalary, experienceLevel)
-  frequency:   Enum["daily", "weekly"] (default: "daily")
-  lastSentAt:  Date
-  isActive:    Boolean (default: true)
-  createdAt, updatedAt (timestamps)
-}
-```
-
-### Company
-```js
-{
-  name:        String (required, unique)
-  description: String
-  website:     String
-  location:    String
-  logo:        String     // Cloudinary URL
-  userId:      ObjectId → User (required)
-  isVerified:  Boolean (default: false)
-  createdAt, updatedAt (timestamps)
-}
-```
-
-### AuditLog
-```js
-{
-  actor:      ObjectId → User (required)
-  action:     String (required, indexed)
-  targetType: Enum["User", "Job", "Company", "Application"] (required, indexed)
-  targetId:   ObjectId (required, indexed)
-  details:    Object (default: {})
-  createdAt:  Date (default: Date.now, indexed)
-}
-```
-
-### Notification
-```js
-{
-  recipient: ObjectId → User (required, indexed)
-  sender:    ObjectId → User (default: null)
-  type:      Enum["APPLICATION_SUBMITTED", "NEW_APPLICANT", "APPLICATION_STATUS", "INTERVIEW_SCHEDULED", "JOB_ALERT", "SYSTEM"]
-  title:     String (required)
-  message:   String (required)
-  link:      String
-  isRead:    Boolean (default: false, indexed)
-  metadata:  Object (default: {})
-  createdAt, updatedAt (timestamps)
-}
-// Compound index: { recipient: 1, isRead: 1, createdAt: -1 }
 ```
 
 ### Application
 ```js
 {
-  job:            ObjectId → Job (required)
-  applicant:      ObjectId → User (required)
-  status:         Enum["pending", "accepted", "rejected"]  // default: "pending"
-  recruiterNotes: [{ author: ObjectId → User, text: String, createdAt: Date }]
-  scheduledAt:    Date
-  meetingLink:    String
-  createdAt, updatedAt (timestamps)
+  job (ref), applicant (ref),
+  status: Enum["pending", "accepted", "rejected", "interview"],
+  recruiterNotes: [{ author, text, createdAt }],
+  scheduledAt: Date,    // interview datetime
+  meetingLink: String   // video call link
 }
 ```
+
+### Other Models
+- **SavedJob** — unique { user, job } bookmark with compound index
+- **JobAlert** — criteria object + frequency (daily/weekly) + lastSentAt
+- **Notification** — type enum (APPLICATION_SUBMITTED, NEW_APPLICANT, APPLICATION_STATUS, INTERVIEW_SCHEDULED, JOB_ALERT, SYSTEM), isRead flag, compound index { recipient, isRead, createdAt }
+- **Company** — name (unique), description, website, location, logo (Cloudinary URL), isVerified
+- **AuditLog** — actor, action, targetType, targetId, details (immutable, indexed)
 
 ---
 
 ## API Reference
 
-Base URL (production): `https://forework.onrender.com` (supports `/api/v1/*` aliases)
+Base URL (production): `https://forework.onrender.com`
 
 ### User — `/api/user`
 
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|:---:|:----:|-------------|
-| POST | `/register` | ❌ | Any | Register new user. Rate-limited. Sanitized file upload (photo). PII encrypted at rest. |
-| POST | `/login` | ❌ | Any | Login. Rate-limited. Returns JWT in HTTP-only cookie. PII excluded from payload. |
-| POST | `/logout` | ❌ | Any | Clears JWT cookie |
-| POST | `/profile/update` | ✅ | Any | Update profile. Scoped to authenticated user. Sanitized PDF resume upload. |
-| POST | `/forgot-password` | ❌ | Any | Request password reset token. Rate-limited. Anti-enumeration response. |
-| POST | `/reset-password` | ❌ | Any | Reset password via token. Rate-limited. |
-| GET | `/verify-email` | ❌ | Any | Verify email via query token (`?token=`). |
-| POST | `/verify-email` | ❌ | Any | Verify email via body payload `{ token }`. |
-| POST | `/verify-email/resend` | ✅ | Any | Resend verification email link. |
-
-**Register body fields:** `fullname`, `email`, `phoneNumber`, `password`, `role`, `pancard`, `adharcard`, `file`
-
-**Login body fields:** `email`, `password`, `role`
-
----
+| Method | Endpoint | Auth | Description |
+|--------|----------|:---:|-------------|
+| POST | `/register` | ❌ | Register. Rate-limited. PII encrypted at rest. |
+| POST | `/login` | ❌ | Login. Returns JWT in HTTP-only cookie. |
+| POST | `/logout` | ❌ | Clears JWT cookie |
+| POST | `/profile/update` | ✅ | Update profile (name, bio, skills, phone, resume) |
+| POST | `/forgot-password` | ❌ | Request password reset token (anti-enumeration) |
+| POST | `/reset-password` | ❌ | Reset password via token |
+| GET/POST | `/verify-email` | ❌ | Verify email (query token or body payload) |
+| POST | `/verify-email/resend` | ✅ | Resend verification email |
 
 ### Jobs — `/api/job`
 
 | Method | Endpoint | Auth | Role | Description |
 |--------|----------|:---:|:----:|-------------|
-| GET | `/get` | ❌ | Any | Get all jobs. Supports filters: `keyword`, `location`, `jobType`, `experienceMin`, `experienceMax`, `salaryMin`, `salaryMax`, `page`, `limit` (defaults to published only) |
-| GET | `/get/:id` | ❌ | Any | Get single job by ID (populates company and applications) |
-| POST | `/post` | ✅ | `Recruiter` | Post a new job. Requester must own `companyId`. Supports initial `status`. |
-| GET | `/getadminjobs` | ✅ | `Recruiter` | Get all jobs created by authenticated recruiter (supports `?status=`) |
-| PUT | `/:id/status` | ✅ | `Recruiter` | Update job lifecycle status (`draft`, `published`, `paused`, `expired`, `closed`) |
-| POST | `/:id/save` | ✅ | `Student` | Bookmark / save a job |
-| POST/DEL | `/:id/unsave` | ✅ | `Student` | Remove saved job bookmark |
-| GET | `/saved` | ✅ | `Student` | List all saved jobs for authenticated student |
-| POST | `/alerts` | ✅ | `Student` | Create search / job alert criteria |
-| GET | `/alerts` | ✅ | `Student` | List candidate's active job alerts |
-| DELETE | `/alerts/:id` | ✅ | `Student` | Delete a job alert |
-| GET | `/:id/stats` | ✅ | `Recruiter` | Per-job funnel analytics (views, applications, conversion rate %, status breakdown) |
-
-**Post job body fields:** `title`, `description`, `requirements`, `salary`, `location`, `jobType`, `experience`, `position`, `companyId`, `status`
-
----
+| GET | `/get` | ❌ | Any | All jobs with filters: keyword, location, jobType, experienceMin/Max, salaryMin/Max, page, limit |
+| GET | `/get/:id` | ❌ | Any | Single job — increments views counter |
+| POST | `/post` | ✅ | Recruiter | Post new job |
+| GET | `/getadminjobs` | ✅ | Recruiter | Recruiter's jobs (supports ?status=) |
+| PUT | `/:id/status` | ✅ | Recruiter | Update job lifecycle status |
+| POST | `/:id/save` | ✅ | Student | Bookmark a job |
+| POST/DEL | `/:id/unsave` | ✅ | Student | Remove bookmark |
+| GET | `/saved` | ✅ | Student | List saved jobs |
+| POST/GET/DELETE | `/alerts` | ✅ | Student | Create / list / delete job alerts |
+| GET | `/:id/stats` | ✅ | Recruiter | Per-job funnel analytics |
 
 ### Companies — `/api/company`
 
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|:---:|:----:|-------------|
-| POST | `/register` | ✅ | `Recruiter` | Register a new company |
-| GET | `/get` | ✅ | `Recruiter` | Get all companies owned by logged-in recruiter |
-| GET | `/get/:id` | ✅ | `Recruiter` | Get company by ID (ownership verified, returns 403 on non-owner) |
-| PUT | `/update/:id` | ✅ | `Recruiter` | Update company details + logo (ownership verified, returns 403 on non-owner) |
-
----
+`POST /register` · `GET /get` · `GET /get/:id` · `PUT /update/:id` (all require Recruiter auth, ownership verified)
 
 ### Applications — `/api/application`
 
 | Method | Endpoint | Auth | Role | Description |
 |--------|----------|:---:|:----:|-------------|
-| POST | `/apply/:id` | ✅ | `Student` | Apply to a job by ID (POST verb, duplicate prevented, rate-limited) |
-| GET | `/get` | ✅ | `Student` | Get all applications submitted by logged-in candidate |
-| GET | `/:id/applicants` | ✅ | `Recruiter` | Get applicants for job (job ownership verified, populates notes & candidate) |
-| POST | `/status/:id/update` | ✅ | `Recruiter` | Update applicant status (job ownership verified) |
-| POST | `/:id/notes` | ✅ | `Recruiter` | Add recruiter note to application (job ownership verified) |
-| POST | `/:id/schedule` | ✅ | `Recruiter` | Schedule interview + send email notification (job ownership verified) |
+| POST | `/apply/:id` | ✅ | Student | Apply to job (duplicate prevention, rate-limited) |
+| GET | `/get` | ✅ | Student | All applications submitted by candidate |
+| GET | `/:id/applicants` | ✅ | Recruiter | Applicants for a job |
+| POST | `/status/:id/update` | ✅ | Recruiter | Update applicant status |
+| POST | `/:id/notes` | ✅ | Recruiter | Add recruiter note |
+| POST | `/:id/schedule` | ✅ | Recruiter | Schedule interview + send email notification |
 
----
+### Admin — `/api/admin` (Admin role required)
 
-### Administration & Moderation — `/api/admin`
-
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|:---:|:----:|-------------|
-| GET | `/stats` | ✅ | `Admin` | Platform analytics: volume metrics, conversion rates, 30-day growth timelines, role/status distributions |
-| GET | `/users` | ✅ | `Admin` | Paginated platform users list with search and role filter |
-| PATCH | `/users/:id/status` | ✅ | `Admin` | Suspend or unsuspend user account (creates audit log) |
-| GET | `/jobs` | ✅ | `Admin` | Paginated platform jobs list with search and status filter |
-| PATCH | `/jobs/:id/status` | ✅ | `Admin` | Moderate job status (creates audit log) |
-| DELETE | `/jobs/:id` | ✅ | `Admin` | Remove job posting and associated applications (creates audit log) |
-| GET | `/companies` | ✅ | `Admin` | Paginated platform companies with verification and search filter |
-| PATCH | `/companies/:id/verify` | ✅ | `Admin` | Verify or un-verify company entity (creates audit log) |
-| GET | `/audit-logs` | ✅ | `Admin` | Query platform audit log trail with pagination and filters |
-
----
+`GET /stats` · `GET|PATCH /users/:id/status` · `GET|PATCH|DELETE /jobs/:id`
+`GET|PATCH /companies/:id/verify` · `GET /audit-logs`
 
 ### Notifications — `/api/notification`
 
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|:---:|:----:|-------------|
-| GET | `/` | ✅ | Any | Paginated notifications for logged-in user (`?page=1&limit=15&unreadOnly=true`) |
-| GET | `/unread-count` | ✅ | Any | Quick unread notification count for badge rendering |
-| PATCH | `/:id/read` | ✅ | Any | Mark single notification as read (scoped to owner) |
-| PATCH | `/read-all` | ✅ | Any | Mark all notifications for logged-in user as read |
-| DELETE | `/:id` | ✅ | Any | Delete a notification (scoped to owner) |
+`GET /` · `GET /unread-count` · `PATCH /:id/read` · `PATCH /read-all` · `DELETE /:id`
 
 ---
 
@@ -469,39 +313,39 @@ Base URL (production): `https://forework.onrender.com` (supports `/api/v1/*` ali
 
 | Path | Component | Access |
 |------|-----------|--------|
-| `/` or `/Home` | `Home` | Public |
-| `/login` | `Login` | Public |
-| `/register` | `Register` | Public |
-| `/Jobs` | `Jobs` | Public |
-| `/Browse` | `Browse` | Public |
-| `/description/:id` | `Description` | Public |
-| `/Profile` | `Profile` | Public |
-| `/saved-jobs` | `SavedJobs` | 🔒 Student only |
-| `/forgot-password` | `ForgotPassword` | Public |
-| `/reset-password` | `ResetPassword` | Public |
-| `/verify-email` | `VerifyEmail` | Public |
-| `/PrivacyPolicy` | `PrivacyPolicy` | Public |
-| `/TermsofService` | `TermsofService` | Public |
-| `/Creator` | `Creator` | Public |
-| `/recruiter/companies` | `Companies` | 🔒 Recruiter only |
-| `/recruiter/companies/create` | `CompanyCreate` | 🔒 Recruiter only |
-| `/recruiter/companies/:id` | `CompanySetup` | 🔒 Recruiter only |
-| `/recruiter/jobs` | `AdminJobs` | 🔒 Recruiter only |
-| `/recruiter/jobs/create` | `PostJob` | 🔒 Recruiter only |
-| `/recruiter/jobs/:id/applicants` | `Applicants` | 🔒 Recruiter only |
-| `/admin/dashboard` | `AdminDashboard` | 🔒 Admin only |
-| `/admin/users` | `AdminUsers` | 🔒 Admin only |
-| `/admin/jobs` | `AdminJobs` | 🔒 Admin only |
-| `/admin/companies` | `AdminCompanies` | 🔒 Admin only |
-| `/admin/audit-logs` | `AdminAuditLogs` | 🔒 Admin only |
+| `/` or `/Home` | Home | Public |
+| `/login` | Login | Public |
+| `/register` | Register | Public |
+| `/Jobs` | Jobs | Public |
+| `/Browse` | Browse | Public |
+| `/description/:id` | Description | Public |
+| `/Profile` | Profile | Public |
+| `/saved-jobs` | SavedJobs | 🔒 Student |
+| `/forgot-password` | ForgotPassword | Public |
+| `/reset-password` | ResetPassword | Public |
+| `/verify-email` | VerifyEmail | Public |
+| `/PrivacyPolicy` | PrivacyPolicy | Public |
+| `/TermsofService` | TermsofService | Public |
+| `/Creator` | Creator | Public |
+| `/recruiter/companies` | Companies | 🔒 Recruiter |
+| `/recruiter/companies/create` | CompanyCreate | 🔒 Recruiter |
+| `/recruiter/companies/:id` | CompanySetup | 🔒 Recruiter |
+| `/recruiter/jobs` | AdminJobs | 🔒 Recruiter |
+| `/recruiter/jobs/create` | PostJob | 🔒 Recruiter |
+| `/recruiter/jobs/:id/applicants` | Applicants | 🔒 Recruiter |
+| `/admin/dashboard` | AdminDashboard | 🔒 Admin |
+| `/admin/users` | AdminUsers | 🔒 Admin |
+| `/admin/jobs` | AdminJobs | 🔒 Admin |
+| `/admin/companies` | AdminCompanies | 🔒 Admin |
+| `/admin/audit-logs` | AdminAuditLogs | 🔒 Admin |
 
-All routes use **React.lazy** for code-splitting and are wrapped in a `<Suspense>` fallback.
+All routes use **React.lazy** + **Suspense** + top-level **ErrorBoundary**.
 
 ---
 
 ## Redux State Management
 
-State is persisted to `localStorage` via **redux-persist** (key: `"root"`, version: 1).
+Persisted to `localStorage` via redux-persist (key: `"root"`, version: 1).
 
 | Slice | State Shape | Purpose |
 |-------|-------------|---------|
@@ -510,81 +354,43 @@ State is persisted to `localStorage` via **redux-persist** (key: `"root"`, versi
 | `company` | `{ companies, singleCompany }` | Recruiter's company list and active company |
 | `application` | `{ applicants }` | Applicants list for recruiter job views |
 
-**Filter categories available in `Filtercard`:**
-- **Location:** Delhi, Mumbai, Kolhapur, Pune, Bangalore, Hyderabad, Chennai, Remote
-- **Technology:** MERN, React, Data Scientist, Full Stack, Node, Python, Java, Frontend, Backend, Mobile, Desktop
-- **Experience:** 0–3, 3–5, 5–7, 7+ years
-- **Salary:** 0–50k, 50k–100k, 100k–200k, 200k+
+**Filter categories (Filtercard):**
+- Location: Delhi, Mumbai, Kolhapur, Pune, Bangalore, Hyderabad, Chennai, Remote
+- Technology: MERN, React, Data Scientist, Full Stack, Node, Python, Java, Frontend, Backend, Mobile, Desktop
+- Experience: 0–3, 3–5, 5–7, 7+ years
+- Salary: 0–50k, 50k–100k, 100k–200k, 200k+
 
-**Job categories in carousel:** Frontend Developer, Backend Developer, Full Stack Developer, MERN Developer, Data Scientist, DevOps Engineer, Machine Learning Engineer, AI Engineer, Cybersecurity Engineer, Product Manager, UX/UI Designer, Graphics Engineer, Graphics Designer, Video Editor
+**Job categories carousel (14 categories):** Frontend, Backend, Full Stack, MERN, Data Scientist, DevOps, Machine Learning, AI Engineer, Cybersecurity, Product Manager, UX/UI Designer, Graphics Engineer, Graphics Designer, Video Editor
 
 ---
 
 ## Getting Started
 
 ### Prerequisites
-
-- **Node.js** v18+ and npm
-- **MongoDB Atlas** account (free tier works)
-- **Cloudinary** account (free tier works — needed for photo/resume/logo uploads)
-
----
+- Node.js v18+ and npm
+- MongoDB Atlas account (free tier works)
+- Cloudinary account (free tier works)
+- SMTP credentials (Gmail or similar)
 
 ### Backend Setup
 
 ```bash
 cd Backend
+cp .env.example .env   # fill in your values
 npm install
+npm run dev            # development with nodemon → http://localhost:5001
+npm test               # run all 133 tests
 ```
-
-Create a `.env` file inside `Backend/` (copy from `.env.example`):
-
-```env
-MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/forework
-JWT_SECRET=your_strong_secret_key
-PORT=5001
-CLOUD_NAME=your_cloudinary_cloud_name
-CLOUD_API=your_cloudinary_api_key
-API_SECRET=your_cloudinary_api_secret
-FRONTEND_URL=http://localhost:5173
-```
-
-```bash
-# Start with auto-reload (development)
-npm run dev
-
-# Start without nodemon (production)
-npm start
-```
-
-API will be available at: `http://localhost:5001`
-
----
 
 ### Frontend Setup
 
 ```bash
 cd Frontend
+echo "VITE_API_URL=http://localhost:5001" > .env
 npm install
+npm run dev            # → http://localhost:5173
+npm run build          # production build
 ```
-
-Create a `.env` file inside `Frontend/`:
-
-```env
-VITE_API_URL=http://localhost:5001
-```
-
-```bash
-# Start dev server
-npm run dev
-
-# Build for production
-npm run build
-```
-
-App will be available at: `http://localhost:5173`
-
----
 
 ### Docker Setup
 
@@ -596,18 +402,20 @@ docker build -t forework-backend .
 docker run -p 5001:5001 \
   -e MONGO_URI=your_mongo_uri \
   -e JWT_SECRET=your_secret \
+  -e FIELD_ENCRYPTION_KEY=$(openssl rand -hex 32) \
   -e CLOUD_NAME=your_cloudinary_name \
   -e CLOUD_API=your_cloudinary_api_key \
   -e API_SECRET=your_cloudinary_api_secret \
   -e FRONTEND_URL=http://localhost:5173 \
+  -e EMAIL_USER=your@email.com \
+  -e EMAIL_PASS=your_smtp_password \
   forework-backend
 ```
 
-Or use the quick-start shell script:
+Or use the quick-start script:
 
 ```bash
-chmod +x start.sh
-./start.sh
+chmod +x start.sh && ./start.sh
 ```
 
 ---
@@ -620,36 +428,36 @@ chmod +x start.sh
 |----------|:--------:|-------------|
 | `MONGO_URI` | ✅ | MongoDB Atlas connection string |
 | `JWT_SECRET` | ✅ | Secret used to sign and verify JWT tokens |
-| `PORT` | ✅ | Port for the Express server (default: 5001) |
+| `PORT` | ✅ | Express server port (default: 5001) |
 | `CLOUD_NAME` | ✅ | Cloudinary cloud name |
 | `CLOUD_API` | ✅ | Cloudinary API key |
 | `API_SECRET` | ✅ | Cloudinary API secret |
-| `FRONTEND_URL` | ✅ | Allowed CORS origin (e.g., `https://forework.vercel.app`) |
+| `FRONTEND_URL` | ✅ | Allowed CORS origin |
+| `FIELD_ENCRYPTION_KEY` | ✅ | 32-byte hex key for AES-256-GCM PII encryption. Generate: `openssl rand -hex 32`. **Server refuses to start in production if missing or set to the placeholder.** |
+| `EMAIL_USER` | ✅ | SMTP sender address (email verify, password reset, interview scheduling) |
+| `EMAIL_PASS` | ✅ | SMTP app password |
 
 ### Frontend (`Frontend/.env`)
 
 | Variable | Required | Description |
 |----------|:--------:|-------------|
-| `VITE_API_URL` | ✅ | Backend base URL (e.g., `https://forework.onrender.com`) |
+| `VITE_API_URL` | ✅ | Backend base URL |
 
 ---
 
 ## Deployment
 
 ### Frontend → Vercel
-
-1. Push `Frontend/` to GitHub.
-2. Import the project into [Vercel](https://vercel.com), set the root directory to `Frontend`.
-3. Add `VITE_API_URL` environment variable pointing to your Render backend URL.
-4. Deploy. The `vercel.json` SPA rewrite rule ensures React Router works for all paths.
+1. Push `Frontend/` to GitHub
+2. Import into [Vercel](https://vercel.com), set root directory to `Frontend`
+3. Add `VITE_API_URL` → your Render backend URL
+4. Deploy — `vercel.json` SPA rewrite handles React Router
 
 ### Backend → Render
-
-1. Create a new **Web Service** on [Render](https://render.com).
-2. Set build command: `npm install` and start command: `node index.js`.
-3. Set root directory to `Backend/`.
-4. Add all backend environment variables in the Render dashboard.
-5. Set `FRONTEND_URL` to your Vercel app URL to allow CORS.
+1. New **Web Service** on [Render](https://render.com)
+2. Build: `npm install`, Start: `node index.js`, Root: `Backend/`
+3. Add all env vars including `FIELD_ENCRYPTION_KEY`
+4. Set `FRONTEND_URL` to your Vercel app URL
 
 ---
 
@@ -664,13 +472,11 @@ chmod +x start.sh
 
 ## Known Issues
 
-- **Render cold starts:** Free tier backend spins down after ~15 minutes of inactivity. The first request after idle may take 20–30 seconds to wake up.
-- **Cross-origin cookies:** Cookie-based auth may behave differently across browsers, especially in stricter privacy modes. The app uses `SameSite: None; Secure` in production to mitigate this.
-- **Single file uploads only:** Multer is configured with `.single("file")` — multiple file uploads in one request are not supported.
-- **Keyword + structured search only:** Job search combines MongoDB `$regex` on title/description with structured filters (location, jobType, experience/salary range) — no full-text indexing or fuzzy matching.
-- **`FIELD_ENCRYPTION_KEY` must be a real secret:** the server refuses to start in production if this is missing or left as the placeholder value shown in `.env.example` — generate a unique key with `openssl rand -hex 32`.
-
-> Note: email verification, password reset, and pagination are implemented (see [API Reference](#api-reference)) — they were previously listed here as missing; that was stale.
+- **Render cold starts:** Free tier spins down after ~15 min idle; first wake-up request may take 20–30 s.
+- **Cross-origin cookies:** `SameSite: None; Secure` in production — may behave differently in strict browser privacy modes.
+- **Single file uploads only:** Multer uses `.single("file")` — multiple file uploads per request are not supported.
+- **Regex-based search only:** No full-text index or fuzzy matching; uses MongoDB `$regex` on title/description.
+- **`FIELD_ENCRYPTION_KEY` must be a real secret:** Generate with `openssl rand -hex 32`. The server refuses to start in production if this is missing or set to the placeholder value in `.env.example`.
 
 ---
 
@@ -705,4 +511,4 @@ This project is open source and available under the **MIT License**.
 
 ---
 
-> 🔗 **GitHub:** [github.com/Jashan-randhawa](https://github.com/Jashan-randhawa)
+> 🔗 **GitHub:** [github.com/Jashan-randhawa/FOREWORK](https://github.com/Jashan-randhawa/FOREWORK)
