@@ -1,22 +1,8 @@
-﻿import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+﻿import React from "react";
+import RequireRole from "../auth/RequireRole";
 
 const AdminRoute = ({ children }) => {
-  const { user } = useSelector((store) => store.auth);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!user || user.role !== "Admin") {
-      navigate("/");
-    }
-  }, [user, navigate]);
-
-  if (!user || user.role !== "Admin") {
-    return null;
-  }
-
-  return <>{children}</>;
+  return <RequireRole allowedRoles={["Admin"]}>{children}</RequireRole>;
 };
 
 export default AdminRoute;

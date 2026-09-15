@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../components_lite/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { RadioGroup } from "../ui/radio-group";
-import { Link } from "react-router-dom";
 import API from "@/utils/axiosInstance";
 import { toast } from "sonner";
 import { USER_API_ENDPOINT } from "@/utils/data.js";
@@ -18,13 +17,29 @@ const Login = () => {
     role: "",
   });
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
   const { loading, user } = useSelector((store) => store.auth);
+
+  const getDestination = (loggedInUser) => {
+    if (loggedInUser?.isSuspended) {
+      return "/suspended";
+    }
+    const redirectParam = searchParams.get("redirect");
+    if (
+      redirectParam &&
+      redirectParam.startsWith("/") &&
+      !redirectParam.startsWith("//")
+    ) {
+      return redirectParam;
+    }
+    if (loggedInUser?.role === "Admin") return "/admin/dashboard";
+    if (loggedInUser?.role === "Recruiter") return "/recruiter/jobs";
+    return "/";
+  };
+
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
-  };
-  const ChangeFilehandler = (e) => {
-    setInput({ ...input, file: e.target.files?.[0] });
   };
 
   const submitHandler = async (e) => {
@@ -35,13 +50,14 @@ const Login = () => {
       const res = await API.post(`${USER_API_ENDPOINT}/login`, input, {
         headers: { "Content-Type": "application/json" },
       });
-      if (res.data.success) {
-        dispatch(setUser(res.data.user));
-        navigate("/");
-        toast.success(res.data.message);
+      if (res.data?.success) {
+        const loggedInUser = res.data.user;
+        dispatch(setUser(loggedInUser));
+        toast.success(res.data.message || "Logged in successfully");
+        navigate(getDestination(loggedInUser));
       }
     } catch (error) {
-      toast.error("Login failed");
+      toast.error(error.message || error.response?.data?.message || "Login failed");
     } finally {
       dispatch(setLoading(false)); // End loading
     }
@@ -49,9 +65,9 @@ const Login = () => {
 
   useEffect(() => {
     if (user) {
-      navigate("/");
+      navigate(getDestination(user), { replace: true });
     }
-  }, []);
+  }, [user, navigate]);
 
   return (
     <div>
