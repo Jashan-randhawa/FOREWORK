@@ -75,7 +75,15 @@ const Login = () => {
             ></Input>
           </div>
           <div className="my-2">
-            <Label>Password</Label>
+            <div className="flex items-center justify-between">
+              <Label>Password</Label>
+              <Link
+                to="/forgot-password"
+                className="text-xs text-purple-600 hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <Input
               type="password"
               value={input.password}

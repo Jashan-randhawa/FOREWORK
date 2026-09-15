@@ -5,10 +5,14 @@ import { Analytics } from "@vercel/analytics/react";
 const Home = lazy(() => import("./components/components_lite/Home"));
 const Login = lazy(() => import("./components/authentication/Login"));
 const Register = lazy(() => import("./components/authentication/Register"));
+const ForgotPassword = lazy(() => import("./components/authentication/ForgotPassword"));
+const ResetPassword = lazy(() => import("./components/authentication/ResetPassword"));
+const VerifyEmail = lazy(() => import("./components/authentication/VerifyEmail"));
 const PrivacyPolicy = lazy(() => import("./components/components_lite/PrivacyPolicy.jsx"));
 const TermsofService = lazy(() => import("./components/components_lite/TermsofService.jsx"));
 const Jobs = lazy(() => import("./components/components_lite/Jobs.jsx"));
 const Browse = lazy(() => import("./components/components_lite/Browse.jsx"));
+const SavedJobs = lazy(() => import("./components/components_lite/SavedJobs.jsx"));
 const Profile = lazy(() => import("./components/components_lite/Profile.jsx"));
 const Description = lazy(() => import("./components/components_lite/Description.jsx"));
 const Companies = lazy(() => import("./components/admincomponent/Companies"));
@@ -31,12 +35,28 @@ const appRouter = createBrowserRouter([
     element: <Register />,
   },
   {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
+  },
+  {
+    path: "/verify-email",
+    element: <VerifyEmail />,
+  },
+  {
     path: "/description/:id",
     element: <Description />,
   },
   {
     path: "/Profile",
     element: <Profile />,
+  },
+  {
+    path: "/saved-jobs",
+    element: <SavedJobs />,
   },
   {
     path: "/PrivacyPolicy",
@@ -59,8 +79,8 @@ const appRouter = createBrowserRouter([
     element: <Browse />,
   },
   {
-    path:"/Creator",
-    element: <Creator/>
+    path: "/Creator",
+    element: <Creator />,
   },
 
   // /admin
@@ -92,7 +112,6 @@ const appRouter = createBrowserRouter([
     path: "/admin/jobs",
     element: (
       <ProtectedRoute>
-        {" "}
         <AdminJobs />
       </ProtectedRoute>
     ),
@@ -101,8 +120,7 @@ const appRouter = createBrowserRouter([
     path: "/admin/jobs/create",
     element: (
       <ProtectedRoute>
-        {" "}
-        <PostJob />{" "}
+        <PostJob />
       </ProtectedRoute>
     ),
   },

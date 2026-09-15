@@ -238,13 +238,18 @@ FOREWORK-main/
 ### User
 ```js
 {
-  fullname:    String (required)
-  email:       String (required, unique)
-  phoneNumber: String (required, unique)
-  password:    String (required, bcrypt hashed)
-  pancard:     String (required, unique)
-  adharcard:   String (required, unique)
-  role:        Enum["Student", "Recruiter"]  // default: "Student"
+  fullname:                String (required)
+  email:                   String (required, unique)
+  phoneNumber:             String (required, unique)
+  password:                String (required, bcrypt hashed)
+  pancard:                 String (encrypted, pancardHash indexed)
+  adharcard:               String (encrypted, adharcardHash indexed)
+  role:                    Enum["Student", "Recruiter"]  // default: "Student"
+  isEmailVerified:         Boolean (default: false)
+  emailVerificationToken:  String (SHA-256 hashed)
+  emailVerificationExpires: Date
+  passwordResetToken:      String (SHA-256 hashed)
+  passwordResetExpires:    Date
   profile: {
     bio:                String
     skills:             [String]
@@ -263,7 +268,7 @@ FOREWORK-main/
   title:           String (required)
   description:     String (required)
   requirements:    [String]           // comma-separated on input, stored as array
-  salary:          String (required)
+  salary:          Number (required)  // migrated to numeric
   experienceLevel: Number (required)
   location:        String (required)
   jobType:         String (required)  // e.g. "Full-time", "Part-time", "Remote"
@@ -271,6 +276,29 @@ FOREWORK-main/
   company:         ObjectId → Company (required)
   created_by:      ObjectId → User (required)
   applications:    [ObjectId → Application]
+  createdAt, updatedAt (timestamps)
+}
+```
+
+### SavedJob
+```js
+{
+  user:      ObjectId → User (required)
+  job:       ObjectId → Job (required)
+  createdAt, updatedAt (timestamps)
+}
+// Unique compound index: { user: 1, job: 1 }
+```
+
+### JobAlert
+```js
+{
+  user:        ObjectId → User (required)
+  title:       String
+  criteria:    Object (keyword, location, jobType, minSalary, maxSalary, experienceLevel)
+  frequency:   Enum["daily", "weekly"] (default: "daily")
+  lastSentAt:  Date
+  isActive:    Boolean (default: true)
   createdAt, updatedAt (timestamps)
 }
 ```
@@ -302,7 +330,7 @@ FOREWORK-main/
 
 ## API Reference
 
-Base URL (production): `https://forework.onrender.com`
+Base URL (production): `https://forework.onrender.com` (supports `/api/v1/*` aliases)
 
 ### User — `/api/user`
 
@@ -312,6 +340,11 @@ Base URL (production): `https://forework.onrender.com`
 | POST | `/login` | ❌ | Any | Login. Rate-limited. Returns JWT in HTTP-only cookie. PII excluded from payload. |
 | POST | `/logout` | ❌ | Any | Clears JWT cookie |
 | POST | `/profile/update` | ✅ | Any | Update profile. Scoped to authenticated user. Sanitized PDF resume upload. |
+| POST | `/forgot-password` | ❌ | Any | Request password reset token. Rate-limited. Anti-enumeration response. |
+| POST | `/reset-password` | ❌ | Any | Reset password via token. Rate-limited. |
+| GET | `/verify-email` | ❌ | Any | Verify email via query token (`?token=`). |
+| POST | `/verify-email` | ❌ | Any | Verify email via body payload `{ token }`. |
+| POST | `/verify-email/resend` | ✅ | Any | Resend verification email link. |
 
 **Register body fields:** `fullname`, `email`, `phoneNumber`, `password`, `role`, `pancard`, `adharcard`, `file`
 
@@ -323,10 +356,16 @@ Base URL (production): `https://forework.onrender.com`
 
 | Method | Endpoint | Auth | Role | Description |
 |--------|----------|:---:|:----:|-------------|
-| GET | `/get` | ❌ | Any | Get all jobs. Optional `?keyword=` query |
-| GET | `/get/:id` | ❌ | Any | Get single job by ID (populates applications) |
+| GET | `/get` | ❌ | Any | Get all jobs. Supports filters: `keyword`, `location`, `jobType`, `experienceMin`, `experienceMax`, `salaryMin`, `salaryMax`, `page`, `limit` |
+| GET | `/get/:id` | ❌ | Any | Get single job by ID (populates company and applications) |
 | POST | `/post` | ✅ | `Recruiter` | Post a new job. Requester must own `companyId` |
 | GET | `/getadminjobs` | ✅ | `Recruiter` | Get all jobs created by authenticated recruiter |
+| POST | `/:id/save` | ✅ | `Student` | Bookmark / save a job |
+| POST/DEL | `/:id/unsave` | ✅ | `Student` | Remove saved job bookmark |
+| GET | `/saved` | ✅ | `Student` | List all saved jobs for authenticated student |
+| POST | `/alerts` | ✅ | `Student` | Create search / job alert criteria |
+| GET | `/alerts` | ✅ | `Student` | List candidate's active job alerts |
+| DELETE | `/alerts/:id` | ✅ | `Student` | Delete a job alert |
 
 **Post job body fields:** `title`, `description`, `requirements`, `salary`, `location`, `jobType`, `experience`, `position`, `companyId`
 
@@ -365,6 +404,10 @@ Base URL (production): `https://forework.onrender.com`
 | `/Browse` | `Browse` | Public |
 | `/description/:id` | `Description` | Public |
 | `/Profile` | `Profile` | Public |
+| `/saved-jobs` | `SavedJobs` | 🔒 Student only |
+| `/forgot-password` | `ForgotPassword` | Public |
+| `/reset-password` | `ResetPassword` | Public |
+| `/verify-email` | `VerifyEmail` | Public |
 | `/PrivacyPolicy` | `PrivacyPolicy` | Public |
 | `/TermsofService` | `TermsofService` | Public |
 | `/Creator` | `Creator` | Public |

@@ -93,6 +93,8 @@ const applyRateLimiter = rateLimit({
 app.use("/api", globalApiLimiter);
 app.use("/api/user/login", authRateLimiter);
 app.use("/api/user/register", authRateLimiter);
+app.use("/api/user/forgot-password", authRateLimiter);
+app.use("/api/user/reset-password", authRateLimiter);
 app.use("/api/application/apply", applyRateLimiter);
 
 // Health check endpoint
