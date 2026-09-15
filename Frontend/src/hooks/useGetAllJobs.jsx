@@ -1,6 +1,7 @@
 import { setAllJobs, setPagination } from "@/redux/jobSlice";
 import { JOB_API_ENDPOINT } from "@/utils/data";
 import API from "@/utils/axiosInstance";
+import { unwrapList, unwrapPagination } from "@/services/http";
 import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -36,9 +37,9 @@ const useGetAllJobs = () => {
       if (pagination?.limit) params.append("limit", pagination.limit);
 
       const res = await API.get(`${JOB_API_ENDPOINT}/get?${params.toString()}`);
-      if (res.data.success || res.data.status) {
-        const jobs = res.data.data?.jobs || res.data.jobs || [];
-        const pag = res.data.data?.pagination || res.data.pagination;
+      if (res.data?.success || res.data?.status) {
+        const jobs = unwrapList(res, "jobs");
+        const pag = unwrapPagination(res);
         dispatch(setAllJobs(jobs));
         if (pag) {
           dispatch(setPagination(pag));
@@ -48,7 +49,7 @@ const useGetAllJobs = () => {
       }
     } catch (err) {
       console.error("Fetch Error:", err);
-      setError(err.response?.data?.message || err.message || "An error occurred.");
+      setError(err.message || "An error occurred.");
     } finally {
       setLoading(false);
     }

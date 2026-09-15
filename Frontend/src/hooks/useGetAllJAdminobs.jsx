@@ -1,6 +1,7 @@
 import { setAllAdminJobs } from "@/redux/jobSlice";
 import { JOB_API_ENDPOINT } from "@/utils/data";
 import API from "@/utils/axiosInstance";
+import { unwrapList } from "@/services/http";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 
@@ -15,10 +16,9 @@ const useGetAllAdminJobs = () => {
       setError(null);
       try {
         const res = await API.get(`${JOB_API_ENDPOINT}/getadminjobs`);
-        console.log("API Response:", res.data);
-        if (res.data.status) {
-          // Updated success check
-          dispatch(setAllAdminJobs(res.data.jobs));
+        if (res.data?.status || res.data?.success) {
+          const jobs = unwrapList(res, "jobs");
+          dispatch(setAllAdminJobs(jobs));
         } else {
           setError("Failed to fetch jobs.");
         }
