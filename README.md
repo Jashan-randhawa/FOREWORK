@@ -275,6 +275,7 @@ FOREWORK-main/
   position:        Number (required)  // number of open positions
   company:         ObjectId → Company (required)
   created_by:      ObjectId → User (required)
+  status:          Enum["draft", "published", "paused", "expired", "closed"] // default: "published"
   applications:    [ObjectId → Application]
   createdAt, updatedAt (timestamps)
 }
@@ -319,9 +320,12 @@ FOREWORK-main/
 ### Application
 ```js
 {
-  job:       ObjectId → Job (required)
-  applicant: ObjectId → User (required)
-  status:    Enum["pending", "accepted", "rejected"]  // default: "pending"
+  job:            ObjectId → Job (required)
+  applicant:      ObjectId → User (required)
+  status:         Enum["pending", "accepted", "rejected"]  // default: "pending"
+  recruiterNotes: [{ author: ObjectId → User, text: String, createdAt: Date }]
+  scheduledAt:    Date
+  meetingLink:    String
   createdAt, updatedAt (timestamps)
 }
 ```
@@ -356,10 +360,11 @@ Base URL (production): `https://forework.onrender.com` (supports `/api/v1/*` ali
 
 | Method | Endpoint | Auth | Role | Description |
 |--------|----------|:---:|:----:|-------------|
-| GET | `/get` | ❌ | Any | Get all jobs. Supports filters: `keyword`, `location`, `jobType`, `experienceMin`, `experienceMax`, `salaryMin`, `salaryMax`, `page`, `limit` |
+| GET | `/get` | ❌ | Any | Get all jobs. Supports filters: `keyword`, `location`, `jobType`, `experienceMin`, `experienceMax`, `salaryMin`, `salaryMax`, `page`, `limit` (defaults to published only) |
 | GET | `/get/:id` | ❌ | Any | Get single job by ID (populates company and applications) |
-| POST | `/post` | ✅ | `Recruiter` | Post a new job. Requester must own `companyId` |
-| GET | `/getadminjobs` | ✅ | `Recruiter` | Get all jobs created by authenticated recruiter |
+| POST | `/post` | ✅ | `Recruiter` | Post a new job. Requester must own `companyId`. Supports initial `status`. |
+| GET | `/getadminjobs` | ✅ | `Recruiter` | Get all jobs created by authenticated recruiter (supports `?status=`) |
+| PUT | `/:id/status` | ✅ | `Recruiter` | Update job lifecycle status (`draft`, `published`, `paused`, `expired`, `closed`) |
 | POST | `/:id/save` | ✅ | `Student` | Bookmark / save a job |
 | POST/DEL | `/:id/unsave` | ✅ | `Student` | Remove saved job bookmark |
 | GET | `/saved` | ✅ | `Student` | List all saved jobs for authenticated student |
@@ -367,7 +372,7 @@ Base URL (production): `https://forework.onrender.com` (supports `/api/v1/*` ali
 | GET | `/alerts` | ✅ | `Student` | List candidate's active job alerts |
 | DELETE | `/alerts/:id` | ✅ | `Student` | Delete a job alert |
 
-**Post job body fields:** `title`, `description`, `requirements`, `salary`, `location`, `jobType`, `experience`, `position`, `companyId`
+**Post job body fields:** `title`, `description`, `requirements`, `salary`, `location`, `jobType`, `experience`, `position`, `companyId`, `status`
 
 ---
 
@@ -377,8 +382,8 @@ Base URL (production): `https://forework.onrender.com` (supports `/api/v1/*` ali
 |--------|----------|:---:|:----:|-------------|
 | POST | `/register` | ✅ | `Recruiter` | Register a new company |
 | GET | `/get` | ✅ | `Recruiter` | Get all companies owned by logged-in recruiter |
-| GET | `/get/:id` | ✅ | `Recruiter` | Get company by ID (ownership verified) |
-| PUT | `/update/:id` | ✅ | `Recruiter` | Update company details + logo (ownership verified, image-only upload) |
+| GET | `/get/:id` | ✅ | `Recruiter` | Get company by ID (ownership verified, returns 403 on non-owner) |
+| PUT | `/update/:id` | ✅ | `Recruiter` | Update company details + logo (ownership verified, returns 403 on non-owner) |
 
 ---
 
@@ -388,8 +393,10 @@ Base URL (production): `https://forework.onrender.com` (supports `/api/v1/*` ali
 |--------|----------|:---:|:----:|-------------|
 | POST | `/apply/:id` | ✅ | `Student` | Apply to a job by ID (POST verb, duplicate prevented, rate-limited) |
 | GET | `/get` | ✅ | `Student` | Get all applications submitted by logged-in candidate |
-| GET | `/:id/applicants` | ✅ | `Recruiter` | Get applicants for job (job ownership verified) |
+| GET | `/:id/applicants` | ✅ | `Recruiter` | Get applicants for job (job ownership verified, populates notes & candidate) |
 | POST | `/status/:id/update` | ✅ | `Recruiter` | Update applicant status (job ownership verified) |
+| POST | `/:id/notes` | ✅ | `Recruiter` | Add recruiter note to application (job ownership verified) |
+| POST | `/:id/schedule` | ✅ | `Recruiter` | Schedule interview + send email notification (job ownership verified) |
 
 ---
 

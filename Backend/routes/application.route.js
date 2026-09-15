@@ -10,6 +10,8 @@ import {
   getApplicants,
   getAppliedJobs,
   updateStatus,
+  addRecruiterNote,
+  scheduleInterview,
 } from "../controllers/application.controller.js";
 
 const router = express.Router();
@@ -39,6 +41,26 @@ router
     requireRole("Recruiter"),
     requireApplicationOwnership,
     updateStatus
+  );
+
+// Recruiter notes on an application (EMP-003)
+router
+  .route("/:id/notes")
+  .post(
+    authenticateToken,
+    requireRole("Recruiter"),
+    requireApplicationOwnership,
+    addRecruiterNote
+  );
+
+// Interview scheduling (EMP-004)
+router
+  .route("/:id/schedule")
+  .post(
+    authenticateToken,
+    requireRole("Recruiter"),
+    requireApplicationOwnership,
+    scheduleInterview
   );
 
 export default router;

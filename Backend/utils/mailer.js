@@ -59,3 +59,33 @@ export const sendPasswordResetEmail = async (email, token, frontendUrl) => {
     `,
   });
 };
+
+export const sendInterviewInvitationEmail = async ({
+  email,
+  candidateName,
+  jobTitle,
+  companyName,
+  scheduledAt,
+  meetingLink,
+}) => {
+  const formattedDate = new Date(scheduledAt).toLocaleString();
+  return sendEmail({
+    to: email,
+    subject: `Interview Scheduled: ${jobTitle} at ${companyName || "FOREWORK"}`,
+    text: `Hello ${candidateName},\n\nYour interview for ${jobTitle} at ${companyName || "the company"} has been scheduled.\n\nDate & Time: ${formattedDate}\nMeeting Link: ${meetingLink}\n\nBest regards,\nRecruiting Team`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px;">
+        <h2>Interview Invitation</h2>
+        <p>Dear ${candidateName},</p>
+        <p>Your interview for <strong>${jobTitle}</strong> at <strong>${companyName || "the company"}</strong> has been scheduled.</p>
+        <div style="background-color: #f3f4f6; padding: 15px; border-radius: 6px; margin: 15px 0;">
+          <p><strong>Date & Time:</strong> ${formattedDate}</p>
+          <p><strong>Meeting Link:</strong> <a href="${meetingLink}" target="_blank">${meetingLink}</a></p>
+        </div>
+        <p>Please make sure to join the meeting link on time.</p>
+        <p>Best regards,<br/>Recruiting Team</p>
+      </div>
+    `,
+  });
+};
+

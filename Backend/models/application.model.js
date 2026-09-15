@@ -20,6 +20,33 @@ const applicationSchema = new mongoose.Schema(
       default: "pending",
       index: true,
     },
+    recruiterNotes: [
+      {
+        author: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        text: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    scheduledAt: {
+      type: Date,
+      default: null,
+    },
+    meetingLink: {
+      type: String,
+      trim: true,
+      default: "",
+    },
   },
   {
     timestamps: true,

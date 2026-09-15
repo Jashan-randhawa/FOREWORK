@@ -6,6 +6,7 @@ import {
   getAllJobs,
   getJobById,
   postJob,
+  updateJobStatus,
 } from "../controllers/job.controller.js";
 import {
   saveJob,
@@ -28,6 +29,11 @@ router
 router
   .route("/getadminjobs")
   .get(authenticateToken, requireRole("Recruiter"), getAdminJobs);
+
+router
+  .route("/:id/status")
+  .put(authenticateToken, requireRole("Recruiter"), updateJobStatus)
+  .post(authenticateToken, requireRole("Recruiter"), updateJobStatus);
 
 // Candidate Saved Jobs endpoints (CAND-001)
 router

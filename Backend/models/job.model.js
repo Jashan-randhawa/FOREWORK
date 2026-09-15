@@ -58,6 +58,12 @@ const jobSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    status: {
+      type: String,
+      enum: ["draft", "published", "paused", "expired", "closed"],
+      default: "published",
+      index: true,
+    },
     applications: [
       {
         type: mongoose.Schema.Types.ObjectId,

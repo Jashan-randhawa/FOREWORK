@@ -15,8 +15,19 @@ export const postJob = async (req, res, next) => {
       experience,
       position,
       companyId,
+      status = "published",
     } = req.body;
     const userId = req.id;
+
+    const validStatuses = ["draft", "published", "paused", "expired", "closed"];
+    const jobStatus = status.toLowerCase();
+    if (!validStatuses.includes(jobStatus)) {
+      return res.status(400).json({
+        message: `Invalid status. Allowed values: ${validStatuses.join(", ")}`,
+        success: false,
+        status: false,
+      });
+    }
 
     if (
       !title ||
@@ -103,6 +114,7 @@ export const postJob = async (req, res, next) => {
       position: numPosition,
       company: companyId,
       created_by: userId,
+      status: jobStatus,
     });
 
     return res.status(201).json({
@@ -131,9 +143,17 @@ export const getAllJobs = async (req, res, next) => {
       page = 1,
       limit = 10,
       sort = "latest",
+      status,
     } = req.query;
 
     const query = {};
+
+    // Public listings show published jobs unless explicit status is requested
+    if (status) {
+      query.status = status.toLowerCase();
+    } else {
+      query.status = "published";
+    }
 
     // Keyword search across title and description
     if (keyword && keyword.trim()) {
@@ -275,11 +295,15 @@ export const getJobById = async (req, res, next) => {
 export const getAdminJobs = async (req, res, next) => {
   try {
     const adminId = req.id;
+    const { status } = req.query;
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 20));
     const skip = (page - 1) * limit;
 
     const query = { created_by: adminId };
+    if (status) {
+      query.status = status.toLowerCase();
+    }
     const total = await Job.countDocuments(query);
     const totalPages = Math.ceil(total / limit) || 1;
 
@@ -310,6 +334,64 @@ export const getAdminJobs = async (req, res, next) => {
       pagination,
       total,
       status: true,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Recruiter updates job status (EMP-002)
+export const updateJobStatus = async (req, res, next) => {
+  try {
+    const jobId = req.params.id;
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: "Status is required",
+      });
+    }
+
+    const validStatuses = ["draft", "published", "paused", "expired", "closed"];
+    const normalizedStatus = status.toLowerCase();
+    if (!validStatuses.includes(normalizedStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid status. Allowed values: ${validStatuses.join(", ")}`,
+      });
+    }
+
+    if (!jobId || !mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid job ID format",
+      });
+    }
+
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found",
+      });
+    }
+
+    if (job.created_by.toString() !== req.id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: you do not have permission to modify this job",
+      });
+    }
+
+    job.status = normalizedStatus;
+    await job.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Job status updated to ${normalizedStatus}`,
+      data: { job },
+      job,
     });
   } catch (error) {
     next(error);
