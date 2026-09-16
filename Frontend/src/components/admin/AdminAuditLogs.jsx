@@ -324,7 +324,7 @@ const AdminAuditLogs = () => {
                       className={`absolute -left-[31px] top-1 w-5 h-5 rounded-full border-2 border-white dark:border-gray-900 ${config.dotColor} flex items-center justify-center shadow-sm`}
                     />
 
-                    <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-4 bg-gray-50/40 dark:bg-gray-850 hover:bg-white dark:hover:bg-gray-800 hover:shadow-sm transition-all">
+                    <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-4 bg-gray-50/40 dark:bg-gray-900/80 hover:bg-white dark:hover:bg-gray-800 hover:shadow-sm transition-all">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span
@@ -525,7 +525,7 @@ const AdminAuditLogs = () => {
 
                         {/* Expandable Forensic Details Drawer */}
                         {isExpanded && (
-                          <TableRow className="bg-gray-50/60 dark:bg-gray-850/60 border-t border-b border-red-100 dark:border-red-950/40">
+                          <TableRow className="bg-gray-50/60 dark:bg-gray-900/60 border-t border-b border-red-100 dark:border-red-950/40">
                             <TableCell colSpan={7} className="p-4 sm:p-6">
                               <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 shadow-sm space-y-4">
                                 <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">

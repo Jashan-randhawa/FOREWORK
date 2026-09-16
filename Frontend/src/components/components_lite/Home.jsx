@@ -26,26 +26,26 @@ const Home = () => {
   const platformPillars = [
     {
       icon: ShieldCheck,
-      color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800",
+      color: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800/70 shadow-sm shadow-emerald-500/10",
       title: "100% Verified Employers",
-      desc: "Every company profile and job listing undergoes moderation to protect job seekers from scam and spam postings.",
+      desc: "Every company profile and job listing undergoes strict moderation to protect job seekers from spam, scams, and ghost postings.",
     },
     {
       icon: Zap,
-      color: "text-[#6B3AC2] bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800",
+      color: "text-[#6B3AC2] dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 border-purple-200 dark:border-purple-800/70 shadow-sm shadow-purple-500/10",
       title: "Transparent Telemetry",
-      desc: "Track your applications in real-time. Know exactly when your resume is reviewed, shortlisted, or scheduled.",
+      desc: "Track your applications in real-time with zero ambiguity. Know the exact second your resume is opened, shortlisted, or scheduled.",
     },
     {
       icon: Calendar,
-      color: "text-blue-600 bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800",
+      color: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-800/70 shadow-sm shadow-blue-500/10",
       title: "Direct Video Interviews",
-      desc: "Interview details and video conference links are surfaced directly inside your dashboard with scheduled time alerts.",
+      desc: "Interview details and direct conference links are surfaced in your telemetry dashboard with automatic time-zone reminders.",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 flex flex-col justify-between">
+    <div className="min-h-screen bg-gray-50/50 dark:bg-[#0E0C13] text-gray-900 dark:text-gray-100 flex flex-col justify-between transition-colors">
       <Navbar />
 
       <main id="main-content" className="flex-1">
@@ -53,37 +53,40 @@ const Home = () => {
         <Header />
 
         {/* 2. Platform Value Props / Why ForeWork */}
-        <section className="py-14 sm:py-16 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-2xl mx-auto mb-10">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#6B3AC2]">
-                Platform Advantages
+        <section className="py-16 sm:py-20 bg-white dark:bg-[#120E19] border-b border-gray-200 dark:border-[#231E2D] relative overflow-hidden transition-colors">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-100/70 dark:bg-purple-950/70 text-[#6B3AC2] dark:text-purple-300 border border-purple-200 dark:border-purple-800/60 mb-3">
+                <Sparkles className="w-3.5 h-3.5" /> Platform Advantages
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white mt-1">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
                 Built for Transparent, Modern Hiring
               </h2>
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mt-2">
                 We bridge ambitious candidates and vetted employers with zero ghosting.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
               {platformPillars.map((item, idx) => {
                 const Icon = item.icon;
                 return (
                   <div
                     key={idx}
-                    className="p-6 rounded-2xl bg-gray-50/50 dark:bg-gray-850 border border-gray-200/80 dark:border-gray-800 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all group"
+                    className="p-7 rounded-2xl bg-white dark:bg-[#171221] border border-gray-200 dark:border-[#2A2337] hover:border-[#6B3AC2]/50 dark:hover:border-purple-500/50 shadow-sm hover:shadow-xl hover:shadow-purple-500/5 hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between relative overflow-hidden"
                   >
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${item.color} mb-4`}>
-                      <Icon className="w-6 h-6" />
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#6B3AC2]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div>
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${item.color} mb-5 group-hover:scale-105 transition-transform`}>
+                        <Icon className="w-6 h-6" />
+                      </div>
+                      <h3 className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-[#6B3AC2] dark:group-hover:text-purple-300 transition-colors mb-2.5">
+                        {item.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                        {item.desc}
+                      </p>
                     </div>
-                    <h3 className="font-bold text-base text-gray-900 dark:text-white group-hover:text-[#6B3AC2] transition-colors mb-2">
-                      {item.title}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                      {item.desc}
-                    </p>
                   </div>
                 );
               })}
