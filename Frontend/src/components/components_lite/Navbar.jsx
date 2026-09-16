@@ -75,6 +75,9 @@ const Navbar = () => {
             ) : user && user.role === "Recruiter" ? (
               <>
                 <li>
+                  <Link to={"/recruiter/dashboard"}>Dashboard</Link>
+                </li>
+                <li>
                   <Link to={"/recruiter/companies"}>Companies</Link>
                 </li>
                 <li>
@@ -167,6 +170,11 @@ const Navbar = () => {
 
                     {user && user.role === "Recruiter" && (
                       <>
+                        <div className="flex w-fit items-center gap-2 cursor-pointer">
+                          <Button variant="link" className="p-0">
+                            <Link to={"/recruiter/dashboard"}>Dashboard</Link>
+                          </Button>
+                        </div>
                         <div className="flex w-fit items-center gap-2 cursor-pointer">
                           <Button variant="link" className="p-0">
                             <Link to={"/recruiter/companies"}>My Companies</Link>

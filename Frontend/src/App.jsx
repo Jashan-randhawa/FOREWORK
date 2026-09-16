@@ -18,6 +18,7 @@ const JobAlerts = lazy(() => import("./components/components_lite/JobAlerts.jsx"
 const Profile = lazy(() => import("./components/components_lite/Profile.jsx"));
 const ApplicationsPage = lazy(() => import("./components/components_lite/ApplicationsPage.jsx"));
 const Description = lazy(() => import("./components/components_lite/Description.jsx"));
+const RecruiterDashboard = lazy(() => import("./components/admincomponent/RecruiterDashboard"));
 const Companies = lazy(() => import("./components/admincomponent/Companies"));
 const CompanyCreate = lazy(() => import("./components/admincomponent/CompanyCreate"));
 const CompanySetup = lazy(() => import("./components/admincomponent/CompanySetup"));
@@ -113,6 +114,22 @@ const appRouter = createBrowserRouter([
   },
 
   // Recruiter route tree (/recruiter/*)
+  {
+    path: "/recruiter",
+    element: (
+      <ProtectedRoute>
+        <RecruiterDashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/recruiter/dashboard",
+    element: (
+      <ProtectedRoute>
+        <RecruiterDashboard />
+      </ProtectedRoute>
+    ),
+  },
   {
     path: "/recruiter/companies",
     element: (
