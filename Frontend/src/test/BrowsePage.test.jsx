@@ -161,12 +161,12 @@ describe("Browse Page - Phase 2 Sidebar Filters", () => {
     expect(sidebar).toHaveClass("w-full");
     expect(sidebar).toHaveClass("md:w-1/4");
 
-    expect(screen.getByText("Filter Jobs")).toBeInTheDocument();
-    expect(screen.getByText("Location")).toBeInTheDocument();
-    expect(screen.getByText("Technology")).toBeInTheDocument();
-    expect(screen.getByText("Job Type")).toBeInTheDocument();
-    expect(screen.getByText("Experience")).toBeInTheDocument();
-    expect(screen.getByText("Salary")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Filter Jobs")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Location")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Technology")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Job Type")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Experience")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Salary")).toBeInTheDocument();
   });
 
   it("dispatches filter changes when selecting options in Filtercard", () => {
@@ -287,4 +287,61 @@ describe("Browse Page - Phase 3 Card + Motion Polish", () => {
     expect(cardEl).toHaveClass("border-[#C9A24B]/40");
   });
 });
+
+describe("Browse Page - Phase 4 Sort + Numbered Pagination", () => {
+  beforeEach(() => {
+    mockLoading = false;
+    vi.clearAllMocks();
+  });
+
+  it("renders SortSelect dropdown with default relevance and updates on selection", () => {
+    const store = createTestStore({ allJobs: mockJobs });
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <Browse />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    const sortSelect = screen.getByRole("combobox", { name: "Sort jobs by" });
+    expect(sortSelect).toBeInTheDocument();
+    expect(sortSelect).toHaveValue("relevance");
+
+    fireEvent.change(sortSelect, { target: { value: "salary" } });
+    expect(store.getState().job.sortBy).toBe("salary");
+
+    fireEvent.change(sortSelect, { target: { value: "newest" } });
+    expect(store.getState().job.sortBy).toBe("newest");
+  });
+
+  it("renders numbered pills and jumps to specific page on pill click", () => {
+    const store = createTestStore({
+      allJobs: mockJobs,
+      pagination: { page: 1, limit: 6, total: 30, totalPages: 5, hasMore: true },
+    });
+
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <Browse />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    // Verify numbered page buttons 1 to 5 exist
+    const page1Btn = screen.getByRole("button", { name: "Page 1" });
+    const page2Btn = screen.getByRole("button", { name: "Page 2" });
+    const page3Btn = screen.getByRole("button", { name: "Page 3" });
+
+    expect(page1Btn).toHaveAttribute("aria-current", "page");
+    expect(page1Btn).toHaveClass("bg-[#6B3AC2]");
+    expect(page2Btn).toBeInTheDocument();
+
+    // Click page 3 to jump
+    fireEvent.click(page3Btn);
+    expect(store.getState().job.pagination.page).toBe(3);
+  });
+});
+
 

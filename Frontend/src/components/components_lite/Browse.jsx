@@ -3,6 +3,7 @@ import Navbar from "./Navbar";
 import Filtercard from "./Filtercard";
 import Job1 from "./Job1";
 import JobCardSkeleton from "./JobCardSkeleton";
+import SortSelect from "./SortSelect";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { setSearchedQuery, setPage, clearFilters } from "@/redux/jobSlice";
@@ -37,6 +38,47 @@ const Browse = () => {
     }
   };
 
+  const handlePageClick = (pageNumber) => {
+    if (
+      pageNumber >= 1 &&
+      pageNumber <= pagination?.totalPages &&
+      pageNumber !== pagination?.page
+    ) {
+      dispatch(setPage(pageNumber));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const getPaginationItems = (currentPage, totalPages) => {
+    if (!totalPages || totalPages <= 1) return [];
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 4) {
+      return [1, 2, 3, 4, 5, "...", totalPages];
+    }
+    if (currentPage >= totalPages - 3) {
+      return [
+        1,
+        "...",
+        totalPages - 4,
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages,
+      ];
+    }
+    return [
+      1,
+      "...",
+      currentPage - 1,
+      currentPage,
+      currentPage + 1,
+      "...",
+      totalPages,
+    ];
+  };
+
   return (
     <div className="min-h-screen bg-[#141018] text-[#B7ACD6] flex flex-col">
       <Navbar />
@@ -49,7 +91,7 @@ const Browse = () => {
 
           {/* Right Main Content: Header + Jobs Grid / Skeleton / Empty + Pagination */}
           <section aria-label="Job listings" className="flex-1 flex flex-col">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#1F1B26]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-[#1F1B26]">
               <div>
                 <h1 className="font-bold text-2xl text-white tracking-tight">
                   {searchedQuery ? `Results for "${searchedQuery}"` : "All Available Jobs"}
@@ -64,16 +106,20 @@ const Browse = () => {
                     ` (Page ${pagination.page} of ${pagination.totalPages})`}
                 </p>
               </div>
-              {searchedQuery && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => dispatch(clearFilters())}
-                  className="border-[#3D2166] bg-[#1F1B26] text-[#B7ACD6] hover:bg-[#2A2434] hover:text-white hover:border-[#6B3AC2] transition-colors"
-                >
-                  Clear Search
-                </Button>
-              )}
+
+              <div className="flex items-center gap-3">
+                <SortSelect />
+                {searchedQuery && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => dispatch(clearFilters())}
+                    className="border-[#3D2166] bg-[#1F1B26] text-[#B7ACD6] hover:bg-[#2A2434] hover:text-white hover:border-[#6B3AC2] transition-colors h-8 text-xs"
+                  >
+                    Clear Search
+                  </Button>
+                )}
+              </div>
             </div>
 
             {loading ? (
@@ -118,33 +164,67 @@ const Browse = () => {
                   ))}
                 </div>
 
-                {/* Pagination Controls */}
+                {/* Numbered Pill Pagination Controls */}
                 {pagination?.totalPages > 1 && (
-                  <nav aria-label="Browse Pagination" className="flex items-center justify-center gap-3 mt-10 pt-6 border-t border-[#1F1B26]">
+                  <nav
+                    aria-label="Browse Pagination"
+                    className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mt-10 pt-6 border-t border-[#1F1B26]"
+                  >
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handlePrevPage}
                       disabled={pagination.page <= 1}
                       aria-label="Go to previous page"
-                      className="flex items-center gap-1 border-[#3D2166] bg-[#1F1B26] text-[#B7ACD6] hover:bg-[#2A2434] hover:text-white disabled:opacity-40 disabled:border-[#2A2434]"
+                      className="flex items-center gap-1 border-[#3D2166] bg-[#1F1B26] text-[#B7ACD6] hover:bg-[#2A2434] hover:text-white disabled:opacity-30 disabled:border-[#2A2434] h-8 px-2.5 text-xs"
                     >
                       <ChevronLeft className="w-4 h-4" />
-                      Previous
+                      <span className="hidden sm:inline">Previous</span>
                     </Button>
-                    <span className="text-sm text-[#7A7488]" aria-current="page">
-                      Page <span className="text-[#B7ACD6] font-medium">{pagination.page}</span> of{" "}
-                      <span className="text-[#B7ACD6] font-medium">{pagination.totalPages}</span>
-                    </span>
+
+                    <div className="flex items-center gap-1">
+                      {getPaginationItems(
+                        pagination.page,
+                        pagination.totalPages
+                      ).map((item, idx) => {
+                        if (item === "...") {
+                          return (
+                            <span
+                              key={`ellipsis-${idx}`}
+                              className="px-1.5 text-xs text-[#7A7488] select-none"
+                            >
+                              …
+                            </span>
+                          );
+                        }
+                        const isActive = item === pagination.page;
+                        return (
+                          <button
+                            key={`page-${item}`}
+                            onClick={() => handlePageClick(item)}
+                            aria-label={`Page ${item}`}
+                            aria-current={isActive ? "page" : undefined}
+                            className={`min-w-[32px] h-8 px-2 text-xs rounded-md transition-all font-medium ${
+                              isActive
+                                ? "bg-[#6B3AC2] text-white shadow-[0_0_12px_rgba(107,58,194,0.4)] border border-[#6B3AC2]"
+                                : "bg-[#1F1B26] border border-[#3D2166] text-[#B7ACD6] hover:bg-[#2A2434] hover:text-white hover:border-[#6B3AC2]"
+                            }`}
+                          >
+                            {item}
+                          </button>
+                        );
+                      })}
+                    </div>
+
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handleNextPage}
                       disabled={pagination.page >= pagination.totalPages}
                       aria-label="Go to next page"
-                      className="flex items-center gap-1 border-[#3D2166] bg-[#1F1B26] text-[#B7ACD6] hover:bg-[#2A2434] hover:text-white disabled:opacity-40 disabled:border-[#2A2434]"
+                      className="flex items-center gap-1 border-[#3D2166] bg-[#1F1B26] text-[#B7ACD6] hover:bg-[#2A2434] hover:text-white disabled:opacity-30 disabled:border-[#2A2434] h-8 px-2.5 text-xs"
                     >
-                      Next
+                      <span className="hidden sm:inline">Next</span>
                       <ChevronRight className="w-4 h-4" />
                     </Button>
                   </nav>

@@ -144,6 +144,7 @@ export const getAllJobs = async (req, res, next) => {
       page = 1,
       limit = 10,
       sort = "latest",
+      sortBy,
       status,
     } = req.query;
 
@@ -204,15 +205,18 @@ export const getAllJobs = async (req, res, next) => {
     const skip = (pageNum - 1) * limitNum;
 
     // Sorting
+    const effectiveSort = sortBy || sort;
     let sortObj = { createdAt: -1 };
-    if (sort === "salary_desc") {
+    if (effectiveSort === "salary" || effectiveSort === "salary_desc") {
       sortObj = { salary: -1, createdAt: -1 };
-    } else if (sort === "salary_asc") {
+    } else if (effectiveSort === "salary_asc") {
       sortObj = { salary: 1, createdAt: -1 };
-    } else if (sort === "experience_asc") {
+    } else if (effectiveSort === "experience_asc") {
       sortObj = { experienceLevel: 1, createdAt: -1 };
-    } else if (sort === "oldest") {
+    } else if (effectiveSort === "oldest") {
       sortObj = { createdAt: 1 };
+    } else if (effectiveSort === "newest" || effectiveSort === "latest" || effectiveSort === "relevance") {
+      sortObj = { createdAt: -1 };
     }
 
     const total = await Job.countDocuments(query);

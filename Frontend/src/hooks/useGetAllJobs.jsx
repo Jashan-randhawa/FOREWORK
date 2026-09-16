@@ -9,7 +9,7 @@ const useGetAllJobs = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { searchedQuery, filters, pagination } = useSelector((store) => store.job);
+  const { searchedQuery, filters, pagination, sortBy } = useSelector((store) => store.job);
 
   const fetchAllJobs = useCallback(async () => {
     setLoading(true);
@@ -35,6 +35,7 @@ const useGetAllJobs = () => {
       }
       if (pagination?.page) params.append("page", pagination.page);
       if (pagination?.limit) params.append("limit", pagination.limit);
+      if (sortBy) params.append("sortBy", sortBy);
 
       const res = await API.get(`${JOB_API_ENDPOINT}/get?${params.toString()}`);
       if (res.data?.success || res.data?.status) {
@@ -65,6 +66,7 @@ const useGetAllJobs = () => {
     filters?.salaryMax,
     pagination?.page,
     pagination?.limit,
+    sortBy,
   ]);
 
   useEffect(() => {

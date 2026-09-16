@@ -27,6 +27,7 @@ const initialState = {
   searchedQuery: "",
   filters: initialFilters,
   pagination: initialPagination,
+  sortBy: "relevance",
 };
 
 const jobSlice = createSlice({
@@ -60,10 +61,15 @@ const jobSlice = createSlice({
       }
       state.pagination.page = 1;
     },
+    setSortBy(state, action) {
+      state.sortBy = action.payload || "relevance";
+      state.pagination.page = 1;
+    },
     clearFilters(state) {
       state.filters = { ...initialFilters };
       state.searchedQuery = "";
       state.pagination.page = 1;
+      state.sortBy = "relevance";
     },
     setPagination(state, action) {
       state.pagination = { ...state.pagination, ...action.payload };
@@ -82,6 +88,7 @@ export const {
   setAllAppliedJobs,
   setSearchedQuery,
   setFilter,
+  setSortBy,
   clearFilters,
   setPagination,
   setPage,
