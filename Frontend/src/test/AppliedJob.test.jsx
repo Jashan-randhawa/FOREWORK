@@ -1,21 +1,27 @@
-import React from "react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { MemoryRouter } from "react-router-dom";
 import AppliedJob from "../components/components_lite/AppliedJob";
+import ApplicationsPage from "../components/components_lite/ApplicationsPage";
+import { ThemeProvider } from "@/context/ThemeContext";
+
+vi.mock("@/hooks/useGetAllAppliedJobs", () => ({
+  default: () => null,
+}));
 
 const createMockStore = (initialState) => {
   return configureStore({
     reducer: {
+      auth: (state = { user: null }) => state,
       job: (state = initialState.job || { allAppliedJobs: [] }) => state,
     },
     preloadedState: initialState,
   });
 };
 
-describe("Phase 2 — Dedicated Applications Page (AppliedJob.jsx)", () => {
+describe("Dedicated Applications Section (AppliedJob.jsx & ApplicationsPage.jsx)", () => {
   const sampleApplications = [
     {
       _id: "app-1",
@@ -62,9 +68,11 @@ describe("Phase 2 — Dedicated Applications Page (AppliedJob.jsx)", () => {
 
     render(
       <Provider store={store}>
-        <MemoryRouter>
-          <AppliedJob />
-        </MemoryRouter>
+        <ThemeProvider>
+          <MemoryRouter>
+            <AppliedJob />
+          </MemoryRouter>
+        </ThemeProvider>
       </Provider>
     );
 
@@ -90,9 +98,11 @@ describe("Phase 2 — Dedicated Applications Page (AppliedJob.jsx)", () => {
 
     render(
       <Provider store={store}>
-        <MemoryRouter>
-          <AppliedJob />
-        </MemoryRouter>
+        <ThemeProvider>
+          <MemoryRouter>
+            <AppliedJob />
+          </MemoryRouter>
+        </ThemeProvider>
       </Provider>
     );
 
@@ -125,15 +135,17 @@ describe("Phase 2 — Dedicated Applications Page (AppliedJob.jsx)", () => {
 
     render(
       <Provider store={store}>
-        <MemoryRouter>
-          <AppliedJob />
-        </MemoryRouter>
+        <ThemeProvider>
+          <MemoryRouter>
+            <AppliedJob />
+          </MemoryRouter>
+        </ThemeProvider>
       </Provider>
     );
 
     // app-1 has interview details: meeting link and date
     expect(screen.getByTestId("interview-details-app-1")).toBeInTheDocument();
-    const meetingLink = screen.getByText("Join Meeting").closest("a");
+    const meetingLink = screen.getAllByText("Join Meeting")[0].closest("a");
     expect(meetingLink).toHaveAttribute("href", "https://meet.google.com/test-room");
 
     // app-2 and app-3 do NOT have interview details
@@ -151,12 +163,110 @@ describe("Phase 2 — Dedicated Applications Page (AppliedJob.jsx)", () => {
 
     render(
       <Provider store={store}>
-        <MemoryRouter>
-          <AppliedJob />
-        </MemoryRouter>
+        <ThemeProvider>
+          <MemoryRouter>
+            <AppliedJob />
+          </MemoryRouter>
+        </ThemeProvider>
       </Provider>
     );
 
     expect(screen.getByText("No applications submitted yet")).toBeInTheDocument();
+  });
+
+  it("renders upcoming interviews banner when scheduled interview exists", () => {
+    const store = createMockStore({
+      job: { allAppliedJobs: sampleApplications },
+    });
+
+    render(
+      <Provider store={store}>
+        <ThemeProvider>
+          <MemoryRouter>
+            <AppliedJob />
+          </MemoryRouter>
+        </ThemeProvider>
+      </Provider>
+    );
+
+    expect(screen.getByTestId("upcoming-interviews-banner")).toBeInTheDocument();
+    expect(screen.getByText("Live Interview Scheduled")).toBeInTheDocument();
+    expect(screen.getByText("Join Interview Room")).toBeInTheDocument();
+  });
+
+  it("filters applications via search input by title or company", () => {
+    const store = createMockStore({
+      job: { allAppliedJobs: sampleApplications },
+    });
+
+    render(
+      <Provider store={store}>
+        <ThemeProvider>
+          <MemoryRouter>
+            <AppliedJob />
+          </MemoryRouter>
+        </ThemeProvider>
+      </Provider>
+    );
+
+    const searchInput = screen.getByPlaceholderText("Search title or company...");
+    fireEvent.change(searchInput, { target: { value: "Pixel" } });
+
+    expect(screen.getByText("Frontend Developer")).toBeInTheDocument();
+    expect(screen.queryByText("Backend Engineer")).not.toBeInTheDocument();
+    expect(screen.queryByText("DevOps Engineer")).not.toBeInTheDocument();
+  });
+
+  it("toggles between Table view and Cards view", () => {
+    const store = createMockStore({
+      job: { allAppliedJobs: sampleApplications },
+    });
+
+    render(
+      <Provider store={store}>
+        <ThemeProvider>
+          <MemoryRouter>
+            <AppliedJob />
+          </MemoryRouter>
+        </ThemeProvider>
+      </Provider>
+    );
+
+    const cardsToggleBtn = screen.getByRole("button", { name: "Cards View" });
+    fireEvent.click(cardsToggleBtn);
+
+    // Cards are rendered
+    expect(screen.getByTestId("application-card-app-1")).toBeInTheDocument();
+    expect(screen.getByTestId("application-card-app-2")).toBeInTheDocument();
+    expect(screen.getByTestId("application-card-app-3")).toBeInTheDocument();
+
+    // Toggle back to table view
+    const tableToggleBtn = screen.getByRole("button", { name: "Table View" });
+    fireEvent.click(tableToggleBtn);
+    expect(screen.getByTestId("application-row-app-1")).toBeInTheDocument();
+  });
+
+  it("renders ApplicationsPage with metrics cards and hero banner", () => {
+    const store = createMockStore({
+      job: { allAppliedJobs: sampleApplications },
+    });
+
+    render(
+      <Provider store={store}>
+        <ThemeProvider>
+          <MemoryRouter>
+            <ApplicationsPage />
+          </MemoryRouter>
+        </ThemeProvider>
+      </Provider>
+    );
+
+    expect(screen.getByText("Candidate Telemetry")).toBeInTheDocument();
+    expect(screen.getByText("My Job Applications")).toBeInTheDocument();
+    expect(screen.getByText("Total Applied")).toBeInTheDocument();
+    expect(screen.getByText("In Review")).toBeInTheDocument();
+    expect(screen.getAllByText("Accepted").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Interviews")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Explore More Jobs" })).toBeInTheDocument();
   });
 });
