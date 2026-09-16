@@ -391,7 +391,10 @@ const Creator = () => {
                   </Button>
                 </Link>
                 <Link to="/Jobs">
-                  <Button variant="outline" className="text-white border-white/40 hover:bg-white/10 px-6 h-11 text-sm">
+                  <Button
+                    variant="outline"
+                    className="bg-transparent text-white border-2 border-white/80 hover:bg-white hover:text-[#6B3AC2] font-semibold px-6 h-11 text-sm shadow-sm transition-all"
+                  >
                     Browse All Jobs
                   </Button>
                 </Link>
