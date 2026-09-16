@@ -70,26 +70,26 @@ const Filtercard = () => {
     (filters?.salaryMin !== "" && filters?.salaryMin !== undefined);
 
   return (
-    <div className="w-full bg-[#1F1B26] p-5 rounded-xl border border-[#3D2166] space-y-6 shadow-sm">
+    <div className="w-full bg-white dark:bg-[#1F1B26] p-5 rounded-xl border border-gray-200 dark:border-[#3D2166] space-y-6 shadow-sm">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-lg text-white">Filter Jobs</h2>
+        <h2 className="font-bold text-lg text-gray-900 dark:text-white">Filter Jobs</h2>
         {hasActiveFilters && (
           <Button
             variant="ghost"
             size="sm"
             onClick={() => dispatch(clearFilters())}
-            className="text-xs text-rose-400 hover:text-rose-300 hover:bg-[#2A2434] h-8 px-2 flex items-center gap-1 transition-colors"
+            className="text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:text-rose-400 dark:hover:text-rose-300 dark:hover:bg-[#2A2434] h-8 px-2 flex items-center gap-1 transition-colors"
           >
             <RotateCcw className="w-3 h-3" />
             Clear
           </Button>
         )}
       </div>
-      <hr className="border-[#2A2434]" />
+      <hr className="border-gray-200 dark:border-[#2A2434]" />
 
       {/* Location Filter */}
       <div>
-        <h3 className="font-semibold text-xs uppercase text-[#958EA3] tracking-wider mb-2">
+        <h3 className="font-semibold text-xs uppercase text-gray-500 dark:text-[#958EA3] tracking-wider mb-2">
           Location
         </h3>
         <RadioGroup value={filters?.location || ""} onValueChange={handleLocationChange}>
@@ -101,12 +101,14 @@ const Filtercard = () => {
                 <RadioGroupItem
                   value={loc}
                   id={id}
-                  className="border-[#4A3866] data-[state=checked]:border-[#6B3AC2] text-[#6B3AC2] bg-[#141018] focus-visible:ring-[#6B3AC2]"
+                  className="border-gray-300 dark:border-[#4A3866] data-[state=checked]:border-[#6B3AC2] text-[#6B3AC2] bg-white dark:bg-[#141018] focus-visible:ring-[#6B3AC2]"
                 />
                 <label
                   htmlFor={id}
                   className={`text-sm cursor-pointer transition-colors ${
-                    isSelected ? "text-white font-medium" : "text-[#B7ACD6] hover:text-white"
+                    isSelected
+                      ? "text-[#6B3AC2] font-semibold dark:text-white dark:font-medium"
+                      : "text-gray-700 hover:text-gray-900 dark:text-[#B7ACD6] dark:hover:text-white"
                   }`}
                 >
                   {loc}
@@ -119,7 +121,7 @@ const Filtercard = () => {
 
       {/* Technology Filter */}
       <div>
-        <h3 className="font-semibold text-xs uppercase text-[#958EA3] tracking-wider mb-2">
+        <h3 className="font-semibold text-xs uppercase text-gray-500 dark:text-[#958EA3] tracking-wider mb-2">
           Technology
         </h3>
         <RadioGroup value={filters?.technology || ""} onValueChange={handleTechnologyChange}>
@@ -131,12 +133,14 @@ const Filtercard = () => {
                 <RadioGroupItem
                   value={tech}
                   id={id}
-                  className="border-[#4A3866] data-[state=checked]:border-[#6B3AC2] text-[#6B3AC2] bg-[#141018] focus-visible:ring-[#6B3AC2]"
+                  className="border-gray-300 dark:border-[#4A3866] data-[state=checked]:border-[#6B3AC2] text-[#6B3AC2] bg-white dark:bg-[#141018] focus-visible:ring-[#6B3AC2]"
                 />
                 <label
                   htmlFor={id}
                   className={`text-sm cursor-pointer transition-colors ${
-                    isSelected ? "text-white font-medium" : "text-[#B7ACD6] hover:text-white"
+                    isSelected
+                      ? "text-[#6B3AC2] font-semibold dark:text-white dark:font-medium"
+                      : "text-gray-700 hover:text-gray-900 dark:text-[#B7ACD6] dark:hover:text-white"
                   }`}
                 >
                   {tech}
@@ -149,7 +153,7 @@ const Filtercard = () => {
 
       {/* Job Type Filter */}
       <div>
-        <h3 className="font-semibold text-xs uppercase text-[#958EA3] tracking-wider mb-2">
+        <h3 className="font-semibold text-xs uppercase text-gray-500 dark:text-[#958EA3] tracking-wider mb-2">
           Job Type
         </h3>
         <RadioGroup value={filters?.jobType || ""} onValueChange={handleJobTypeChange}>
@@ -161,12 +165,14 @@ const Filtercard = () => {
                 <RadioGroupItem
                   value={type}
                   id={id}
-                  className="border-[#4A3866] data-[state=checked]:border-[#6B3AC2] text-[#6B3AC2] bg-[#141018] focus-visible:ring-[#6B3AC2]"
+                  className="border-gray-300 dark:border-[#4A3866] data-[state=checked]:border-[#6B3AC2] text-[#6B3AC2] bg-white dark:bg-[#141018] focus-visible:ring-[#6B3AC2]"
                 />
                 <label
                   htmlFor={id}
                   className={`text-sm cursor-pointer transition-colors ${
-                    isSelected ? "text-white font-medium" : "text-[#B7ACD6] hover:text-white"
+                    isSelected
+                      ? "text-[#6B3AC2] font-semibold dark:text-white dark:font-medium"
+                      : "text-gray-700 hover:text-gray-900 dark:text-[#B7ACD6] dark:hover:text-white"
                   }`}
                 >
                   {type}
@@ -179,7 +185,7 @@ const Filtercard = () => {
 
       {/* Experience Filter */}
       <div>
-        <h3 className="font-semibold text-xs uppercase text-[#958EA3] tracking-wider mb-2">
+        <h3 className="font-semibold text-xs uppercase text-gray-500 dark:text-[#958EA3] tracking-wider mb-2">
           Experience
         </h3>
         <RadioGroup value={selectedExpLabel} onValueChange={handleExperienceChange}>
@@ -191,12 +197,14 @@ const Filtercard = () => {
                 <RadioGroupItem
                   value={exp.label}
                   id={id}
-                  className="border-[#4A3866] data-[state=checked]:border-[#6B3AC2] text-[#6B3AC2] bg-[#141018] focus-visible:ring-[#6B3AC2]"
+                  className="border-gray-300 dark:border-[#4A3866] data-[state=checked]:border-[#6B3AC2] text-[#6B3AC2] bg-white dark:bg-[#141018] focus-visible:ring-[#6B3AC2]"
                 />
                 <label
                   htmlFor={id}
                   className={`text-sm cursor-pointer transition-colors ${
-                    isSelected ? "text-white font-medium" : "text-[#B7ACD6] hover:text-white"
+                    isSelected
+                      ? "text-[#6B3AC2] font-semibold dark:text-white dark:font-medium"
+                      : "text-gray-700 hover:text-gray-900 dark:text-[#B7ACD6] dark:hover:text-white"
                   }`}
                 >
                   {exp.label}
@@ -209,7 +217,7 @@ const Filtercard = () => {
 
       {/* Salary Filter */}
       <div>
-        <h3 className="font-semibold text-xs uppercase text-[#958EA3] tracking-wider mb-2">
+        <h3 className="font-semibold text-xs uppercase text-gray-500 dark:text-[#958EA3] tracking-wider mb-2">
           Salary
         </h3>
         <RadioGroup value={selectedSalaryLabel} onValueChange={handleSalaryChange}>
@@ -221,12 +229,14 @@ const Filtercard = () => {
                 <RadioGroupItem
                   value={sal.label}
                   id={id}
-                  className="border-[#4A3866] data-[state=checked]:border-[#6B3AC2] text-[#6B3AC2] bg-[#141018] focus-visible:ring-[#6B3AC2]"
+                  className="border-gray-300 dark:border-[#4A3866] data-[state=checked]:border-[#6B3AC2] text-[#6B3AC2] bg-white dark:bg-[#141018] focus-visible:ring-[#6B3AC2]"
                 />
                 <label
                   htmlFor={id}
                   className={`text-sm cursor-pointer transition-colors ${
-                    isSelected ? "text-white font-medium" : "text-[#B7ACD6] hover:text-white"
+                    isSelected
+                      ? "text-[#6B3AC2] font-semibold dark:text-white dark:font-medium"
+                      : "text-gray-700 hover:text-gray-900 dark:text-[#B7ACD6] dark:hover:text-white"
                   }`}
                 >
                   {sal.label}

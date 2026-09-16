@@ -9,6 +9,7 @@ import { persistStore } from "redux-persist";
 
 import store from "./redux/store";
 import { PersistGate } from "redux-persist/integration/react";
+import { ThemeProvider } from "./context/ThemeContext";
 
 const persistor = persistStore(store);
 
@@ -16,8 +17,10 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <App />
-        <Toaster />
+        <ThemeProvider>
+          <App />
+          <Toaster />
+        </ThemeProvider>
       </PersistGate>
     </Provider>
   </StrictMode>

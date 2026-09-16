@@ -4,6 +4,7 @@ import Filtercard from "./Filtercard";
 import Job1 from "./Job1";
 import JobCardSkeleton from "./JobCardSkeleton";
 import SortSelect from "./SortSelect";
+import ThemeToggle from "./ThemeToggle";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { setSearchedQuery, setPage, clearFilters } from "@/redux/jobSlice";
@@ -106,7 +107,7 @@ const Browse = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#141018] text-[#B7ACD6] flex flex-col">
+    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-[#141018] dark:text-[#B7ACD6] flex flex-col transition-colors duration-200">
       <Navbar />
       <main id="main-content" className="max-w-7xl mx-auto my-8 px-4 flex-1 w-full">
         <div className="flex flex-col md:flex-row gap-6">
@@ -117,14 +118,14 @@ const Browse = () => {
 
           {/* Right Main Content: Header + Jobs Grid / Skeleton / Empty + Pagination */}
           <section aria-label="Job listings" className="flex-1 flex flex-col">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-[#1F1B26]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-200 dark:border-[#1F1B26]">
               <div>
-                <h1 className="font-bold text-2xl text-white tracking-tight">
+                <h1 className="font-bold text-2xl text-gray-900 dark:text-white tracking-tight">
                   {searchedQuery ? `Results for "${searchedQuery}"` : "All Available Jobs"}
                 </h1>
-                <p className="text-sm text-[#958EA3] mt-1">
+                <p className="text-sm text-gray-500 dark:text-[#958EA3] mt-1">
                   Found{" "}
-                  <span className="text-[#B7ACD6] font-medium">
+                  <span className="text-gray-900 dark:text-[#B7ACD6] font-semibold">
                     {pagination?.total || allJobs?.length || 0}
                   </span>{" "}
                   job opportunities
@@ -142,7 +143,7 @@ const Browse = () => {
                   aria-label="Open job filters"
                   aria-expanded={isMobileFilterOpen}
                   aria-controls="mobile-filter-drawer"
-                  className="md:hidden flex items-center gap-1.5 border-[#3D2166] bg-[#1F1B26] text-[#B7ACD6] hover:bg-[#2A2434] hover:text-white hover:border-[#6B3AC2] transition-colors h-8 text-xs"
+                  className="md:hidden flex items-center gap-1.5 border-gray-200 bg-white text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:border-[#3D2166] dark:bg-[#1F1B26] dark:text-[#B7ACD6] dark:hover:bg-[#2A2434] dark:hover:text-white dark:hover:border-[#6B3AC2] transition-colors h-8 text-xs"
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5" />
                   <span>Filters</span>
@@ -154,13 +155,14 @@ const Browse = () => {
                 </Button>
 
                 <SortSelect />
+                <ThemeToggle />
 
                 {searchedQuery && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => dispatch(clearFilters())}
-                    className="border-[#3D2166] bg-[#1F1B26] text-[#B7ACD6] hover:bg-[#2A2434] hover:text-white hover:border-[#6B3AC2] transition-colors h-8 text-xs"
+                    className="border-gray-200 bg-white text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:border-[#3D2166] dark:bg-[#1F1B26] dark:text-[#B7ACD6] dark:hover:bg-[#2A2434] dark:hover:text-white dark:hover:border-[#6B3AC2] transition-colors h-8 text-xs"
                   >
                     Clear Search
                   </Button>
@@ -178,12 +180,12 @@ const Browse = () => {
                 ))}
               </div>
             ) : allJobs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 bg-[#1F1B26] rounded-xl border border-dashed border-[#3D2166] p-8 text-center max-w-md mx-auto shadow-sm w-full">
-                <div className="p-3 bg-[#141018] rounded-full border border-[#3D2166] mb-3">
-                  <Frown className="w-10 h-10 text-[#958EA3]" />
+              <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-[#1F1B26] rounded-xl border border-dashed border-gray-200 dark:border-[#3D2166] p-8 text-center max-w-md mx-auto shadow-sm w-full">
+                <div className="p-3 bg-gray-100 dark:bg-[#141018] rounded-full border border-gray-200 dark:border-[#3D2166] mb-3">
+                  <Frown className="w-10 h-10 text-gray-400 dark:text-[#958EA3]" />
                 </div>
-                <h3 className="font-semibold text-white text-lg">No jobs match your search</h3>
-                <p className="text-[#958EA3] text-sm mt-1">
+                <h3 className="font-semibold text-gray-900 dark:text-white text-lg">No jobs match your search</h3>
+                <p className="text-gray-500 dark:text-[#958EA3] text-sm mt-1">
                   Try searching with different keywords or clear your query to view all listings.
                 </p>
                 <Button
@@ -214,7 +216,7 @@ const Browse = () => {
                 {pagination?.totalPages > 1 && (
                   <nav
                     aria-label="Browse Pagination"
-                    className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mt-10 pt-6 border-t border-[#1F1B26]"
+                    className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mt-10 pt-6 border-t border-gray-200 dark:border-[#1F1B26]"
                   >
                     <Button
                       variant="outline"
@@ -222,7 +224,7 @@ const Browse = () => {
                       onClick={handlePrevPage}
                       disabled={pagination.page <= 1}
                       aria-label="Go to previous page"
-                      className="flex items-center gap-1 border-[#3D2166] bg-[#1F1B26] text-[#B7ACD6] hover:bg-[#2A2434] hover:text-white disabled:opacity-30 disabled:border-[#2A2434] h-8 px-2.5 text-xs"
+                      className="flex items-center gap-1 border-gray-200 bg-white text-gray-700 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 disabled:border-gray-200 dark:border-[#3D2166] dark:bg-[#1F1B26] dark:text-[#B7ACD6] dark:hover:bg-[#2A2434] dark:hover:text-white dark:disabled:opacity-30 dark:disabled:border-[#2A2434] h-8 px-2.5 text-xs"
                     >
                       <ChevronLeft className="w-4 h-4" />
                       <span className="hidden sm:inline">Previous</span>
@@ -237,7 +239,7 @@ const Browse = () => {
                           return (
                             <span
                               key={`ellipsis-${idx}`}
-                              className="px-1.5 text-xs text-[#958EA3] select-none"
+                              className="px-1.5 text-xs text-gray-400 dark:text-[#958EA3] select-none"
                             >
                               …
                             </span>
@@ -252,8 +254,8 @@ const Browse = () => {
                             aria-current={isActive ? "page" : undefined}
                             className={`min-w-[32px] h-8 px-2 text-xs rounded-md transition-all font-medium ${
                               isActive
-                                ? "bg-[#6B3AC2] text-white shadow-[0_0_12px_rgba(107,58,194,0.4)] border border-[#6B3AC2]"
-                                : "bg-[#1F1B26] border border-[#3D2166] text-[#B7ACD6] hover:bg-[#2A2434] hover:text-white hover:border-[#6B3AC2]"
+                                ? "bg-[#6B3AC2] text-white shadow-[0_0_12px_rgba(107,58,194,0.3)] border border-[#6B3AC2]"
+                                : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300 dark:bg-[#1F1B26] dark:border-[#3D2166] dark:text-[#B7ACD6] dark:hover:bg-[#2A2434] dark:hover:text-white dark:hover:border-[#6B3AC2]"
                             }`}
                           >
                             {item}
@@ -268,7 +270,7 @@ const Browse = () => {
                       onClick={handleNextPage}
                       disabled={pagination.page >= pagination.totalPages}
                       aria-label="Go to next page"
-                      className="flex items-center gap-1 border-[#3D2166] bg-[#1F1B26] text-[#B7ACD6] hover:bg-[#2A2434] hover:text-white disabled:opacity-30 disabled:border-[#2A2434] h-8 px-2.5 text-xs"
+                      className="flex items-center gap-1 border-gray-200 bg-white text-gray-700 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 disabled:border-gray-200 dark:border-[#3D2166] dark:bg-[#1F1B26] dark:text-[#B7ACD6] dark:hover:bg-[#2A2434] dark:hover:text-white dark:disabled:opacity-30 dark:disabled:border-[#2A2434] h-8 px-2.5 text-xs"
                     >
                       <span className="hidden sm:inline">Next</span>
                       <ChevronRight className="w-4 h-4" />
@@ -292,21 +294,21 @@ const Browse = () => {
         >
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm transition-opacity"
             onClick={() => setIsMobileFilterOpen(false)}
             aria-hidden="true"
           />
 
           {/* Drawer Panel */}
-          <div className="relative ml-auto w-full max-w-xs bg-[#1F1B26] border-l border-[#3D2166] p-5 shadow-2xl flex flex-col h-full overflow-y-auto z-10">
-            <div className="flex items-center justify-between pb-3 border-b border-[#2A2434] mb-4">
-              <span className="font-bold text-base text-white">Filter Jobs</span>
+          <div className="relative ml-auto w-full max-w-xs bg-white dark:bg-[#1F1B26] border-l border-gray-200 dark:border-[#3D2166] p-5 shadow-2xl flex flex-col h-full overflow-y-auto z-10">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-[#2A2434] mb-4">
+              <span className="font-bold text-base text-gray-900 dark:text-white">Filter Jobs</span>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsMobileFilterOpen(false)}
                 aria-label="Close filters"
-                className="w-8 h-8 rounded-full text-[#958EA3] hover:text-white hover:bg-[#2A2434]"
+                className="w-8 h-8 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-[#958EA3] dark:hover:text-white dark:hover:bg-[#2A2434]"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -316,7 +318,7 @@ const Browse = () => {
               <Filtercard />
             </div>
 
-            <div className="pt-4 border-t border-[#2A2434] mt-4">
+            <div className="pt-4 border-t border-gray-200 dark:border-[#2A2434] mt-4">
               <Button
                 onClick={() => setIsMobileFilterOpen(false)}
                 className="w-full bg-[#6B3AC2] hover:bg-[#552d9b] text-white text-xs font-semibold h-9"

@@ -6,6 +6,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import Browse from "../components/components_lite/Browse";
 import Job1 from "../components/components_lite/Job1";
 import jobReducer from "@/redux/jobSlice";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 let mockLoading = false;
 vi.mock("@/hooks/useGetAllJobs", () => ({
@@ -60,27 +61,61 @@ describe("Browse Page - Phase 1 Theme Foundation", () => {
   beforeEach(() => {
     mockLoading = false;
     vi.clearAllMocks();
+    localStorage.clear();
+    document.documentElement.classList.remove("dark");
   });
 
-  it("renders dark theme page shell and header with default title", () => {
+  it("renders light theme page shell by default and header with default title", () => {
     const store = createTestStore({ allJobs: mockJobs, pagination: { page: 1, totalPages: 1, total: 1 } });
     const { container } = render(
       <Provider store={store}>
-        <MemoryRouter>
-          <Browse />
-        </MemoryRouter>
+        <ThemeProvider>
+          <MemoryRouter>
+            <Browse />
+          </MemoryRouter>
+        </ThemeProvider>
       </Provider>
     );
 
-    // Dark shell verification
+    // Light shell verification (default)
     const shell = container.firstChild;
-    expect(shell).toHaveClass("bg-[#141018]");
-    expect(shell).toHaveClass("text-[#B7ACD6]");
+    expect(shell).toHaveClass("bg-gray-50");
+    expect(shell).toHaveClass("text-gray-900");
+    expect(shell).toHaveClass("dark:bg-[#141018]");
+    expect(shell).toHaveClass("dark:text-[#B7ACD6]");
 
     // Header title and count
     expect(screen.getByText("All Available Jobs")).toBeInTheDocument();
     expect(screen.getByText(/Found/i)).toBeInTheDocument();
     expect(screen.getByText("1")).toBeInTheDocument();
+  });
+
+  it("renders theme toggle button and switches between light and dark themes on click", () => {
+    const store = createTestStore({ allJobs: mockJobs });
+    render(
+      <Provider store={store}>
+        <ThemeProvider>
+          <MemoryRouter>
+            <Browse />
+          </MemoryRouter>
+        </ThemeProvider>
+      </Provider>
+    );
+
+    // Default: light theme, toggle button offers switching to dark theme
+    const toggleBtn = screen.getByRole("button", { name: "Switch to dark theme" });
+    expect(toggleBtn).toBeInTheDocument();
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+
+    // Click to toggle to dark theme
+    fireEvent.click(toggleBtn);
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+    expect(screen.getByRole("button", { name: "Switch to light theme" })).toBeInTheDocument();
+
+    // Click again to toggle back to light theme
+    fireEvent.click(screen.getByRole("button", { name: "Switch to light theme" }));
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+    expect(screen.getByRole("button", { name: "Switch to dark theme" })).toBeInTheDocument();
   });
 
   it("renders searched query header and handles clear search button", () => {
@@ -91,17 +126,19 @@ describe("Browse Page - Phase 1 Theme Foundation", () => {
     });
     render(
       <Provider store={store}>
-        <MemoryRouter>
-          <Browse />
-        </MemoryRouter>
+        <ThemeProvider>
+          <MemoryRouter>
+            <Browse />
+          </MemoryRouter>
+        </ThemeProvider>
       </Provider>
     );
 
     expect(screen.getByText('Results for "Frontend Developer"')).toBeInTheDocument();
     const clearButton = screen.getByRole("button", { name: /Clear Search/i });
     expect(clearButton).toBeInTheDocument();
-    expect(clearButton).toHaveClass("border-[#3D2166]");
-    expect(clearButton).toHaveClass("bg-[#1F1B26]");
+    expect(clearButton).toHaveClass("dark:border-[#3D2166]");
+    expect(clearButton).toHaveClass("dark:bg-[#1F1B26]");
 
     fireEvent.click(clearButton);
     expect(store.getState().job.searchedQuery).toBe("");
@@ -269,7 +306,7 @@ describe("Browse Page - Phase 3 Card + Motion Polish", () => {
 
     const detailsBtn = screen.getByRole("button", { name: "Details" });
     expect(detailsBtn).toBeInTheDocument();
-    expect(detailsBtn).toHaveClass("border-[#3D2166]");
+    expect(detailsBtn).toHaveClass("dark:border-[#3D2166]");
   });
 
   it("renders saved job state with subtle gold accent", () => {
@@ -284,7 +321,7 @@ describe("Browse Page - Phase 3 Card + Motion Polish", () => {
 
     expect(screen.getAllByText("Saved").length).toBe(2);
     const cardEl = container.firstChild;
-    expect(cardEl).toHaveClass("border-[#C9A24B]/40");
+    expect(cardEl).toHaveClass("dark:border-[#C9A24B]/40");
   });
 });
 
