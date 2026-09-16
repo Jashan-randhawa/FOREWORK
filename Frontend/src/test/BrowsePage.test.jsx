@@ -4,6 +4,7 @@ import { MemoryRouter, useSearchParams } from "react-router-dom";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import Browse from "../components/components_lite/Browse";
+import Job1 from "../components/components_lite/Job1";
 import jobReducer from "@/redux/jobSlice";
 
 let mockLoading = false;
@@ -106,7 +107,7 @@ describe("Browse Page - Phase 1 Theme Foundation", () => {
     expect(store.getState().job.searchedQuery).toBe("");
   });
 
-  it("renders dark-styled loading state when fetching jobs", () => {
+  it("renders JobCardSkeleton cards during loading instead of a spinner", () => {
     mockLoading = true;
     const store = createTestStore();
     render(
@@ -117,7 +118,8 @@ describe("Browse Page - Phase 1 Theme Foundation", () => {
       </Provider>
     );
 
-    expect(screen.getByText("Searching jobs...")).toBeInTheDocument();
+    const skeletons = screen.getAllByTestId("job-card-skeleton");
+    expect(skeletons.length).toBe(6);
   });
 
   it("renders dark-surface empty state when no jobs match", () => {
@@ -241,3 +243,48 @@ describe("Browse Page - Phase 2 Sidebar Filters", () => {
     });
   });
 });
+
+describe("Browse Page - Phase 3 Card + Motion Polish", () => {
+  beforeEach(() => {
+    mockLoading = false;
+    vi.clearAllMocks();
+  });
+
+  it("renders Job1 on charcoal surface with purple-tinted border and badges", () => {
+    const store = createTestStore({ allJobs: mockJobs });
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <Browse />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    const titleEl = screen.getByText("Senior Full Stack Engineer");
+    expect(titleEl).toBeInTheDocument();
+    expect(screen.getByText("Acme Corp")).toBeInTheDocument();
+    expect(screen.getByText("Bengaluru, India")).toBeInTheDocument();
+    expect(screen.getByText("3 Positions")).toBeInTheDocument();
+    expect(screen.getByText("24 LPA")).toBeInTheDocument();
+
+    const detailsBtn = screen.getByRole("button", { name: "Details" });
+    expect(detailsBtn).toBeInTheDocument();
+    expect(detailsBtn).toHaveClass("border-[#3D2166]");
+  });
+
+  it("renders saved job state with subtle gold accent", () => {
+    const store = createTestStore({ allJobs: mockJobs });
+    const { container } = render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <Job1 job={mockJobs[0]} isSavedInitial={true} />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    expect(screen.getAllByText("Saved").length).toBe(2);
+    const cardEl = container.firstChild;
+    expect(cardEl).toHaveClass("border-[#C9A24B]/40");
+  });
+});
+

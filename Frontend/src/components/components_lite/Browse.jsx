@@ -2,12 +2,14 @@ import { useEffect } from "react";
 import Navbar from "./Navbar";
 import Filtercard from "./Filtercard";
 import Job1 from "./Job1";
+import JobCardSkeleton from "./JobCardSkeleton";
 import { useDispatch, useSelector } from "react-redux";
+import { motion } from "framer-motion";
 import { setSearchedQuery, setPage, clearFilters } from "@/redux/jobSlice";
 import useGetAllJobs from "@/hooks/useGetAllJobs";
 import useFilterUrlSync from "@/hooks/useFilterUrlSync";
 import { Button } from "../ui/button";
-import { ChevronLeft, ChevronRight, Loader2, Frown } from "lucide-react";
+import { ChevronLeft, ChevronRight, Frown } from "lucide-react";
 
 const Browse = () => {
   useFilterUrlSync();
@@ -45,7 +47,7 @@ const Browse = () => {
             <Filtercard />
           </aside>
 
-          {/* Right Main Content: Header + Jobs Grid / Loading / Empty + Pagination */}
+          {/* Right Main Content: Header + Jobs Grid / Skeleton / Empty + Pagination */}
           <section aria-label="Job listings" className="flex-1 flex flex-col">
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#1F1B26]">
               <div>
@@ -75,9 +77,13 @@ const Browse = () => {
             </div>
 
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-24">
-                <Loader2 className="w-8 h-8 animate-spin text-[#6B3AC2] mb-2" />
-                <p className="text-[#7A7488] text-sm">Searching jobs...</p>
+              <div
+                aria-label="Loading job opportunities"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              >
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <JobCardSkeleton key={index} />
+                ))}
               </div>
             ) : allJobs.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 bg-[#1F1B26] rounded-xl border border-dashed border-[#3D2166] p-8 text-center max-w-md mx-auto shadow-sm w-full">
@@ -99,9 +105,17 @@ const Browse = () => {
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {allJobs.map((job) => {
-                    return <Job1 key={job._id || job.id} job={job} />;
-                  })}
+                  {allJobs.map((job, idx) => (
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25, delay: idx * 0.04 }}
+                      key={job._id || job.id}
+                      className="h-full"
+                    >
+                      <Job1 job={job} />
+                    </motion.div>
+                  ))}
                 </div>
 
                 {/* Pagination Controls */}
