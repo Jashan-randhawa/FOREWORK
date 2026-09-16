@@ -37,7 +37,7 @@ const renderDescription = (userState, jobState = {}) => {
     },
     preloadedState: {
       job: {
-        singleJob: jobState.hasOwnProperty("singleJob") ? jobState.singleJob : mockJob,
+        singleJob: "singleJob" in jobState ? jobState.singleJob : mockJob,
         allAppliedJobs: jobState.allAppliedJobs || [],
         allJobs: jobState.allJobs || [mockJob],
         allAdminJobs: [],

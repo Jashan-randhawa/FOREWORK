@@ -1,9 +1,5 @@
-import React from "react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { Provider } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
-import { MemoryRouter } from "react-router-dom";
 import { ConfirmDialog, DataTable, ResumeViewer, ApplicationStatusBadge, JobLifecycleBadge } from "../components/shared";
 
 describe("Phase 8 - Responsive and Accessibility Pass", () => {

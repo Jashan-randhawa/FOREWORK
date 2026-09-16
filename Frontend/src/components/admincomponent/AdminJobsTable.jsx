@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
   Edit2,
@@ -29,7 +29,6 @@ const AdminJobsTable = () => {
   const [filterJobs, setFilterJobs] = useState(allAdminJobs);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [selectedJobForAnalytics, setSelectedJobForAnalytics] = useState(null);
-  const [updatingId, setUpdatingId] = useState(null);
 
   useEffect(() => {
     const filteredJobs =
@@ -48,29 +47,29 @@ const AdminJobsTable = () => {
     setFilterJobs(filteredJobs);
   }, [allAdminJobs, searchJobByText]);
 
-  const handleStatusChange = async (jobId, newStatus) => {
-    try {
-      setUpdatingId(jobId);
-      const res = await API.put(`${JOB_API_ENDPOINT}/${jobId}/status`, {
-        status: newStatus,
-      });
+  const handleStatusChange = useCallback(
+    async (jobId, newStatus) => {
+      try {
+        const res = await API.put(`${JOB_API_ENDPOINT}/${jobId}/status`, {
+          status: newStatus,
+        });
 
-      if (res.data?.success) {
-        toast.success(`Job status changed to ${newStatus}`);
-        const updatedJobs = allAdminJobs.map((j) =>
-          j._id === jobId ? { ...j, status: newStatus } : j
-        );
-        dispatch(setAllAdminJobs(updatedJobs));
-        setFilterJobs((prev) =>
-          prev.map((j) => (j._id === jobId ? { ...j, status: newStatus } : j))
-        );
+        if (res.data?.success) {
+          toast.success(`Job status changed to ${newStatus}`);
+          const updatedJobs = allAdminJobs.map((j) =>
+            j._id === jobId ? { ...j, status: newStatus } : j
+          );
+          dispatch(setAllAdminJobs(updatedJobs));
+          setFilterJobs((prev) =>
+            prev.map((j) => (j._id === jobId ? { ...j, status: newStatus } : j))
+          );
+        }
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Failed to update job status");
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to update job status");
-    } finally {
-      setUpdatingId(null);
-    }
-  };
+    },
+    [allAdminJobs, dispatch]
+  );
 
   const columns = useMemo(
     () => [
@@ -203,12 +202,8 @@ const AdminJobsTable = () => {
         },
       },
     ],
-    [navigate, allAdminJobs]
+    [navigate, allAdminJobs, handleStatusChange]
   );
-
-  if (!companies) {
-    return <div>Loading...</div>;
-  }
 
   // Ensure items have companyName for client sorting
   const tableData = useMemo(() => {
@@ -217,6 +212,10 @@ const AdminJobsTable = () => {
       companyName: j.company?.name || "",
     }));
   }, [filterJobs]);
+
+  if (!companies) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="w-full">
