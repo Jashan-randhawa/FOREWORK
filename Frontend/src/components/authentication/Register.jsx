@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   User,
@@ -17,6 +17,8 @@ import {
   ArrowLeft,
   X,
   CheckCircle2,
+  AlertCircle,
+  ShieldCheck,
 } from "lucide-react";
 import API from "@/utils/axiosInstance";
 import { USER_API_ENDPOINT } from "@/utils/data";
@@ -25,36 +27,157 @@ import { setLoading } from "@/redux/authSlice";
 import ThemeToggle from "@/components/components_lite/ThemeToggle";
 import AuthHeroPanel from "./AuthHeroPanel";
 
+// Password strength evaluator
+const getPasswordStrength = (password) => {
+  if (!password) return { score: 0, label: "", color: "" };
+
+  let score = 0;
+  if (password.length >= 8) score += 1;
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1;
+  if (/\d/.test(password)) score += 1;
+  if (/[^A-Za-z0-9]/.test(password)) score += 1;
+
+  switch (score) {
+    case 1:
+      return { score: 1, label: "Weak", color: "bg-rose-500", text: "text-rose-500" };
+    case 2:
+      return { score: 2, label: "Fair", color: "bg-amber-500", text: "text-amber-500" };
+    case 3:
+      return { score: 3, label: "Good", color: "bg-blue-500", text: "text-blue-500" };
+    case 4:
+      return { score: 4, label: "Strong", color: "bg-emerald-500", text: "text-emerald-500" };
+    default:
+      return { score: 0, label: "Too Short", color: "bg-gray-300 dark:bg-gray-700", text: "text-gray-400" };
+  }
+};
+
+const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+const AADHAAR_REGEX = /^\d{12}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^\+?[0-9]{10,14}$/;
+
 const Register = () => {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const dispatch = useDispatch();
+  const { loading, user } = useSelector((store) => store.auth);
+
+  // URL Role Sync
+  const roleParam = searchParams.get("role");
+  const initialRole = roleParam?.toLowerCase() === "recruiter" ? "Recruiter" : "Student";
+
   const [input, setInput] = useState({
     fullname: "",
     email: "",
     password: "",
-    role: "Student",
+    confirmPassword: "",
+    role: initialRole,
     phoneNumber: "",
     pancard: "",
     adharcard: "",
     file: null,
   });
 
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [announcement, setAnnouncement] = useState("");
 
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { loading, user } = useSelector((store) => store.auth);
+  useEffect(() => {
+    if (roleParam) {
+      const synchedRole = roleParam.toLowerCase() === "recruiter" ? "Recruiter" : "Student";
+      setInput((prev) => (prev.role !== synchedRole ? { ...prev, role: synchedRole } : prev));
+    }
+  }, [roleParam]);
+
+  const validateField = (name, value, currentForm = input) => {
+    let error = "";
+    switch (name) {
+      case "fullname":
+        if (!value.trim()) error = "Full name is required";
+        else if (value.trim().length < 2) error = "Name must be at least 2 characters";
+        break;
+      case "email":
+        if (!value.trim()) error = "Email address is required";
+        else if (!EMAIL_REGEX.test(value.trim())) error = "Enter a valid email address (e.g. name@domain.com)";
+        break;
+      case "phoneNumber":
+        if (!value.trim()) error = "Phone number is required";
+        else if (!PHONE_REGEX.test(value.replace(/\s+/g, ""))) error = "Enter a valid 10-14 digit phone number";
+        break;
+      case "password":
+        if (!value) error = "Password is required";
+        else if (value.length < 8) error = "Password must be at least 8 characters long";
+        break;
+      case "confirmPassword":
+        if (!value) error = "Please confirm your password";
+        else if (value !== currentForm.password) error = "Passwords do not match";
+        break;
+      case "pancard":
+        if (!value.trim()) error = "PAN Card number is required";
+        else if (!PAN_REGEX.test(value.trim().toUpperCase())) error = "PAN format must be 5 letters, 4 digits, 1 letter (e.g. ABCDE1234F)";
+        break;
+      case "adharcard":
+        if (!value.trim()) error = "Aadhaar Card number is required";
+        else if (!AADHAAR_REGEX.test(value.trim().replace(/\s+/g, ""))) error = "Aadhaar must be exactly 12 numeric digits";
+        break;
+      default:
+        break;
+    }
+    return error;
+  };
 
   const changeEventHandler = (e) => {
-    setInput({ ...input, [e.target.name]: e.target.value });
+    let { name, value } = e.target;
+
+    // Auto-uppercase PAN Card
+    if (name === "pancard") {
+      value = value.toUpperCase().slice(0, 10);
+    }
+
+    // Auto-format Aadhaar to numeric only (max 12 digits)
+    if (name === "adharcard") {
+      value = value.replace(/\D/g, "").slice(0, 12);
+    }
+
+    const updated = { ...input, [name]: value };
+    setInput(updated);
+
+    if (touched[name]) {
+      const err = validateField(name, value, updated);
+      setErrors((prev) => ({ ...prev, [name]: err }));
+    }
+
+    // Also revalidate confirm password if password is changing
+    if (name === "password" && touched.confirmPassword) {
+      const confirmErr = validateField("confirmPassword", input.confirmPassword, updated);
+      setErrors((prev) => ({ ...prev, confirmPassword: confirmErr }));
+    }
+  };
+
+  const blurHandler = (e) => {
+    const { name, value } = e.target;
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    const err = validateField(name, value, input);
+    setErrors((prev) => ({ ...prev, [name]: err }));
   };
 
   const setRole = (role) => {
     setInput((prev) => ({ ...prev, role }));
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("role", role === "Recruiter" ? "recruiter" : "candidate");
+    setSearchParams(newParams, { replace: true });
   };
 
   const changeFileHandler = (e) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
+      if (!selectedFile.type.startsWith("image/")) {
+        toast.error("Please select an image file (PNG, JPG, WebP)");
+        return;
+      }
       setInput((prev) => ({ ...prev, file: selectedFile }));
       setPreviewUrl(URL.createObjectURL(selectedFile));
     }
@@ -71,19 +194,42 @@ const Register = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    if (!input.fullname || !input.email || !input.password || !input.phoneNumber || !input.pancard || !input.adharcard || !input.role) {
-      toast.error("Please fill in all required fields.");
+    // Validate all fields
+    const newErrors = {};
+    const fieldsToValidate = [
+      "fullname",
+      "email",
+      "phoneNumber",
+      "password",
+      "confirmPassword",
+      "pancard",
+      "adharcard",
+    ];
+
+    fieldsToValidate.forEach((field) => {
+      const err = validateField(field, input[field], input);
+      if (err) newErrors[field] = err;
+    });
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setTouched(
+        fieldsToValidate.reduce((acc, f) => ({ ...acc, [f]: true }), {})
+      );
+      const firstError = Object.values(newErrors)[0];
+      setAnnouncement(firstError);
+      toast.error(firstError);
       return;
     }
 
     const formData = new FormData();
-    formData.append("fullname", input.fullname);
-    formData.append("email", input.email);
+    formData.append("fullname", input.fullname.trim());
+    formData.append("email", input.email.trim());
     formData.append("password", input.password);
-    formData.append("pancard", input.pancard);
-    formData.append("adharcard", input.adharcard);
+    formData.append("pancard", input.pancard.trim().toUpperCase());
+    formData.append("adharcard", input.adharcard.trim().replace(/\s+/g, ""));
     formData.append("role", input.role);
-    formData.append("phoneNumber", input.phoneNumber);
+    formData.append("phoneNumber", input.phoneNumber.trim().replace(/\s+/g, ""));
     if (input.file) {
       formData.append("file", input.file);
     }
@@ -95,13 +241,14 @@ const Register = () => {
       });
       if (res.data.success) {
         toast.success(res.data.message || "Account created successfully! Please sign in.");
-        navigate("/login");
+        navigate(`/login${input.role === "Recruiter" ? "?role=recruiter" : "?role=candidate"}`);
       }
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
         "An unexpected error occurred during registration.";
+      setAnnouncement(errorMessage);
       toast.error(errorMessage);
     } finally {
       dispatch(setLoading(false));
@@ -114,8 +261,15 @@ const Register = () => {
     }
   }, [user, navigate]);
 
+  const passwordStrength = getPasswordStrength(input.password);
+
   return (
     <div className="min-h-screen lg:h-[100dvh] w-full flex flex-col lg:flex-row bg-[#FAFAFA] dark:bg-[#141018] text-gray-900 dark:text-gray-100 transition-colors duration-200 selection:bg-purple-500/20 overflow-x-hidden lg:overflow-hidden">
+      {/* Accessibility screen-reader announcer */}
+      <div className="sr-only" aria-live="polite" role="status">
+        {announcement}
+      </div>
+
       {/* ── Left Hero Panel (AI-Attendance-System Editorial Style) ── */}
       <AuthHeroPanel mode="register" />
 
@@ -167,7 +321,7 @@ const Register = () => {
 
           {/* Role Selector Segmented Controls */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">
               I want to join as
             </label>
             <div
@@ -208,7 +362,7 @@ const Register = () => {
           </div>
 
           {/* Registration Form */}
-          <form onSubmit={submitHandler} aria-labelledby="register-heading" className="space-y-3">
+          <form onSubmit={submitHandler} aria-labelledby="register-heading" className="space-y-3" noValidate>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Full Name */}
               <div className="space-y-1">
@@ -228,11 +382,24 @@ const Register = () => {
                     autoComplete="name"
                     required
                     aria-required="true"
+                    aria-invalid={!!errors.fullname}
+                    aria-describedby={errors.fullname ? "reg-fullname-error" : undefined}
                     onChange={changeEventHandler}
+                    onBlur={blurHandler}
                     placeholder="John Doe"
-                    className="w-full pl-9 pr-3 h-9.5 rounded-xl bg-white dark:bg-[#141018] border border-gray-200 dark:border-[#2A2434] text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#6B3AC2] focus:border-transparent transition-all"
+                    className={`w-full pl-9 pr-3 h-9.5 rounded-xl bg-white dark:bg-[#141018] border text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                      errors.fullname
+                        ? "border-rose-400 dark:border-rose-500/80 focus:ring-rose-500"
+                        : "border-gray-200 dark:border-[#2A2434] focus:ring-[#6B3AC2]"
+                    }`}
                   />
                 </div>
+                {errors.fullname && (
+                  <p id="reg-fullname-error" className="text-[10px] text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1 mt-0.5">
+                    <AlertCircle className="w-3 h-3 shrink-0" />
+                    <span>{errors.fullname}</span>
+                  </p>
+                )}
               </div>
 
               {/* Email Address */}
@@ -253,11 +420,24 @@ const Register = () => {
                     autoComplete="email"
                     required
                     aria-required="true"
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? "reg-email-error" : undefined}
                     onChange={changeEventHandler}
+                    onBlur={blurHandler}
                     placeholder="john@example.com"
-                    className="w-full pl-9 pr-3 h-9.5 rounded-xl bg-white dark:bg-[#141018] border border-gray-200 dark:border-[#2A2434] text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#6B3AC2] focus:border-transparent transition-all"
+                    className={`w-full pl-9 pr-3 h-9.5 rounded-xl bg-white dark:bg-[#141018] border text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                      errors.email
+                        ? "border-rose-400 dark:border-rose-500/80 focus:ring-rose-500"
+                        : "border-gray-200 dark:border-[#2A2434] focus:ring-[#6B3AC2]"
+                    }`}
                   />
                 </div>
+                {errors.email && (
+                  <p id="reg-email-error" className="text-[10px] text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1 mt-0.5">
+                    <AlertCircle className="w-3 h-3 shrink-0" />
+                    <span>{errors.email}</span>
+                  </p>
+                )}
               </div>
 
               {/* Phone Number */}
@@ -278,11 +458,62 @@ const Register = () => {
                     autoComplete="tel"
                     required
                     aria-required="true"
+                    aria-invalid={!!errors.phoneNumber}
+                    aria-describedby={errors.phoneNumber ? "reg-phone-error" : undefined}
                     onChange={changeEventHandler}
+                    onBlur={blurHandler}
                     placeholder="+91 9876543210"
-                    className="w-full pl-9 pr-3 h-9.5 rounded-xl bg-white dark:bg-[#141018] border border-gray-200 dark:border-[#2A2434] text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#6B3AC2] focus:border-transparent transition-all"
+                    className={`w-full pl-9 pr-3 h-9.5 rounded-xl bg-white dark:bg-[#141018] border text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                      errors.phoneNumber
+                        ? "border-rose-400 dark:border-rose-500/80 focus:ring-rose-500"
+                        : "border-gray-200 dark:border-[#2A2434] focus:ring-[#6B3AC2]"
+                    }`}
                   />
                 </div>
+                {errors.phoneNumber && (
+                  <p id="reg-phone-error" className="text-[10px] text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1 mt-0.5">
+                    <AlertCircle className="w-3 h-3 shrink-0" />
+                    <span>{errors.phoneNumber}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* PAN Card */}
+              <div className="space-y-1">
+                <label
+                  htmlFor="reg-pancard"
+                  className="text-[11px] font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400"
+                >
+                  PAN Card Number
+                </label>
+                <div className="relative">
+                  <CreditCard className="w-4 h-4 text-gray-400 dark:text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    id="reg-pancard"
+                    type="text"
+                    value={input.pancard}
+                    name="pancard"
+                    required
+                    aria-required="true"
+                    aria-invalid={!!errors.pancard}
+                    aria-describedby={errors.pancard ? "reg-pancard-error" : undefined}
+                    onChange={changeEventHandler}
+                    onBlur={blurHandler}
+                    placeholder="ABCDE1234F"
+                    maxLength={10}
+                    className={`w-full pl-9 pr-3 h-9.5 rounded-xl bg-white dark:bg-[#141018] border text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:border-transparent transition-all uppercase ${
+                      errors.pancard
+                        ? "border-rose-400 dark:border-rose-500/80 focus:ring-rose-500"
+                        : "border-gray-200 dark:border-[#2A2434] focus:ring-[#6B3AC2]"
+                    }`}
+                  />
+                </div>
+                {errors.pancard && (
+                  <p id="reg-pancard-error" className="text-[10px] text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1 mt-0.5">
+                    <AlertCircle className="w-3 h-3 shrink-0" />
+                    <span>{errors.pancard}</span>
+                  </p>
+                )}
               </div>
 
               {/* Password */}
@@ -303,9 +534,16 @@ const Register = () => {
                     autoComplete="new-password"
                     required
                     aria-required="true"
+                    aria-invalid={!!errors.password}
+                    aria-describedby={errors.password ? "reg-password-error" : undefined}
                     onChange={changeEventHandler}
-                    placeholder="••••••••"
-                    className="w-full pl-9 pr-9 h-9.5 rounded-xl bg-white dark:bg-[#141018] border border-gray-200 dark:border-[#2A2434] text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#6B3AC2] focus:border-transparent transition-all"
+                    onBlur={blurHandler}
+                    placeholder="Min 8 characters"
+                    className={`w-full pl-9 pr-9 h-9.5 rounded-xl bg-white dark:bg-[#141018] border text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                      errors.password
+                        ? "border-rose-400 dark:border-rose-500/80 focus:ring-rose-500"
+                        : "border-gray-200 dark:border-[#2A2434] focus:ring-[#6B3AC2]"
+                    }`}
                   />
                   <button
                     type="button"
@@ -316,34 +554,77 @@ const Register = () => {
                     {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
                 </div>
+                {/* Live Password Strength Meter */}
+                {input.password && (
+                  <div className="pt-1 space-y-1">
+                    <div className="grid grid-cols-4 gap-1 h-1 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full transition-all ${passwordStrength.score >= 1 ? passwordStrength.color : "opacity-0"}`} />
+                      <div className={`h-full rounded-full transition-all ${passwordStrength.score >= 2 ? passwordStrength.color : "opacity-0"}`} />
+                      <div className={`h-full rounded-full transition-all ${passwordStrength.score >= 3 ? passwordStrength.color : "opacity-0"}`} />
+                      <div className={`h-full rounded-full transition-all ${passwordStrength.score >= 4 ? passwordStrength.color : "opacity-0"}`} />
+                    </div>
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className="text-gray-500 dark:text-gray-400">Strength</span>
+                      <span className={`font-bold ${passwordStrength.text}`}>{passwordStrength.label}</span>
+                    </div>
+                  </div>
+                )}
+                {errors.password && (
+                  <p id="reg-password-error" className="text-[10px] text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1 mt-0.5">
+                    <AlertCircle className="w-3 h-3 shrink-0" />
+                    <span>{errors.password}</span>
+                  </p>
+                )}
               </div>
 
-              {/* PAN Card */}
+              {/* Confirm Password */}
               <div className="space-y-1">
                 <label
-                  htmlFor="reg-pancard"
+                  htmlFor="reg-confirm-password"
                   className="text-[11px] font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400"
                 >
-                  PAN Card Number
+                  Confirm Password
                 </label>
                 <div className="relative">
-                  <CreditCard className="w-4 h-4 text-gray-400 dark:text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Lock className="w-4 h-4 text-gray-400 dark:text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
-                    id="reg-pancard"
-                    type="text"
-                    value={input.pancard}
-                    name="pancard"
+                    id="reg-confirm-password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={input.confirmPassword}
+                    name="confirmPassword"
+                    autoComplete="new-password"
                     required
                     aria-required="true"
+                    aria-invalid={!!errors.confirmPassword}
+                    aria-describedby={errors.confirmPassword ? "reg-confirm-password-error" : undefined}
                     onChange={changeEventHandler}
-                    placeholder="ABCDE1234F"
-                    className="w-full pl-9 pr-3 h-9.5 rounded-xl bg-white dark:bg-[#141018] border border-gray-200 dark:border-[#2A2434] text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#6B3AC2] focus:border-transparent transition-all uppercase"
+                    onBlur={blurHandler}
+                    placeholder="Repeat password"
+                    className={`w-full pl-9 pr-9 h-9.5 rounded-xl bg-white dark:bg-[#141018] border text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                      errors.confirmPassword
+                        ? "border-rose-400 dark:border-rose-500/80 focus:ring-rose-500"
+                        : "border-gray-200 dark:border-[#2A2434] focus:ring-[#6B3AC2]"
+                    }`}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 cursor-pointer transition-colors focus:outline-none"
+                    aria-label={showConfirmPassword ? "Hide password confirmation" : "Show password confirmation"}
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
                 </div>
+                {errors.confirmPassword && (
+                  <p id="reg-confirm-password-error" className="text-[10px] text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1 mt-0.5">
+                    <AlertCircle className="w-3 h-3 shrink-0" />
+                    <span>{errors.confirmPassword}</span>
+                  </p>
+                )}
               </div>
 
               {/* Aadhaar Card */}
-              <div className="space-y-1">
+              <div className="space-y-1 sm:col-span-2">
                 <label
                   htmlFor="reg-adharcard"
                   className="text-[11px] font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400"
@@ -359,11 +640,25 @@ const Register = () => {
                     name="adharcard"
                     required
                     aria-required="true"
+                    aria-invalid={!!errors.adharcard}
+                    aria-describedby={errors.adharcard ? "reg-adharcard-error" : undefined}
                     onChange={changeEventHandler}
-                    placeholder="123456789012"
-                    className="w-full pl-9 pr-3 h-9.5 rounded-xl bg-white dark:bg-[#141018] border border-gray-200 dark:border-[#2A2434] text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#6B3AC2] focus:border-transparent transition-all"
+                    onBlur={blurHandler}
+                    placeholder="12-digit UIDAI number (e.g. 123456789012)"
+                    maxLength={12}
+                    className={`w-full pl-9 pr-3 h-9.5 rounded-xl bg-white dark:bg-[#141018] border text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                      errors.adharcard
+                        ? "border-rose-400 dark:border-rose-500/80 focus:ring-rose-500"
+                        : "border-gray-200 dark:border-[#2A2434] focus:ring-[#6B3AC2]"
+                    }`}
                   />
                 </div>
+                {errors.adharcard && (
+                  <p id="reg-adharcard-error" className="text-[10px] text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1 mt-0.5">
+                    <AlertCircle className="w-3 h-3 shrink-0" />
+                    <span>{errors.adharcard}</span>
+                  </p>
+                )}
               </div>
             </div>
 
@@ -396,7 +691,7 @@ const Register = () => {
                   <button
                     type="button"
                     onClick={removeFileHandler}
-                    className="p-1 text-gray-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors"
+                    className="p-1 text-gray-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
                     title="Remove selected file"
                   >
                     <X className="w-4 h-4" />
@@ -446,7 +741,7 @@ const Register = () => {
             <p className="text-xs text-gray-600 dark:text-gray-400">
               Already have an account?{" "}
               <Link
-                to="/login"
+                to={`/login${input.role === "Recruiter" ? "?role=recruiter" : "?role=candidate"}`}
                 className="font-bold text-[#6B3AC2] dark:text-purple-400 hover:underline focus:outline-none focus:ring-1 focus:ring-[#6B3AC2] rounded"
               >
                 Login here

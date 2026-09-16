@@ -12,6 +12,8 @@ import {
   Loader2,
   ArrowLeft,
   Sparkles,
+  AlertCircle,
+  Clock,
 } from "lucide-react";
 import API from "@/utils/axiosInstance";
 import { toast } from "sonner";
@@ -21,17 +23,52 @@ import ThemeToggle from "@/components/components_lite/ThemeToggle";
 import AuthHeroPanel from "./AuthHeroPanel";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const dispatch = useDispatch();
+  const { loading, user } = useSelector((store) => store.auth);
+
+  // URL Role Sync: default to query param if provided (?role=recruiter | ?role=candidate)
+  const roleParam = searchParams.get("role");
+  const initialRole = roleParam?.toLowerCase() === "recruiter" ? "Recruiter" : "Student";
+
   const [input, setInput] = useState({
     email: "",
     password: "",
-    role: "Student",
+    role: initialRole,
   });
+
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const dispatch = useDispatch();
-  const { loading, user } = useSelector((store) => store.auth);
+  // Security Throttling: Lockout after 5 failed login attempts for 30s
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
+  const [announcement, setAnnouncement] = useState("");
+
+  useEffect(() => {
+    if (lockoutSeconds <= 0) return;
+    const timer = setInterval(() => {
+      setLockoutSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setAnnouncement("Lockout period expired. You may now attempt to log in.");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [lockoutSeconds]);
+
+  // Keep state in sync if URL parameter updates externally
+  useEffect(() => {
+    if (roleParam) {
+      const synchedRole = roleParam.toLowerCase() === "recruiter" ? "Recruiter" : "Student";
+      setInput((prev) => (prev.role !== synchedRole ? { ...prev, role: synchedRole } : prev));
+    }
+  }, [roleParam]);
 
   const getDestination = (loggedInUser) => {
     if (loggedInUser?.isSuspended) {
@@ -50,12 +87,44 @@ const Login = () => {
     return "/";
   };
 
+  const validateField = (name, value) => {
+    let error = "";
+    if (name === "email") {
+      if (!value.trim()) {
+        error = "Email address is required";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
+        error = "Please enter a valid email address (e.g. name@domain.com)";
+      }
+    } else if (name === "password") {
+      if (!value) {
+        error = "Password is required";
+      }
+    }
+    return error;
+  };
+
   const changeEventHandler = (e) => {
-    setInput({ ...input, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setInput((prev) => ({ ...prev, [name]: value }));
+
+    if (touched[name]) {
+      const err = validateField(name, value);
+      setErrors((prev) => ({ ...prev, [name]: err }));
+    }
+  };
+
+  const blurHandler = (e) => {
+    const { name, value } = e.target;
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    const err = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: err }));
   };
 
   const setRole = (role) => {
     setInput((prev) => ({ ...prev, role }));
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("role", role === "Recruiter" ? "recruiter" : "candidate");
+    setSearchParams(newParams, { replace: true });
   };
 
   const handleQuickFill = (roleType) => {
@@ -65,35 +134,76 @@ const Login = () => {
         password: "password123",
         role: "Recruiter",
       });
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set("role", "recruiter");
+      setSearchParams(newParams, { replace: true });
     } else {
       setInput({
         email: "candidate@example.com",
         password: "password123",
         role: "Student",
       });
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set("role", "candidate");
+      setSearchParams(newParams, { replace: true });
     }
+    setErrors({});
   };
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    if (!input.email.trim() || !input.password.trim()) {
-      toast.error("Please provide both email and password.");
+
+    if (lockoutSeconds > 0) {
+      toast.error(`Too many failed attempts. Please wait ${lockoutSeconds} seconds.`);
+      return;
+    }
+
+    const emailErr = validateField("email", input.email);
+    const passwordErr = validateField("password", input.password);
+
+    if (emailErr || passwordErr) {
+      setTouched({ email: true, password: true });
+      setErrors({ email: emailErr, password: passwordErr });
+      const firstError = emailErr || passwordErr;
+      setAnnouncement(firstError);
+      toast.error(firstError);
       return;
     }
 
     try {
       dispatch(setLoading(true));
-      const res = await API.post(`${USER_API_ENDPOINT}/login`, input, {
-        headers: { "Content-Type": "application/json" },
-      });
+      const res = await API.post(
+        `${USER_API_ENDPOINT}/login`,
+        {
+          email: input.email.trim(),
+          password: input.password,
+          role: input.role,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       if (res.data?.success) {
+        setFailedAttempts(0);
         const loggedInUser = res.data.user;
         dispatch(setUser(loggedInUser));
         toast.success(res.data.message || "Logged in successfully");
         navigate(getDestination(loggedInUser));
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message || "Login failed");
+      const nextFailed = failedAttempts + 1;
+      setFailedAttempts(nextFailed);
+
+      if (nextFailed >= 5) {
+        setLockoutSeconds(30);
+        const lockMsg = "Too many failed login attempts. Submissions temporarily locked for 30 seconds.";
+        setAnnouncement(lockMsg);
+        toast.error(lockMsg);
+      } else {
+        const errorMsg = error.response?.data?.message || error.message || "Login failed";
+        setAnnouncement(errorMsg);
+        toast.error(`${errorMsg} (${5 - nextFailed} attempts remaining before temporary lockout)`);
+      }
     } finally {
       dispatch(setLoading(false));
     }
@@ -107,6 +217,11 @@ const Login = () => {
 
   return (
     <div className="h-screen max-h-screen h-[100dvh] max-h-[100dvh] w-full flex flex-col lg:flex-row bg-[#FAFAFA] dark:bg-[#141018] text-gray-900 dark:text-gray-100 transition-colors duration-200 selection:bg-purple-500/20 overflow-hidden">
+      {/* Accessibility screen-reader announcer */}
+      <div className="sr-only" aria-live="polite" role="status">
+        {announcement}
+      </div>
+
       {/* ── Left Hero Panel (AI-Attendance-System Editorial Style) ── */}
       <AuthHeroPanel mode="login" />
 
@@ -158,7 +273,7 @@ const Login = () => {
 
           {/* Role Selector Segmented Controls */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">
               Account Role
             </label>
             <div
@@ -221,8 +336,24 @@ const Login = () => {
             </div>
           </div>
 
+          {/* Lockout Warning Banner */}
+          {lockoutSeconds > 0 && (
+            <div
+              role="alert"
+              className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 flex items-center gap-2.5 text-xs font-medium"
+            >
+              <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 animate-pulse" />
+              <div>
+                <p className="font-semibold">Account Login Throttled</p>
+                <p className="text-[11px] opacity-90">
+                  Multiple failed attempts. Please wait <strong>{lockoutSeconds}s</strong> before trying again.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Login Form */}
-          <form onSubmit={submitHandler} aria-labelledby="login-heading" className="space-y-3.5">
+          <form onSubmit={submitHandler} aria-labelledby="login-heading" className="space-y-3.5" noValidate>
             {/* Email Field */}
             <div className="space-y-1">
               <label
@@ -241,11 +372,27 @@ const Login = () => {
                   autoComplete="email"
                   required
                   aria-required="true"
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "login-email-error" : undefined}
                   onChange={changeEventHandler}
+                  onBlur={blurHandler}
                   placeholder="name@company.com"
-                  className="w-full pl-10 pr-3.5 h-10 rounded-xl bg-white dark:bg-[#141018] border border-gray-200 dark:border-[#2A2434] text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#6B3AC2] focus:border-transparent transition-all"
+                  className={`w-full pl-10 pr-3.5 h-10 rounded-xl bg-white dark:bg-[#141018] border text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                    errors.email
+                      ? "border-rose-400 dark:border-rose-500/80 focus:ring-rose-500"
+                      : "border-gray-200 dark:border-[#2A2434] focus:ring-[#6B3AC2]"
+                  }`}
                 />
               </div>
+              {errors.email && (
+                <p
+                  id="login-email-error"
+                  className="text-[11px] text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1 mt-1"
+                >
+                  <AlertCircle className="w-3 h-3 shrink-0" />
+                  <span>{errors.email}</span>
+                </p>
+              )}
             </div>
 
             {/* Password Field */}
@@ -274,9 +421,16 @@ const Login = () => {
                   autoComplete="current-password"
                   required
                   aria-required="true"
+                  aria-invalid={!!errors.password}
+                  aria-describedby={errors.password ? "login-password-error" : undefined}
                   onChange={changeEventHandler}
+                  onBlur={blurHandler}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 h-10 rounded-xl bg-white dark:bg-[#141018] border border-gray-200 dark:border-[#2A2434] text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#6B3AC2] focus:border-transparent transition-all"
+                  className={`w-full pl-10 pr-10 h-10 rounded-xl bg-white dark:bg-[#141018] border text-gray-900 dark:text-gray-100 text-xs sm:text-sm placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                    errors.password
+                      ? "border-rose-400 dark:border-rose-500/80 focus:ring-rose-500"
+                      : "border-gray-200 dark:border-[#2A2434] focus:ring-[#6B3AC2]"
+                  }`}
                 />
                 <button
                   type="button"
@@ -287,13 +441,22 @@ const Login = () => {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {errors.password && (
+                <p
+                  id="login-password-error"
+                  className="text-[11px] text-rose-600 dark:text-rose-400 font-medium flex items-center gap-1 mt-1"
+                >
+                  <AlertCircle className="w-3 h-3 shrink-0" />
+                  <span>{errors.password}</span>
+                </p>
+              )}
             </div>
 
             {/* Submit Button */}
             <div className="pt-1">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || lockoutSeconds > 0}
                 className="w-full h-10 flex items-center justify-center gap-2 bg-gradient-to-r from-[#6B3AC2] to-[#8E51ED] hover:from-[#5b2fa8] hover:to-[#7c41d3] text-white font-semibold rounded-xl text-xs sm:text-sm shadow-md shadow-purple-500/20 hover:shadow-lg hover:shadow-purple-500/30 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#6B3AC2] focus:ring-offset-2 dark:focus:ring-offset-[#191522]"
               >
                 {loading ? (
@@ -301,6 +464,8 @@ const Login = () => {
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Authenticating Session...</span>
                   </>
+                ) : lockoutSeconds > 0 ? (
+                  <span>Locked ({lockoutSeconds}s)</span>
                 ) : (
                   <span>Sign In to FOREWORK</span>
                 )}
@@ -313,7 +478,7 @@ const Login = () => {
             <p className="text-xs text-gray-600 dark:text-gray-400">
               Don&apos;t have an account?{" "}
               <Link
-                to="/register"
+                to={`/register${input.role === "Recruiter" ? "?role=recruiter" : "?role=candidate"}`}
                 className="font-bold text-[#6B3AC2] dark:text-purple-400 hover:underline focus:outline-none focus:ring-1 focus:ring-[#6B3AC2] rounded"
               >
                 Register here

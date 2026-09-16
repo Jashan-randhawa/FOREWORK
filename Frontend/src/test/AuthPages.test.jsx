@@ -24,7 +24,13 @@ vi.mock("sonner", () => ({
   },
 }));
 
-function renderWithProviders(ui, { preloadedState = { auth: { user: null, loading: false } } } = {}) {
+function renderWithProviders(
+  ui,
+  {
+    initialEntries = ["/"],
+    preloadedState = { auth: { user: null, loading: false } },
+  } = {}
+) {
   const store = configureStore({
     reducer: {
       auth: authReducer,
@@ -37,7 +43,7 @@ function renderWithProviders(ui, { preloadedState = { auth: { user: null, loadin
     ...render(
       <Provider store={store}>
         <ThemeProvider>
-          <MemoryRouter>{ui}</MemoryRouter>
+          <MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>
         </ThemeProvider>
       </Provider>
     ),
@@ -74,7 +80,7 @@ describe("AuthHeroPanel", () => {
   });
 });
 
-describe("Redesigned Login Page", () => {
+describe("Hardened Login Page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -91,6 +97,16 @@ describe("Redesigned Login Page", () => {
     expect(screen.getByRole("button", { name: /Sign In to FOREWORK/i })).toBeInTheDocument();
   });
 
+  it("pre-selects role based on URL parameter (?role=recruiter)", () => {
+    renderWithProviders(<Login />, { initialEntries: ["/login?role=recruiter"] });
+
+    const recruiterBtn = screen.getByRole("radio", { name: /Recruiter/i });
+    const candidateBtn = screen.getByRole("radio", { name: /Candidate/i });
+
+    expect(recruiterBtn).toHaveAttribute("aria-checked", "true");
+    expect(candidateBtn).toHaveAttribute("aria-checked", "false");
+  });
+
   it("toggles password visibility when the eye button is clicked", () => {
     renderWithProviders(<Login />);
 
@@ -103,18 +119,15 @@ describe("Redesigned Login Page", () => {
     expect(screen.getByLabelText(/Hide password/i)).toBeInTheDocument();
   });
 
-  it("toggles active role selection between Candidate and Recruiter", () => {
+  it("displays inline validation error for invalid email format", () => {
     renderWithProviders(<Login />);
 
-    const candidateBtn = screen.getByRole("radio", { name: /Candidate/i });
-    const recruiterBtn = screen.getByRole("radio", { name: /Recruiter/i });
+    const emailInput = screen.getByLabelText(/Email Address/i);
+    fireEvent.change(emailInput, { target: { value: "invalid-email" } });
+    fireEvent.blur(emailInput);
 
-    expect(candidateBtn).toHaveAttribute("aria-checked", "true");
-    expect(recruiterBtn).toHaveAttribute("aria-checked", "false");
-
-    fireEvent.click(recruiterBtn);
-    expect(recruiterBtn).toHaveAttribute("aria-checked", "true");
-    expect(candidateBtn).toHaveAttribute("aria-checked", "false");
+    expect(screen.getByText(/Please enter a valid email address/i)).toBeInTheDocument();
+    expect(emailInput).toHaveAttribute("aria-invalid", "true");
   });
 
   it("fills demo credentials using quick preset buttons", () => {
@@ -125,6 +138,32 @@ describe("Redesigned Login Page", () => {
 
     expect(screen.getByLabelText(/Email Address/i)).toHaveValue("candidate@example.com");
     expect(screen.getByLabelText(/^Password/i)).toHaveValue("password123");
+  });
+
+  it("locks submissions for 30s after 5 consecutive failed attempts", async () => {
+    API.post.mockRejectedValue(new Error("Invalid credentials"));
+
+    renderWithProviders(<Login />);
+
+    fireEvent.change(screen.getByLabelText(/Email Address/i), {
+      target: { value: "test@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/^Password/i), {
+      target: { value: "wrongpassword" },
+    });
+
+    const submitBtn = screen.getByRole("button", { name: /Sign In to FOREWORK/i });
+
+    // Trigger 5 failed attempts
+    for (let i = 0; i < 5; i++) {
+      fireEvent.click(submitBtn);
+      await waitFor(() => expect(API.post).toHaveBeenCalledTimes(i + 1));
+    }
+
+    // Now lockout should be active
+    expect(screen.getByText("Account Login Throttled")).toBeInTheDocument();
+    expect(screen.getByText(/Submissions temporarily locked/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Locked/i })).toBeDisabled();
   });
 
   it("submits the login form with valid credentials", async () => {
@@ -162,7 +201,7 @@ describe("Redesigned Login Page", () => {
   });
 });
 
-describe("Redesigned Register Page", () => {
+describe("Hardened Register Page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     if (typeof window.URL.createObjectURL === "undefined") {
@@ -171,7 +210,7 @@ describe("Redesigned Register Page", () => {
     }
   });
 
-  it("renders the onboarding form with 2-column fields and role switch", () => {
+  it("renders all form fields including confirm password and role selector", () => {
     renderWithProviders(<Register />);
 
     expect(screen.getByText("Candidate & Recruiter Onboarding")).toBeInTheDocument();
@@ -180,9 +219,71 @@ describe("Redesigned Register Page", () => {
     expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Phone Number/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Confirm Password/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/PAN Card Number/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Aadhaar Card Number/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Complete Registration/i })).toBeInTheDocument();
+  });
+
+  it("calculates live password strength meter", () => {
+    renderWithProviders(<Register />);
+
+    const passwordInput = screen.getByLabelText(/^Password/i);
+
+    // Weak password (< 8 chars)
+    fireEvent.change(passwordInput, { target: { value: "abc" } });
+    expect(screen.getByText("Too Short")).toBeInTheDocument();
+
+    // Fair / Medium password (>=8 chars, lowercase + uppercase)
+    fireEvent.change(passwordInput, { target: { value: "Password" } });
+    expect(screen.getByText("Fair")).toBeInTheDocument();
+
+    // Strong password (>=8 chars, uppercase, number, symbol)
+    fireEvent.change(passwordInput, { target: { value: "P@ssw0rd123!" } });
+    expect(screen.getByText("Strong")).toBeInTheDocument();
+  });
+
+  it("validates confirm password mismatch", () => {
+    renderWithProviders(<Register />);
+
+    const passwordInput = screen.getByLabelText(/^Password/i);
+    const confirmInput = screen.getByLabelText(/Confirm Password/i);
+
+    fireEvent.change(passwordInput, { target: { value: "P@ssw0rd123" } });
+    fireEvent.change(confirmInput, { target: { value: "DifferentPassword" } });
+    fireEvent.blur(confirmInput);
+
+    expect(screen.getByText("Passwords do not match")).toBeInTheDocument();
+    expect(confirmInput).toHaveAttribute("aria-invalid", "true");
+  });
+
+  it("auto-uppercases and validates PAN Card format", () => {
+    renderWithProviders(<Register />);
+
+    const panInput = screen.getByLabelText(/PAN Card Number/i);
+
+    // Auto-uppercase
+    fireEvent.change(panInput, { target: { value: "abcde1234f" } });
+    expect(panInput).toHaveValue("ABCDE1234F");
+
+    // Invalid format
+    fireEvent.change(panInput, { target: { value: "12345" } });
+    fireEvent.blur(panInput);
+    expect(screen.getByText(/PAN format must be 5 letters, 4 digits, 1 letter/i)).toBeInTheDocument();
+  });
+
+  it("validates Aadhaar Card 12-digit numeric length", () => {
+    renderWithProviders(<Register />);
+
+    const aadhaarInput = screen.getByLabelText(/Aadhaar Card Number/i);
+
+    // Typing non-numeric characters should be stripped
+    fireEvent.change(aadhaarInput, { target: { value: "123abc456" } });
+    expect(aadhaarInput).toHaveValue("123456");
+
+    // Less than 12 digits triggers error on blur
+    fireEvent.blur(aadhaarInput);
+    expect(screen.getByText(/Aadhaar must be exactly 12 numeric digits/i)).toBeInTheDocument();
   });
 
   it("handles profile photo selection and removal", () => {
@@ -201,7 +302,7 @@ describe("Redesigned Register Page", () => {
     expect(screen.queryByText("avatar.png")).not.toBeInTheDocument();
   });
 
-  it("submits register form data with FormData", async () => {
+  it("submits register form data with FormData upon valid input", async () => {
     API.post.mockResolvedValueOnce({
       data: {
         success: true,
@@ -211,10 +312,11 @@ describe("Redesigned Register Page", () => {
 
     renderWithProviders(<Register />);
 
-    fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: "John Doe" } });
-    fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: "john@example.com" } });
+    fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: "Jane Doe" } });
+    fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: "jane@example.com" } });
     fireEvent.change(screen.getByLabelText(/Phone Number/i), { target: { value: "9876543210" } });
-    fireEvent.change(screen.getByLabelText(/^Password/i), { target: { value: "secret123" } });
+    fireEvent.change(screen.getByLabelText(/^Password/i), { target: { value: "P@ssw0rd123" } });
+    fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: "P@ssw0rd123" } });
     fireEvent.change(screen.getByLabelText(/PAN Card Number/i), { target: { value: "ABCDE1234F" } });
     fireEvent.change(screen.getByLabelText(/Aadhaar Card Number/i), { target: { value: "123456789012" } });
 
