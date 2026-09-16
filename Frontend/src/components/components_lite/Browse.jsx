@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Filtercard from "./Filtercard";
 import Job1 from "./Job1";
@@ -10,19 +10,37 @@ import { setSearchedQuery, setPage, clearFilters } from "@/redux/jobSlice";
 import useGetAllJobs from "@/hooks/useGetAllJobs";
 import useFilterUrlSync from "@/hooks/useFilterUrlSync";
 import { Button } from "../ui/button";
-import { ChevronLeft, ChevronRight, Frown } from "lucide-react";
+import { ChevronLeft, ChevronRight, Frown, SlidersHorizontal, X } from "lucide-react";
 
 const Browse = () => {
   useFilterUrlSync();
   const { loading } = useGetAllJobs();
-  const { allJobs, pagination, searchedQuery } = useSelector((store) => store.job);
+  const { allJobs, pagination, searchedQuery, filters } = useSelector((store) => store.job);
   const dispatch = useDispatch();
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   useEffect(() => {
     return () => {
       dispatch(clearFilters());
     };
   }, [dispatch]);
+
+  // Lock body scroll when mobile filter drawer is open
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setIsMobileFilterOpen(false);
+    };
+    if (isMobileFilterOpen) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown);
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isMobileFilterOpen]);
 
   const handlePrevPage = () => {
     if (pagination?.page > 1) {
@@ -48,6 +66,14 @@ const Browse = () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
+
+  const activeFiltersCount = [
+    Boolean(filters?.location),
+    Boolean(filters?.technology),
+    Boolean(filters?.jobType),
+    filters?.experienceMin !== "" && filters?.experienceMin !== undefined,
+    filters?.salaryMin !== "" && filters?.salaryMin !== undefined,
+  ].filter(Boolean).length;
 
   const getPaginationItems = (currentPage, totalPages) => {
     if (!totalPages || totalPages <= 1) return [];
@@ -84,8 +110,8 @@ const Browse = () => {
       <Navbar />
       <main id="main-content" className="max-w-7xl mx-auto my-8 px-4 flex-1 w-full">
         <div className="flex flex-col md:flex-row gap-6">
-          {/* Left Sidebar: Filter Card */}
-          <aside aria-label="Job filters" className="w-full md:w-1/4">
+          {/* Desktop Left Sidebar: Filter Card */}
+          <aside aria-label="Job filters" className="hidden md:block w-full md:w-1/4">
             <Filtercard />
           </aside>
 
@@ -96,7 +122,7 @@ const Browse = () => {
                 <h1 className="font-bold text-2xl text-white tracking-tight">
                   {searchedQuery ? `Results for "${searchedQuery}"` : "All Available Jobs"}
                 </h1>
-                <p className="text-sm text-[#7A7488] mt-1">
+                <p className="text-sm text-[#958EA3] mt-1">
                   Found{" "}
                   <span className="text-[#B7ACD6] font-medium">
                     {pagination?.total || allJobs?.length || 0}
@@ -107,8 +133,28 @@ const Browse = () => {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                {/* Mobile Filters Pill Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsMobileFilterOpen(true)}
+                  aria-label="Open job filters"
+                  aria-expanded={isMobileFilterOpen}
+                  aria-controls="mobile-filter-drawer"
+                  className="md:hidden flex items-center gap-1.5 border-[#3D2166] bg-[#1F1B26] text-[#B7ACD6] hover:bg-[#2A2434] hover:text-white hover:border-[#6B3AC2] transition-colors h-8 text-xs"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  <span>Filters</span>
+                  {activeFiltersCount > 0 && (
+                    <span className="ml-1 px-1.5 py-0.5 bg-[#6B3AC2] text-white rounded-full text-[10px] font-semibold leading-none">
+                      {activeFiltersCount}
+                    </span>
+                  )}
+                </Button>
+
                 <SortSelect />
+
                 {searchedQuery && (
                   <Button
                     variant="outline"
@@ -134,10 +180,10 @@ const Browse = () => {
             ) : allJobs.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 bg-[#1F1B26] rounded-xl border border-dashed border-[#3D2166] p-8 text-center max-w-md mx-auto shadow-sm w-full">
                 <div className="p-3 bg-[#141018] rounded-full border border-[#3D2166] mb-3">
-                  <Frown className="w-10 h-10 text-[#7A7488]" />
+                  <Frown className="w-10 h-10 text-[#958EA3]" />
                 </div>
                 <h3 className="font-semibold text-white text-lg">No jobs match your search</h3>
-                <p className="text-[#7A7488] text-sm mt-1">
+                <p className="text-[#958EA3] text-sm mt-1">
                   Try searching with different keywords or clear your query to view all listings.
                 </p>
                 <Button
@@ -191,7 +237,7 @@ const Browse = () => {
                           return (
                             <span
                               key={`ellipsis-${idx}`}
-                              className="px-1.5 text-xs text-[#7A7488] select-none"
+                              className="px-1.5 text-xs text-[#958EA3] select-none"
                             >
                               …
                             </span>
@@ -234,6 +280,53 @@ const Browse = () => {
           </section>
         </div>
       </main>
+
+      {/* Mobile Slide-Over Filter Drawer */}
+      {isMobileFilterOpen && (
+        <div
+          id="mobile-filter-drawer"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Job filters"
+          className="fixed inset-0 z-50 flex md:hidden"
+        >
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+            onClick={() => setIsMobileFilterOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* Drawer Panel */}
+          <div className="relative ml-auto w-full max-w-xs bg-[#1F1B26] border-l border-[#3D2166] p-5 shadow-2xl flex flex-col h-full overflow-y-auto z-10">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2A2434] mb-4">
+              <span className="font-bold text-base text-white">Filter Jobs</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMobileFilterOpen(false)}
+                aria-label="Close filters"
+                className="w-8 h-8 rounded-full text-[#958EA3] hover:text-white hover:bg-[#2A2434]"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto pr-1">
+              <Filtercard />
+            </div>
+
+            <div className="pt-4 border-t border-[#2A2434] mt-4">
+              <Button
+                onClick={() => setIsMobileFilterOpen(false)}
+                className="w-full bg-[#6B3AC2] hover:bg-[#552d9b] text-white text-xs font-semibold h-9"
+              >
+                Apply Filters
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

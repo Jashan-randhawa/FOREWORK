@@ -14,7 +14,7 @@ const SortSelect = () => {
     <div className="flex items-center gap-2">
       <label
         htmlFor="sort-jobs-select"
-        className="text-xs text-[#7A7488] whitespace-nowrap hidden sm:inline"
+        className="text-xs text-[#958EA3] whitespace-nowrap hidden sm:inline"
       >
         Sort by:
       </label>
@@ -36,7 +36,7 @@ const SortSelect = () => {
             Salary
           </option>
         </select>
-        <ArrowUpDown className="w-3.5 h-3.5 text-[#7A7488] pointer-events-none absolute left-2.5" />
+        <ArrowUpDown className="w-3.5 h-3.5 text-[#958EA3] pointer-events-none absolute left-2.5" />
       </div>
     </div>
   );

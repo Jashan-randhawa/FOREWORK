@@ -344,4 +344,88 @@ describe("Browse Page - Phase 4 Sort + Numbered Pagination", () => {
   });
 });
 
+describe("Browse Page - Phase 5 Mobile + Accessibility Pass", () => {
+  beforeEach(() => {
+    mockLoading = false;
+    vi.clearAllMocks();
+  });
+
+  it("renders mobile filter pill button and opens slide-over drawer on click", () => {
+    const store = createTestStore({ allJobs: mockJobs });
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <Browse />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    const mobileFiltersBtn = screen.getByRole("button", { name: "Open job filters" });
+    expect(mobileFiltersBtn).toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Job filters" })).not.toBeInTheDocument();
+
+    // Open drawer
+    fireEvent.click(mobileFiltersBtn);
+    const dialog = screen.getByRole("dialog", { name: "Job filters" });
+    expect(dialog).toBeInTheDocument();
+
+    // Close via close button
+    const closeBtn = screen.getByRole("button", { name: "Close filters" });
+    expect(closeBtn).toBeInTheDocument();
+    fireEvent.click(closeBtn);
+    expect(screen.queryByRole("dialog", { name: "Job filters" })).not.toBeInTheDocument();
+  });
+
+  it("closes mobile filter drawer on Escape key press", () => {
+    const store = createTestStore({ allJobs: mockJobs });
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <Browse />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    const mobileFiltersBtn = screen.getByRole("button", { name: "Open job filters" });
+    fireEvent.click(mobileFiltersBtn);
+    expect(screen.getByRole("dialog", { name: "Job filters" })).toBeInTheDocument();
+
+    // Press Escape
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: "Job filters" })).not.toBeInTheDocument();
+  });
+
+  it("verifies all key aria-labels and landmarks are preserved for screen-readers", () => {
+    const store = createTestStore({
+      allJobs: mockJobs,
+      pagination: { page: 1, limit: 6, total: 20, totalPages: 4, hasMore: true },
+    });
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <Browse />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    // Main landmark
+    expect(screen.getByRole("main")).toHaveAttribute("id", "main-content");
+
+    // Aside filter landmark
+    expect(screen.getByRole("complementary", { name: "Job filters" })).toBeInTheDocument();
+
+    // Section listings landmark
+    expect(screen.getByRole("region", { name: "Job listings" })).toBeInTheDocument();
+
+    // Sort select accessible name
+    expect(screen.getByRole("combobox", { name: "Sort jobs by" })).toBeInTheDocument();
+
+    // Pagination landmark and controls
+    expect(screen.getByRole("navigation", { name: "Browse Pagination" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Go to previous page" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Go to next page" })).toBeInTheDocument();
+  });
+});
+
+
 

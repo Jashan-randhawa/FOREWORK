@@ -98,7 +98,7 @@ const Job1 = ({ job, isSavedInitial = false, onUnsaved = null }) => {
       <div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <p className="text-xs text-[#7A7488]">
+            <p className="text-xs text-[#958EA3]">
               {daysAgoFunction(job?.createdAt)}
             </p>
             {isSaved && (
@@ -111,7 +111,7 @@ const Job1 = ({ job, isSavedInitial = false, onUnsaved = null }) => {
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full hover:bg-[#2A2434] text-[#7A7488] hover:text-white w-8 h-8"
+              className="rounded-full hover:bg-[#2A2434] text-[#958EA3] hover:text-white w-8 h-8"
               onClick={handleShare}
               title="Share job link"
               aria-label="Share job"
@@ -122,7 +122,7 @@ const Job1 = ({ job, isSavedInitial = false, onUnsaved = null }) => {
               variant="ghost"
               size="icon"
               className={`rounded-full hover:bg-[#2A2434] w-8 h-8 ${
-                isSaved ? "text-[#C9A24B]" : "text-[#7A7488] hover:text-[#6B3AC2]"
+                isSaved ? "text-[#C9A24B]" : "text-[#958EA3] hover:text-[#6B3AC2]"
               }`}
               disabled={saving}
               onClick={handleToggleSave}
@@ -148,7 +148,7 @@ const Job1 = ({ job, isSavedInitial = false, onUnsaved = null }) => {
             <h3 className="font-semibold text-base text-white leading-tight truncate">
               {job?.company?.name || "Company"}
             </h3>
-            <p className="text-xs text-[#7A7488] truncate">
+            <p className="text-xs text-[#958EA3] truncate">
               {job?.location || "India"}
             </p>
           </div>

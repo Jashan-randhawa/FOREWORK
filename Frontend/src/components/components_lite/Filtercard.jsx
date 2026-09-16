@@ -89,7 +89,7 @@ const Filtercard = () => {
 
       {/* Location Filter */}
       <div>
-        <h3 className="font-semibold text-xs uppercase text-[#7A7488] tracking-wider mb-2">
+        <h3 className="font-semibold text-xs uppercase text-[#958EA3] tracking-wider mb-2">
           Location
         </h3>
         <RadioGroup value={filters?.location || ""} onValueChange={handleLocationChange}>
@@ -119,7 +119,7 @@ const Filtercard = () => {
 
       {/* Technology Filter */}
       <div>
-        <h3 className="font-semibold text-xs uppercase text-[#7A7488] tracking-wider mb-2">
+        <h3 className="font-semibold text-xs uppercase text-[#958EA3] tracking-wider mb-2">
           Technology
         </h3>
         <RadioGroup value={filters?.technology || ""} onValueChange={handleTechnologyChange}>
@@ -149,7 +149,7 @@ const Filtercard = () => {
 
       {/* Job Type Filter */}
       <div>
-        <h3 className="font-semibold text-xs uppercase text-[#7A7488] tracking-wider mb-2">
+        <h3 className="font-semibold text-xs uppercase text-[#958EA3] tracking-wider mb-2">
           Job Type
         </h3>
         <RadioGroup value={filters?.jobType || ""} onValueChange={handleJobTypeChange}>
@@ -179,7 +179,7 @@ const Filtercard = () => {
 
       {/* Experience Filter */}
       <div>
-        <h3 className="font-semibold text-xs uppercase text-[#7A7488] tracking-wider mb-2">
+        <h3 className="font-semibold text-xs uppercase text-[#958EA3] tracking-wider mb-2">
           Experience
         </h3>
         <RadioGroup value={selectedExpLabel} onValueChange={handleExperienceChange}>
@@ -209,7 +209,7 @@ const Filtercard = () => {
 
       {/* Salary Filter */}
       <div>
-        <h3 className="font-semibold text-xs uppercase text-[#7A7488] tracking-wider mb-2">
+        <h3 className="font-semibold text-xs uppercase text-[#958EA3] tracking-wider mb-2">
           Salary
         </h3>
         <RadioGroup value={selectedSalaryLabel} onValueChange={handleSalaryChange}>
