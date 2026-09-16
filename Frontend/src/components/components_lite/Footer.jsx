@@ -17,7 +17,8 @@ const Footer = () => {
           Powered by <a href="https://github.com/Jashan-randhawa">Jashanpreet Singh</a>
         </p>
         <p>
-          <Link to={"/PrivacyPolicy"}>Privacy Policy </Link> |
+          <Link to={"/about"}>About </Link> |
+          <Link to={"/PrivacyPolicy"}> Privacy Policy </Link> |
           <Link to={"/TermsofService"}> Terms of Service</Link>
         </p>
       </div>

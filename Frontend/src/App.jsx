@@ -112,6 +112,10 @@ const appRouter = createBrowserRouter([
     path: "/Creator",
     element: <Creator />,
   },
+  {
+    path: "/about",
+    element: <Creator />,
+  },
 
   // Recruiter route tree (/recruiter/*)
   {
