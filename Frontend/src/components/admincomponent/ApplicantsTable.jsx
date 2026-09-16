@@ -1,13 +1,4 @@
-import React, { useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
+import React, { useState, useMemo } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
   Dialog,
@@ -24,7 +15,6 @@ import {
   MoreHorizontal,
   MessageSquare,
   Calendar,
-  ExternalLink,
   Loader2,
   Plus,
   Video,
@@ -34,12 +24,7 @@ import { toast } from "sonner";
 import { APPLICATION_API_ENDPOINT } from "@/utils/data";
 import API from "@/utils/axiosInstance";
 import { setAllApplicants } from "@/redux/applicationSlice";
-
-const STATUS_CLASSES = {
-  pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  accepted: "bg-green-100 text-green-800 border-green-200",
-  rejected: "bg-red-100 text-red-800 border-red-200",
-};
+import { DataTable, ApplicationStatusBadge, ResumeViewer } from "../shared";
 
 const ApplicantsTable = () => {
   const dispatch = useDispatch();
@@ -98,7 +83,11 @@ const ApplicantsTable = () => {
   // Submit Note (EMP-003)
   const handleAddNote = async (e) => {
     e.preventDefault();
-    if (!noteText.trim() || !selectedAppForNotes) return;
+    if (!noteText.trim()) {
+      toast.error("Please enter a note before submitting.");
+      return;
+    }
+    if (!selectedAppForNotes) return;
 
     try {
       setAddingNote(true);
@@ -106,10 +95,9 @@ const ApplicantsTable = () => {
         `${APPLICATION_API_ENDPOINT}/${selectedAppForNotes._id}/notes`,
         { text: noteText.trim() }
       );
-
       if (res.data?.success) {
-        toast.success("Recruiter note added successfully");
-        const updatedNotes = res.data.recruiterNotes || res.data.data?.recruiterNotes;
+        toast.success("Note added successfully");
+        const updatedNotes = res.data.data?.recruiterNotes || [];
         updateApplicationInStore(selectedAppForNotes._id, {
           recruiterNotes: updatedNotes,
         });
@@ -130,12 +118,9 @@ const ApplicantsTable = () => {
     setSelectedAppForSchedule(app);
     let initialDate = "";
     if (app.scheduledAt) {
-      try {
-        const d = new Date(app.scheduledAt);
-        initialDate = d.toISOString().slice(0, 16);
-      } catch (err) {
-        initialDate = "";
-      }
+      const d = new Date(app.scheduledAt);
+      const tzOffset = d.getTimezoneOffset() * 60000;
+      initialDate = new Date(d.getTime() - tzOffset).toISOString().slice(0, 16);
     }
     setScheduleData({
       scheduledAt: initialDate,
@@ -143,29 +128,31 @@ const ApplicantsTable = () => {
     });
   };
 
-  // Submit Interview Schedule (EMP-004)
-  const handleScheduleSubmit = async (e) => {
+  // Submit Schedule (EMP-004)
+  const handleScheduleInterview = async (e) => {
     e.preventDefault();
-    if (!selectedAppForSchedule || !scheduleData.scheduledAt || !scheduleData.meetingLink) {
-      toast.error("Please provide both scheduled date/time and meeting link");
+    if (!scheduleData.scheduledAt) {
+      toast.error("Please select a date and time for the interview.");
       return;
     }
+    if (!selectedAppForSchedule) return;
 
     try {
       setScheduling(true);
       const res = await API.post(
         `${APPLICATION_API_ENDPOINT}/${selectedAppForSchedule._id}/schedule`,
         {
-          scheduledAt: scheduleData.scheduledAt,
+          scheduledAt: new Date(scheduleData.scheduledAt).toISOString(),
           meetingLink: scheduleData.meetingLink.trim(),
         }
       );
-
       if (res.data?.success) {
-        toast.success("Interview scheduled & email notification sent to candidate");
+        toast.success(
+          res.data.message || "Interview scheduled and candidate notified via email!"
+        );
         updateApplicationInStore(selectedAppForSchedule._id, {
-          scheduledAt: scheduleData.scheduledAt,
-          meetingLink: scheduleData.meetingLink.trim(),
+          scheduledAt: res.data.data?.scheduledAt || new Date(scheduleData.scheduledAt).toISOString(),
+          meetingLink: res.data.data?.meetingLink || scheduleData.meetingLink.trim(),
         });
         setSelectedAppForSchedule(null);
       }
@@ -176,159 +163,154 @@ const ApplicantsTable = () => {
     }
   };
 
-  return (
-    <div className="w-full overflow-x-auto">
-      <Table className="min-w-[850px]">
-        <TableCaption>A list of applicants for this job</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Candidate</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Contact</TableHead>
-            <TableHead>Resume</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Interview</TableHead>
-            <TableHead>Notes</TableHead>
-            <TableHead>Applied Date</TableHead>
-            <TableHead className="text-right">Action</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {applicants?.applications?.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={9} className="text-center py-6 text-gray-500">
-                No applicants yet
-              </TableCell>
-            </TableRow>
+  const columns = useMemo(
+    () => [
+      {
+        header: "Full Name",
+        accessorKey: "applicantName",
+        sortable: true,
+        cell: (item) => (
+          <span className="font-semibold text-gray-900 dark:text-gray-100">
+            {item?.applicant?.fullname || "Unknown"}
+          </span>
+        ),
+      },
+      {
+        header: "Email",
+        accessorKey: "applicantEmail",
+        sortable: true,
+        cell: (item) => item?.applicant?.email || "—",
+      },
+      {
+        header: "Contact",
+        cell: (item) => item?.applicant?.phoneNumber || "N/A",
+      },
+      {
+        header: "Resume",
+        cell: (item) => (
+          <ResumeViewer
+            resumeUrl={item?.applicant?.profile?.resume}
+            resumeOriginalName={item?.applicant?.profile?.resumeOriginalName}
+            fallbackText="N/A"
+          />
+        ),
+      },
+      {
+        header: "Status",
+        accessorKey: "status",
+        sortable: true,
+        cell: (item) => <ApplicationStatusBadge status={item.status || "pending"} />,
+      },
+      {
+        header: "Interview",
+        cell: (item) => {
+          return item.scheduledAt ? (
+            <div className="flex flex-col gap-1 text-xs">
+              <span className="text-xs text-green-700 font-semibold flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-green-600" />
+                {new Date(item.scheduledAt).toLocaleDateString()}
+              </span>
+              {item.meetingLink && (
+                <a
+                  href={item.meetingLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                >
+                  <Video className="w-3 h-3" /> Meeting Link
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={() => openScheduleModal(item)}
+                className="text-xs text-gray-500 hover:text-gray-700 underline text-left"
+              >
+                Reschedule
+              </button>
+            </div>
           ) : (
-            applicants?.applications?.map((item) => {
-              const currentStatus = (item.status || "pending").toLowerCase();
-              const statusClass =
-                STATUS_CLASSES[currentStatus] || STATUS_CLASSES.pending;
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => openScheduleModal(item)}
+              className="h-7 text-xs flex items-center gap-1"
+            >
+              <Calendar className="w-3.5 h-3.5" /> Schedule
+            </Button>
+          );
+        },
+      },
+      {
+        header: "Notes",
+        cell: (item) => (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => openNotesModal(item)}
+            className="h-7 text-xs flex items-center gap-1.5 text-gray-700 hover:bg-gray-100"
+          >
+            <MessageSquare className="w-3.5 h-3.5 text-purple-600" />
+            <span>{item.recruiterNotes?.length || 0} notes</span>
+          </Button>
+        ),
+      },
+      {
+        header: "Action",
+        className: "text-right",
+        headerClassName: "text-right",
+        cell: (item) => (
+          <div className="flex justify-end">
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  aria-label="Open status options"
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+                >
+                  <MoreHorizontal className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-36 p-1.5 text-sm shadow-md" align="end">
+                <div className="text-xs font-semibold text-gray-400 px-2 py-1 uppercase tracking-wider">
+                  Update Status
+                </div>
+                {["accepted", "rejected", "pending"].map((status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    onClick={() => statusHandler(status, item._id)}
+                    className="w-full text-left px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded cursor-pointer capitalize text-xs text-gray-700 dark:text-gray-200"
+                  >
+                    {status}
+                  </button>
+                ))}
+              </PopoverContent>
+            </Popover>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
-              return (
-                <TableRow key={item._id}>
-                  <TableCell className="font-medium">
-                    {item?.applicant?.fullname || "Unknown"}
-                  </TableCell>
-                  <TableCell>{item?.applicant?.email}</TableCell>
-                  <TableCell>{item?.applicant?.phoneNumber || "N/A"}</TableCell>
-                  <TableCell>
-                    {item.applicant?.profile?.resume ? (
-                      <a
-                        className="inline-flex items-center gap-1 text-purple-600 hover:text-purple-800 font-medium cursor-pointer"
-                        href={item?.applicant?.profile?.resume}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Resume <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    ) : (
-                      <span className="text-gray-400">N/A</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${statusClass}`}
-                    >
-                      {currentStatus}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    {item.scheduledAt ? (
-                      <div className="flex flex-col gap-1">
-                        <span className="text-xs text-green-700 font-semibold flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5 text-green-600" />
-                          {new Date(item.scheduledAt).toLocaleDateString()}
-                        </span>
-                        {item.meetingLink && (
-                          <a
-                            href={item.meetingLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
-                          >
-                            <Video className="w-3 h-3" /> Meeting Link
-                          </a>
-                        )}
-                        <button
-                          onClick={() => openScheduleModal(item)}
-                          className="text-xs text-gray-500 hover:text-gray-700 underline text-left"
-                        >
-                          Reschedule
-                        </button>
-                      </div>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => openScheduleModal(item)}
-                        className="h-7 text-xs flex items-center gap-1"
-                      >
-                        <Calendar className="w-3.5 h-3.5" /> Schedule
-                      </Button>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => openNotesModal(item)}
-                      className="h-7 text-xs flex items-center gap-1.5 text-gray-700 hover:bg-gray-100"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5 text-purple-600" />
-                      <span>{item.recruiterNotes?.length || 0} notes</span>
-                    </Button>
-                  </TableCell>
-                  <TableCell className="text-xs text-gray-500">
-                    {item?.createdAt?.split("T")[0]}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button aria-label="Candidate actions menu" className="p-1 hover:bg-gray-100 rounded cursor-pointer">
-                          <MoreHorizontal className="w-5 h-5" />
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-36 p-1 text-sm shadow-md" align="end">
-                        <div className="text-xs font-semibold text-gray-400 px-2 py-1 uppercase tracking-wider">
-                          Update Status
-                        </div>
-                        {currentStatus !== "accepted" && (
-                          <button
-                            onClick={() => statusHandler("accepted", item._id)}
-                            className="w-full text-left px-2 py-1.5 hover:bg-green-50 text-green-700 rounded text-xs font-medium"
-                          >
-                            Accept Candidate
-                          </button>
-                        )}
-                        {currentStatus !== "rejected" && (
-                          <button
-                            onClick={() => statusHandler("rejected", item._id)}
-                            className="w-full text-left px-2 py-1.5 hover:bg-red-50 text-red-700 rounded text-xs font-medium"
-                          >
-                            Reject Candidate
-                          </button>
-                        )}
-                        {currentStatus !== "pending" && (
-                          <button
-                            onClick={() => statusHandler("pending", item._id)}
-                            className="w-full text-left px-2 py-1.5 hover:bg-yellow-50 text-yellow-700 rounded text-xs font-medium"
-                          >
-                            Reset to Pending
-                          </button>
-                        )}
-                      </PopoverContent>
-                    </Popover>
-                  </TableCell>
-                </TableRow>
-              );
-            })
-          )}
-        </TableBody>
-      </Table>
+  const tableData = useMemo(() => {
+    return (applicants?.applications || []).map((app) => ({
+      ...app,
+      applicantName: app.applicant?.fullname || "",
+      applicantEmail: app.applicant?.email || "",
+    }));
+  }, [applicants?.applications]);
 
-      {/* Recruiter Notes Dialog (EMP-003) */}
+  return (
+    <div className="w-full">
+      <DataTable
+        columns={columns}
+        data={tableData}
+        caption="A list of your recent applied user"
+        emptyMessage="No applicants yet"
+        tableClassName="min-w-[850px]"
+      />
+
+      {/* Recruiter Notes Modal (EMP-003) */}
       <Dialog
         open={!!selectedAppForNotes}
         onOpenChange={(open) => {
@@ -337,72 +319,86 @@ const ApplicantsTable = () => {
       >
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-purple-600" />
-              Recruiter Notes
-            </DialogTitle>
+            <DialogTitle>Recruiter Notes</DialogTitle>
             <DialogDescription>
-              Candidate: {selectedAppForNotes?.applicant?.fullname || "Applicant"}
+              Internal evaluation notes for{" "}
+              <span className="font-semibold text-gray-900">
+                {selectedAppForNotes?.applicant?.fullname || "Candidate"}
+              </span>
+              . Only visible to recruiters.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="max-h-60 overflow-y-auto space-y-3 my-2 pr-1">
+          {/* Existing Notes List */}
+          <div className="max-h-56 overflow-y-auto space-y-2.5 my-2 pr-1">
             {!selectedAppForNotes?.recruiterNotes ||
             selectedAppForNotes.recruiterNotes.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-4">
-                No notes added yet for this applicant.
+              <p className="text-xs text-gray-400 text-center py-4">
+                No notes added yet. Add your first note below.
               </p>
             ) : (
               selectedAppForNotes.recruiterNotes.map((note, idx) => (
                 <div
                   key={note._id || idx}
-                  className="bg-gray-50 border border-gray-100 rounded-lg p-3 text-sm"
+                  className="bg-gray-50 border border-gray-100 rounded-lg p-2.5 text-xs space-y-1"
                 >
-                  <div className="flex justify-between items-center text-xs text-gray-500 mb-1">
-                    <span className="font-semibold text-gray-700">
-                      {note.author?.fullname || "Recruiter"}
-                    </span>
-                    <span>{new Date(note.createdAt).toLocaleString()}</span>
-                  </div>
                   <p className="text-gray-800 whitespace-pre-wrap">{note.text}</p>
+                  <div className="flex justify-between items-center text-[10px] text-gray-400">
+                    <span>{note.author?.fullname || "Recruiter"}</span>
+                    <span>
+                      {note.createdAt
+                        ? new Date(note.createdAt).toLocaleString()
+                        : "Just now"}
+                    </span>
+                  </div>
                 </div>
               ))
             )}
           </div>
 
-          <form onSubmit={handleAddNote} className="space-y-3">
-            <div>
-              <Label htmlFor="noteInput" className="text-xs font-semibold">
-                Add New Note
+          {/* Add Note Form */}
+          <form onSubmit={handleAddNote} className="space-y-3 mt-2">
+            <div className="space-y-1">
+              <Label htmlFor="note-text" className="text-xs font-semibold">
+                Add Note
               </Label>
               <textarea
-                id="noteInput"
+                id="note-text"
                 rows={3}
+                className="w-full text-xs p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 resize-none"
+                placeholder="Write your impressions, interview feedback, or next steps..."
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
-                placeholder="Write observations, interview feedback, or next steps..."
-                className="w-full mt-1.5 p-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
             </div>
-            <DialogFooter>
+            <DialogFooter className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedAppForNotes(null)}
+              >
+                Close
+              </Button>
               <Button
                 type="submit"
+                size="sm"
+                className="bg-purple-600 hover:bg-purple-700 text-white"
                 disabled={addingNote || !noteText.trim()}
-                className="bg-[#6A38C2] hover:bg-[#5b30a6] text-white flex items-center gap-1 text-xs"
               >
                 {addingNote ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
                 ) : (
-                  <Plus className="w-4 h-4 mr-1" />
+                  <Plus className="w-3.5 h-3.5 mr-1" />
                 )}
-                Add Note
+                Save Note
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Interview Scheduling Dialog (EMP-004) */}
+      {/* Schedule Interview Modal (EMP-004) */}
       <Dialog
         open={!!selectedAppForSchedule}
         onOpenChange={(open) => {
@@ -411,18 +407,29 @@ const ApplicantsTable = () => {
       >
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-purple-600" />
-              Schedule Interview
+            <DialogTitle>
+              {selectedAppForSchedule?.scheduledAt
+                ? "Reschedule Interview"
+                : "Schedule Interview"}
             </DialogTitle>
             <DialogDescription>
-              Candidate: {selectedAppForSchedule?.applicant?.fullname || "Applicant"}
+              Set up an interview with{" "}
+              <span className="font-semibold text-gray-900">
+                {selectedAppForSchedule?.applicant?.fullname || "Candidate"}
+              </span>
+              . An invitation email will be automatically sent to{" "}
+              <span className="font-semibold text-gray-900">
+                {selectedAppForSchedule?.applicant?.email}
+              </span>
+              .
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleScheduleSubmit} className="space-y-4 my-2">
-            <div>
-              <Label htmlFor="scheduledAt">Date & Time</Label>
+          <form onSubmit={handleScheduleInterview} className="space-y-4 my-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="scheduledAt" className="text-xs font-semibold">
+                Date & Time <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="scheduledAt"
                 type="datetime-local"
@@ -431,46 +438,49 @@ const ApplicantsTable = () => {
                   setScheduleData({ ...scheduleData, scheduledAt: e.target.value })
                 }
                 required
-                className="mt-1"
+                className="text-xs"
               />
             </div>
-            <div>
-              <Label htmlFor="meetingLink">Meeting Link (Google Meet / Zoom / Teams)</Label>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="meetingLink" className="text-xs font-semibold">
+                Meeting Link (Google Meet, Zoom, etc.)
+              </Label>
               <Input
                 id="meetingLink"
                 type="url"
-                placeholder="https://meet.google.com/abc-defg-hij"
+                placeholder="https://meet.google.com/xyz-abc-def"
                 value={scheduleData.meetingLink}
                 onChange={(e) =>
                   setScheduleData({ ...scheduleData, meetingLink: e.target.value })
                 }
-                required
-                className="mt-1"
+                className="text-xs"
               />
             </div>
-            <p className="text-xs text-gray-500">
-              An email invitation containing the schedule details and meeting link will be
-              sent directly to the candidate ({selectedAppForSchedule?.applicant?.email}).
-            </p>
-            <DialogFooter>
+
+            <DialogFooter className="flex justify-end gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"
+                size="sm"
                 onClick={() => setSelectedAppForSchedule(null)}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                disabled={scheduling}
-                className="bg-[#6A38C2] hover:bg-[#5b30a6] text-white flex items-center gap-1"
+                size="sm"
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+                disabled={scheduling || !scheduleData.scheduledAt}
               >
                 {scheduling ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
                 ) : (
-                  <Calendar className="w-4 h-4 mr-1" />
+                  <Calendar className="w-3.5 h-3.5 mr-1" />
                 )}
-                Schedule & Notify
+                {selectedAppForSchedule?.scheduledAt
+                  ? "Update Schedule"
+                  : "Send Invitation"}
               </Button>
             </DialogFooter>
           </form>
