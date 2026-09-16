@@ -27,14 +27,25 @@ const mockJob = {
   createdAt: "2026-01-01T00:00:00.000Z",
 };
 
+import jobReducer from "@/redux/jobSlice";
+
 const renderDescription = (userState, jobState = {}) => {
   const store = configureStore({
     reducer: {
       auth: () => ({ user: userState }),
-      job: () => ({
-        singleJob: jobState.singleJob || mockJob,
+      job: jobReducer,
+    },
+    preloadedState: {
+      job: {
+        singleJob: jobState.hasOwnProperty("singleJob") ? jobState.singleJob : mockJob,
         allAppliedJobs: jobState.allAppliedJobs || [],
-      }),
+        allJobs: jobState.allJobs || [mockJob],
+        allAdminJobs: [],
+        searchJobByText: "",
+        searchedQuery: "",
+        filters: {},
+        pagination: {},
+      },
     },
   });
 
@@ -116,6 +127,74 @@ describe("Description Component - Duplicate Application Prevention", () => {
       });
       expect(recruiterBtn).toBeInTheDocument();
       expect(recruiterBtn).toBeDisabled();
+    });
+  });
+
+  it("fetches job details exactly once on mount, preventing view count inflation on re-renders", async () => {
+    const { rerender } = renderDescription({ _id: "user-1", role: "Student" }, { singleJob: null });
+
+    await waitFor(() => {
+      expect(screen.getByText("Frontend Developer")).toBeInTheDocument();
+    });
+
+    const singleJobGetCalls = API.get.mock.calls.filter(
+      (call) => call[0].includes("/job/get/job-101")
+    );
+    expect(singleJobGetCalls).toHaveLength(1);
+
+    // Trigger re-render with updated state
+    rerender(
+      <Provider
+        store={configureStore({
+          reducer: {
+            auth: () => ({ user: { _id: "user-1", role: "Student", name: "Updated" } }),
+            job: () => ({ singleJob: mockJob, allAppliedJobs: [], allJobs: [] }),
+          },
+        })}
+      >
+        <MemoryRouter initialEntries={["/description/job-101"]}>
+          <Routes>
+            <Route path="/description/:id" element={<Description />} />
+          </Routes>
+        </MemoryRouter>
+      </Provider>
+    );
+
+    // Must STILL be called exactly once
+    const recheckedCalls = API.get.mock.calls.filter(
+      (call) => call[0].includes("/job/get/job-101")
+    );
+    expect(recheckedCalls).toHaveLength(1);
+  });
+
+  it("renders related jobs matching jobType/category, excluding current job", async () => {
+    const relatedJob1 = {
+      _id: "job-202",
+      title: "React Specialist",
+      company: { name: "WebWorks" },
+      jobType: "Full-time",
+      salary: 15,
+      description: "Build interactive client applications",
+    };
+    const currentJobDuplicate = {
+      ...mockJob,
+      _id: "job-101",
+    };
+
+    renderDescription(
+      { _id: "user-1", role: "Student" },
+      {
+        singleJob: mockJob,
+        allJobs: [relatedJob1, currentJobDuplicate],
+      }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("related-jobs-section")).toBeInTheDocument();
+      expect(screen.getByText("React Specialist")).toBeInTheDocument();
+      expect(screen.getByTestId("related-job-job-202")).toBeInTheDocument();
+      // Current job must not be inside related jobs
+      expect(screen.queryByTestId("related-job-job-101")).not.toBeInTheDocument();
     });
   });
 });
