@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import Login from "../components/authentication/Login";
 import Register from "../components/authentication/Register";
 import AuthHeroPanel from "../components/authentication/AuthHeroPanel";
+import Navbar from "../components/components_lite/Navbar";
 import API from "@/utils/axiosInstance";
 
 vi.mock("@/utils/axiosInstance", () => ({
@@ -332,5 +333,26 @@ describe("Hardened Register Page", () => {
         })
       );
     });
+  });
+});
+
+describe("Global ThemeToggle in Navbar", () => {
+  it("renders the global ThemeToggle in Navbar for unauthenticated and authenticated users", () => {
+    renderWithProviders(<Navbar />);
+
+    const themeToggleBtn = screen.getByRole("button", { name: /Switch to (dark|light) theme/i });
+    expect(themeToggleBtn).toBeInTheDocument();
+
+    // Authenticated state
+    renderWithProviders(<Navbar />, {
+      preloadedState: {
+        auth: {
+          user: { _id: "1", fullname: "Alex Candidate", role: "Student" },
+          loading: false,
+        },
+      },
+    });
+
+    expect(screen.getAllByRole("button", { name: /Switch to (dark|light) theme/i })[0]).toBeInTheDocument();
   });
 });

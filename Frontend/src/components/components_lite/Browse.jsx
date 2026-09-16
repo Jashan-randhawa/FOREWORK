@@ -4,7 +4,6 @@ import Filtercard from "./Filtercard";
 import Job1 from "./Job1";
 import JobCardSkeleton from "./JobCardSkeleton";
 import SortSelect from "./SortSelect";
-import ThemeToggle from "./ThemeToggle";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { setSearchedQuery, setPage, clearFilters } from "@/redux/jobSlice";
@@ -155,7 +154,6 @@ const Browse = () => {
                 </Button>
 
                 <SortSelect />
-                <ThemeToggle />
 
                 {searchedQuery && (
                   <Button

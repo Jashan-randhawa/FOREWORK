@@ -16,6 +16,7 @@ import API from "@/utils/axiosInstance";
 import { USER_API_ENDPOINT } from "@/utils/data";
 import { setUser } from "@/redux/authSlice";
 import { toast } from "sonner";
+import ThemeToggle from "@/components/components_lite/ThemeToggle";
 
 const AdminNavbar = () => {
   const { user } = useSelector((store) => store.auth);
@@ -80,10 +81,11 @@ const AdminNavbar = () => {
             </nav>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <ThemeToggle />
             <Link
               to="/"
-              className="text-xs font-medium text-gray-500 hover:text-gray-700 flex items-center gap-1 hidden sm:flex"
+              className="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 flex items-center gap-1 hidden sm:flex"
             >
               Public Site <ExternalLink className="w-3 h-3" />
             </Link>

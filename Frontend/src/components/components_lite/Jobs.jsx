@@ -4,7 +4,6 @@ import Filtercard from "./Filtercard";
 import Job1 from "./Job1";
 import JobCardSkeleton from "./JobCardSkeleton";
 import SortSelect from "./SortSelect";
-import ThemeToggle from "./ThemeToggle";
 import { useSelector, useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import { Button } from "../ui/button";
@@ -258,7 +257,6 @@ const Jobs = () => {
                 </Button>
 
                 <SortSelect />
-                <ThemeToggle />
 
                 {activeFiltersCount > 0 && (
                   <Button

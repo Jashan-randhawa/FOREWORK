@@ -20,6 +20,7 @@ import API from "@/utils/axiosInstance";
 import { setUser } from "@/redux/authSlice";
 import { USER_API_ENDPOINT } from "@/utils/data";
 import NotificationDropdown from "./NotificationDropdown";
+import ThemeToggle from "./ThemeToggle";
 
 const Navbar = () => {
   const { user } = useSelector((store) => store.auth);
@@ -44,7 +45,7 @@ const Navbar = () => {
     }
   };
   return (
-    <div className="bg-white">
+    <div className="bg-white dark:bg-[#141018] border-b border-gray-100 dark:border-[#2A2434] transition-colors">
       {/* A11Y Skip to content link */}
       <a
         href="#main-content"
@@ -61,7 +62,7 @@ const Navbar = () => {
           </h1>
         </div>
         <div className="flex items-center gap-6 md:gap-10">
-          <ul className="hidden md:flex font-medium items-center gap-6">
+          <ul className="hidden md:flex font-medium items-center gap-6 text-gray-700 dark:text-gray-200">
             {user && user.role === "Admin" ? (
               <>
                 <li>
@@ -116,20 +117,22 @@ const Navbar = () => {
               </>
             )}
           </ul>
-          {!user ? (
-            <div className=" flex items-center gap-2">
-              <Link to={"/login"}>
-                <Button variant="outline">Login</Button>
-              </Link>
-              <Link to={"/register"}>
-                <Button className="bg-[#6B3AC2] hover:bg-[#522998]">
-                  Signup
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <NotificationDropdown />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <ThemeToggle />
+            {!user ? (
+              <div className="flex items-center gap-2">
+                <Link to={"/login"}>
+                  <Button variant="outline">Login</Button>
+                </Link>
+                <Link to={"/register"}>
+                  <Button className="bg-[#6B3AC2] hover:bg-[#522998]">
+                    Signup
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <NotificationDropdown />
               <Popover>
                 <PopoverTrigger asChild>
                   <button
@@ -328,8 +331,9 @@ const Navbar = () => {
                   </div>
                 </PopoverContent>
               </Popover>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
