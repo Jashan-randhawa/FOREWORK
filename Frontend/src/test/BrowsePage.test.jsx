@@ -1,17 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import { MemoryRouter, useSearchParams } from "react-router-dom";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import Browse from "../components/components_lite/Browse";
+import jobReducer from "@/redux/jobSlice";
 
 let mockLoading = false;
 vi.mock("@/hooks/useGetAllJobs", () => ({
   default: () => ({ loading: mockLoading, error: null }),
-}));
-
-vi.mock("@/hooks/useFilterUrlSync", () => ({
-  default: () => {},
 }));
 
 const mockJobs = [
@@ -27,8 +24,6 @@ const mockJobs = [
     createdAt: new Date().toISOString(),
   },
 ];
-
-import jobReducer from "@/redux/jobSlice";
 
 function createTestStore(initialJobState = {}) {
   return configureStore({
@@ -140,5 +135,109 @@ describe("Browse Page - Phase 1 Theme Foundation", () => {
     const viewAllBtn = screen.getByRole("button", { name: /View All Jobs/i });
     expect(viewAllBtn).toBeInTheDocument();
     expect(viewAllBtn).toHaveClass("bg-[#6B3AC2]");
+  });
+});
+
+describe("Browse Page - Phase 2 Sidebar Filters", () => {
+  beforeEach(() => {
+    mockLoading = false;
+    vi.clearAllMocks();
+  });
+
+  it("renders sidebar with Filtercard and accessible aside landmark", () => {
+    const store = createTestStore({ allJobs: mockJobs });
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <Browse />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    const sidebar = screen.getByRole("complementary", { name: "Job filters" });
+    expect(sidebar).toBeInTheDocument();
+    expect(sidebar).toHaveClass("w-full");
+    expect(sidebar).toHaveClass("md:w-1/4");
+
+    expect(screen.getByText("Filter Jobs")).toBeInTheDocument();
+    expect(screen.getByText("Location")).toBeInTheDocument();
+    expect(screen.getByText("Technology")).toBeInTheDocument();
+    expect(screen.getByText("Job Type")).toBeInTheDocument();
+    expect(screen.getByText("Experience")).toBeInTheDocument();
+    expect(screen.getByText("Salary")).toBeInTheDocument();
+  });
+
+  it("dispatches filter changes when selecting options in Filtercard", () => {
+    const store = createTestStore({ allJobs: mockJobs });
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <Browse />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    const sidebar = screen.getByRole("complementary", { name: "Job filters" });
+    const delhiLabel = within(sidebar).getByText("Delhi");
+    fireEvent.click(delhiLabel);
+    expect(store.getState().job.filters.location).toBe("Delhi");
+
+    const fulltimeInput = within(sidebar).getByLabelText("Full-time");
+    fireEvent.click(fulltimeInput);
+    expect(store.getState().job.filters.jobType).toBe("Full-time");
+  });
+
+  it("shows clear button in Filtercard when active filters exist and clears them on click", () => {
+    const store = createTestStore({
+      allJobs: mockJobs,
+      filters: {
+        location: "Bangalore",
+        technology: "",
+        experienceMin: "",
+        experienceMax: "",
+        salaryMin: "",
+        salaryMax: "",
+        jobType: "",
+      },
+    });
+
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <Browse />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    const clearBtn = screen.getByRole("button", { name: /Clear/i });
+    expect(clearBtn).toBeInTheDocument();
+    fireEvent.click(clearBtn);
+    expect(store.getState().job.filters.location).toBe("");
+  });
+
+  it("confirms useFilterUrlSync synchronizes URL search params when sidebar filter is clicked", async () => {
+    let currentParams = "";
+    const LocationWatcher = () => {
+      const [searchParams] = useSearchParams();
+      currentParams = searchParams.toString();
+      return <span data-testid="params">{currentParams}</span>;
+    };
+
+    const store = createTestStore({ allJobs: mockJobs });
+    render(
+      <Provider store={store}>
+        <MemoryRouter initialEntries={["/browse"]}>
+          <Browse />
+          <LocationWatcher />
+        </MemoryRouter>
+      </Provider>
+    );
+
+    const delhiLabel = screen.getByText("Delhi");
+    fireEvent.click(delhiLabel);
+
+    await waitFor(() => {
+      expect(currentParams).toContain("location=Delhi");
+    });
   });
 });

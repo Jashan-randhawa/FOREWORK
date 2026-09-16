@@ -1,4 +1,3 @@
-import React from "react";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Button } from "../ui/button";
 import { useDispatch, useSelector } from "react-redux";
@@ -71,35 +70,45 @@ const Filtercard = () => {
     (filters?.salaryMin !== "" && filters?.salaryMin !== undefined);
 
   return (
-    <div className="w-full bg-white p-4 rounded-lg shadow-sm border border-gray-100 space-y-6">
+    <div className="w-full bg-[#1F1B26] p-5 rounded-xl border border-[#3D2166] space-y-6 shadow-sm">
       <div className="flex items-center justify-between">
-        <h1 className="font-bold text-lg text-gray-900">Filter Jobs</h1>
+        <h2 className="font-bold text-lg text-white">Filter Jobs</h2>
         {hasActiveFilters && (
           <Button
             variant="ghost"
             size="sm"
             onClick={() => dispatch(clearFilters())}
-            className="text-xs text-red-500 hover:text-red-700 h-8 px-2 flex items-center gap-1"
+            className="text-xs text-rose-400 hover:text-rose-300 hover:bg-[#2A2434] h-8 px-2 flex items-center gap-1 transition-colors"
           >
             <RotateCcw className="w-3 h-3" />
             Clear
           </Button>
         )}
       </div>
-      <hr />
+      <hr className="border-[#2A2434]" />
 
       {/* Location Filter */}
       <div>
-        <h2 className="font-semibold text-sm uppercase text-gray-500 tracking-wider mb-2">
+        <h3 className="font-semibold text-xs uppercase text-[#7A7488] tracking-wider mb-2">
           Location
-        </h2>
+        </h3>
         <RadioGroup value={filters?.location || ""} onValueChange={handleLocationChange}>
           {locations.map((loc, idx) => {
             const id = `loc-${idx}`;
+            const isSelected = filters?.location === loc;
             return (
               <div key={id} className="flex items-center space-x-2 py-1">
-                <RadioGroupItem value={loc} id={id} />
-                <label htmlFor={id} className="text-sm cursor-pointer text-gray-700">
+                <RadioGroupItem
+                  value={loc}
+                  id={id}
+                  className="border-[#4A3866] data-[state=checked]:border-[#6B3AC2] text-[#6B3AC2] bg-[#141018] focus-visible:ring-[#6B3AC2]"
+                />
+                <label
+                  htmlFor={id}
+                  className={`text-sm cursor-pointer transition-colors ${
+                    isSelected ? "text-white font-medium" : "text-[#B7ACD6] hover:text-white"
+                  }`}
+                >
                   {loc}
                 </label>
               </div>
@@ -110,16 +119,26 @@ const Filtercard = () => {
 
       {/* Technology Filter */}
       <div>
-        <h2 className="font-semibold text-sm uppercase text-gray-500 tracking-wider mb-2">
+        <h3 className="font-semibold text-xs uppercase text-[#7A7488] tracking-wider mb-2">
           Technology
-        </h2>
+        </h3>
         <RadioGroup value={filters?.technology || ""} onValueChange={handleTechnologyChange}>
           {technologies.map((tech, idx) => {
             const id = `tech-${idx}`;
+            const isSelected = filters?.technology === tech;
             return (
               <div key={id} className="flex items-center space-x-2 py-1">
-                <RadioGroupItem value={tech} id={id} />
-                <label htmlFor={id} className="text-sm cursor-pointer text-gray-700">
+                <RadioGroupItem
+                  value={tech}
+                  id={id}
+                  className="border-[#4A3866] data-[state=checked]:border-[#6B3AC2] text-[#6B3AC2] bg-[#141018] focus-visible:ring-[#6B3AC2]"
+                />
+                <label
+                  htmlFor={id}
+                  className={`text-sm cursor-pointer transition-colors ${
+                    isSelected ? "text-white font-medium" : "text-[#B7ACD6] hover:text-white"
+                  }`}
+                >
                   {tech}
                 </label>
               </div>
@@ -130,16 +149,26 @@ const Filtercard = () => {
 
       {/* Job Type Filter */}
       <div>
-        <h2 className="font-semibold text-sm uppercase text-gray-500 tracking-wider mb-2">
+        <h3 className="font-semibold text-xs uppercase text-[#7A7488] tracking-wider mb-2">
           Job Type
-        </h2>
+        </h3>
         <RadioGroup value={filters?.jobType || ""} onValueChange={handleJobTypeChange}>
           {jobTypes.map((type, idx) => {
             const id = `type-${idx}`;
+            const isSelected = filters?.jobType === type;
             return (
               <div key={id} className="flex items-center space-x-2 py-1">
-                <RadioGroupItem value={type} id={id} />
-                <label htmlFor={id} className="text-sm cursor-pointer text-gray-700">
+                <RadioGroupItem
+                  value={type}
+                  id={id}
+                  className="border-[#4A3866] data-[state=checked]:border-[#6B3AC2] text-[#6B3AC2] bg-[#141018] focus-visible:ring-[#6B3AC2]"
+                />
+                <label
+                  htmlFor={id}
+                  className={`text-sm cursor-pointer transition-colors ${
+                    isSelected ? "text-white font-medium" : "text-[#B7ACD6] hover:text-white"
+                  }`}
+                >
                   {type}
                 </label>
               </div>
@@ -150,16 +179,26 @@ const Filtercard = () => {
 
       {/* Experience Filter */}
       <div>
-        <h2 className="font-semibold text-sm uppercase text-gray-500 tracking-wider mb-2">
+        <h3 className="font-semibold text-xs uppercase text-[#7A7488] tracking-wider mb-2">
           Experience
-        </h2>
+        </h3>
         <RadioGroup value={selectedExpLabel} onValueChange={handleExperienceChange}>
           {experienceRanges.map((exp, idx) => {
             const id = `exp-${idx}`;
+            const isSelected = selectedExpLabel === exp.label;
             return (
               <div key={id} className="flex items-center space-x-2 py-1">
-                <RadioGroupItem value={exp.label} id={id} />
-                <label htmlFor={id} className="text-sm cursor-pointer text-gray-700">
+                <RadioGroupItem
+                  value={exp.label}
+                  id={id}
+                  className="border-[#4A3866] data-[state=checked]:border-[#6B3AC2] text-[#6B3AC2] bg-[#141018] focus-visible:ring-[#6B3AC2]"
+                />
+                <label
+                  htmlFor={id}
+                  className={`text-sm cursor-pointer transition-colors ${
+                    isSelected ? "text-white font-medium" : "text-[#B7ACD6] hover:text-white"
+                  }`}
+                >
                   {exp.label}
                 </label>
               </div>
@@ -170,16 +209,26 @@ const Filtercard = () => {
 
       {/* Salary Filter */}
       <div>
-        <h2 className="font-semibold text-sm uppercase text-gray-500 tracking-wider mb-2">
+        <h3 className="font-semibold text-xs uppercase text-[#7A7488] tracking-wider mb-2">
           Salary
-        </h2>
+        </h3>
         <RadioGroup value={selectedSalaryLabel} onValueChange={handleSalaryChange}>
           {salaryRanges.map((sal, idx) => {
             const id = `sal-${idx}`;
+            const isSelected = selectedSalaryLabel === sal.label;
             return (
               <div key={id} className="flex items-center space-x-2 py-1">
-                <RadioGroupItem value={sal.label} id={id} />
-                <label htmlFor={id} className="text-sm cursor-pointer text-gray-700">
+                <RadioGroupItem
+                  value={sal.label}
+                  id={id}
+                  className="border-[#4A3866] data-[state=checked]:border-[#6B3AC2] text-[#6B3AC2] bg-[#141018] focus-visible:ring-[#6B3AC2]"
+                />
+                <label
+                  htmlFor={id}
+                  className={`text-sm cursor-pointer transition-colors ${
+                    isSelected ? "text-white font-medium" : "text-[#B7ACD6] hover:text-white"
+                  }`}
+                >
                   {sal.label}
                 </label>
               </div>
