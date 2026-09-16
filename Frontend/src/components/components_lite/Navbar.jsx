@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
-import { LogOut, User2, Bookmark, BellRing } from "lucide-react";
+import { LogOut, User2, Bookmark, BellRing, Briefcase } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import API from "@/utils/axiosInstance";
@@ -92,6 +92,11 @@ const Navbar = () => {
                 <li>
                   <Link to={"/Jobs"}>Jobs</Link>
                 </li>
+                {user && user.role === "Student" && (
+                  <li>
+                    <Link to={"/applications"}>Applications</Link>
+                  </li>
+                )}
                 <li>
                   <Link to={"/Creator"}>About</Link>
                 </li>
@@ -181,6 +186,12 @@ const Navbar = () => {
                           <User2 />
                           <Button variant="link">
                             <Link to={"/Profile"}> Profile</Link>
+                          </Button>
+                        </div>
+                        <div className="flex w-fit items-center gap-2 cursor-pointer">
+                          <Briefcase className="w-4 h-4" />
+                          <Button variant="link">
+                            <Link to={"/applications"}> Applications</Link>
                           </Button>
                         </div>
                         <div className="flex w-fit items-center gap-2 cursor-pointer">

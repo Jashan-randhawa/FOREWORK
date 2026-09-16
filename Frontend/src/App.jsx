@@ -16,6 +16,7 @@ const Browse = lazy(() => import("./components/components_lite/Browse.jsx"));
 const SavedJobs = lazy(() => import("./components/components_lite/SavedJobs.jsx"));
 const JobAlerts = lazy(() => import("./components/components_lite/JobAlerts.jsx"));
 const Profile = lazy(() => import("./components/components_lite/Profile.jsx"));
+const ApplicationsPage = lazy(() => import("./components/components_lite/ApplicationsPage.jsx"));
 const Description = lazy(() => import("./components/components_lite/Description.jsx"));
 const Companies = lazy(() => import("./components/admincomponent/Companies"));
 const CompanyCreate = lazy(() => import("./components/admincomponent/CompanyCreate"));
@@ -65,6 +66,10 @@ const appRouter = createBrowserRouter([
   {
     path: "/Profile",
     element: <Profile />,
+  },
+  {
+    path: "/applications",
+    element: <ApplicationsPage />,
   },
   {
     path: "/saved-jobs",
