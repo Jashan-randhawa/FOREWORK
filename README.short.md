@@ -1,104 +1,91 @@
+<div align="center">
+
 # 💼 FOREWORK — Job Portal
 
-> 🌐 **Live Demo:** [forework.vercel.app](https://forework.vercel.app) &nbsp;|&nbsp; ⚙️ **API:** [forework.onrender.com](https://forework.onrender.com) &nbsp;|&nbsp; 📖 **Full Docs:** [README.md](./README.md)
+### Production-Ready MERN Stack Talent Platform
 
-A production-ready, full-stack **Job Portal** built with the MERN stack connecting job seekers, recruiters, and platform admins.
+Connecting Job Seekers, Recruiters, and Platform Admins with End-to-End Application Tracking, Hardened Security, and Real-Time Funnel Analytics.
+
+<br/>
+
+[![Live Demo](https://img.shields.io/badge/Live_Demo-forework.vercel.app-00dfa2?style=for-the-badge&logo=vercel&logoColor=white)](https://forework.vercel.app)
+[![API Status](https://img.shields.io/badge/API_Service-forework.onrender.com-4682b4?style=for-the-badge&logo=render&logoColor=white)](https://forework.onrender.com)
+[![Full Documentation](https://img.shields.io/badge/Full_Docs-README.md-blueviolet?style=for-the-badge)](./README.md)
+[![Tests](https://img.shields.io/badge/Tests-133%20Passing-2ea44f?style=for-the-badge&logo=vitest&logoColor=white)](https://github.com/Jashan-randhawa/FOREWORK)
+
+<br/>
+
+[![React 18](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-20-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://mongodb.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Docker](https://img.shields.io/badge/Docker-Multi--Stage-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com/)
+
+</div>
 
 ---
 
-## 👥 Three Roles
+## 👥 Three Specialized Portals
 
-| Role | What they can do |
-|------|-----------------|
-| **Student / Job Seeker** | Browse & filter jobs, apply with a resume, track status, save jobs, receive in-app notifications, share listings |
-| **Recruiter** | Post jobs, manage applicants, schedule interviews, view analytics dashboards (Recharts) |
-| **Admin** | Moderate users/jobs/companies, view platform stats, full audit log trail |
+| Role | Key Capabilities |
+| :--- | :--- |
+| **Student / Job Seeker** | Browse & search 14 categories, apply with Cloudinary PDF resume, track status in real-time, save jobs, set automated alerts |
+| **Recruiter** | Register company, post jobs, manage 5-stage lifecycle, review applicants, add notes, schedule video interviews, Recharts analytics |
+| **Admin** | Suspend/reactivate users, moderate job postings, verify companies, review immutable security audit logs |
 
 ---
 
 ## ✨ Key Features
 
-- 🔐 JWT auth (HTTP-only cookies) · bcrypt passwords · AES-256-GCM PII encryption (PAN/Aadhaar)
-- 📂 Cloudinary file storage (profile photos, resumes, company logos)
-- 🔍 Server-side job search with keyword, location, job type, experience and salary filters
-- 📋 Job lifecycle management: `draft → published → paused → expired → closed`
-- 📊 Per-job analytics: views, applications, conversion rate, status breakdown (Recharts)
-- 🔔 In-app notification system (application submitted, status updates, interview scheduled)
-- 📧 Transactional email: email verification, password reset, interview scheduling (Nodemailer)
-- 🔖 Save jobs · 📤 1-click share (Web Share API / clipboard fallback)
-- 🚨 Admin moderation: suspend users, moderate jobs, verify companies, audit logs
-- ♿ WCAG accessibility (skip links, ARIA labels, semantic landmarks, Error Boundary)
-- 🐳 Docker multi-stage build · Graceful SIGTERM shutdown · Gzip compression
-- ✅ 133/133 Vitest tests across 10 suites — CI on every push
+- 🔐 **Zero-Trust Security** — JWT in HTTP-only cookies, bcrypt password hashing, AES-256-GCM encrypted PII (PAN & Aadhaar) with blind indexing
+- 📂 **Cloud Storage** — Cloudinary CDN for profile pictures, company logos, and PDF resumes
+- 🔍 **Discovery Engine** — Real-time keyword, location, job type, experience, and salary filtering
+- 📊 **Talent Analytics** — Real-time listing view counts, conversion rates, and pipeline status charts
+- 📧 **Transactional Mail** — Verification tokens, password resets, and interview reminders via Nodemailer
+- 🐳 **Production Hardened** — Multi-stage Alpine Docker build, graceful connection draining, gzip compression, and 133/133 passing Vitest tests
 
 ---
 
-## 🛠 Tech Stack
+## 🛠️ Tech Stack Overview
 
-**Frontend:** React 18 · Vite · Redux Toolkit · React Router v7 · Tailwind CSS · shadcn/ui · Recharts · Framer Motion
-
-**Backend:** Node.js + Express (ESM) · MongoDB + Mongoose · JWT · bcryptjs · Multer · Cloudinary · Nodemailer
-
-**DevOps:** Docker · GitHub Actions CI · Render · Vercel · Vitest
+- **Frontend:** React 18, Vite 6, Redux Toolkit, React Router v7, Tailwind CSS, shadcn/ui, Recharts, Framer Motion
+- **Backend:** Node.js, Express (ESM), MongoDB Atlas, Mongoose, JWT, Multer, Cloudinary, Nodemailer
+- **Testing & DevOps:** Vitest (10 suites, 133 tests), Docker, GitHub Actions CI, Vercel, Render
 
 ---
 
 ## 🚀 Quick Start
 
 ```bash
-# Clone
+# 1. Clone repository
 git clone https://github.com/Jashan-randhawa/FOREWORK.git
 cd FOREWORK
 
-# Backend
+# 2. Start Backend
 cd Backend
-cp .env.example .env     # fill in your values (see Environment Variables below)
+cp .env.example .env
 npm install
-npm run dev              # → http://localhost:5001
+npm run dev        # Runs on http://localhost:5001
 
-# Frontend (new terminal)
-cd Frontend
+# 3. Start Frontend (separate terminal)
+cd ../Frontend
 echo "VITE_API_URL=http://localhost:5001" > .env
 npm install
-npm run dev              # → http://localhost:5173
+npm run dev        # Runs on http://localhost:5173
 ```
 
 ---
 
-## ⚙️ Required Environment Variables (Backend)
+## 🔑 Demo Sandbox Accounts
 
-| Variable | Description |
-|----------|-------------|
-| `MONGO_URI` | MongoDB Atlas connection string |
-| `JWT_SECRET` | JWT signing secret |
-| `PORT` | Server port (default 5001) |
-| `CLOUD_NAME` / `CLOUD_API` / `API_SECRET` | Cloudinary credentials |
-| `FRONTEND_URL` | Allowed CORS origin |
-| `FIELD_ENCRYPTION_KEY` | AES-256-GCM key — run `openssl rand -hex 32` |
-| `EMAIL_USER` / `EMAIL_PASS` | SMTP credentials for transactional email |
+| Persona | Email | Password | Access |
+| :--- | :--- | :---: | :--- |
+| **Candidate** | `jashan@gmail.com` | `password123` | Search, apply, bookmark, tracker |
+| **Recruiter** | `recruiter@company.com` | `password123` | Post jobs, screen resumes, interview setup |
 
 ---
 
-## 🧪 Tests
+## 👨‍💻 Creator
 
-```bash
-cd Backend
-npm test    # 133 tests across 10 Vitest suites (all passing)
-```
-
----
-
-## 🔑 Demo Credentials
-
-| Role | Email | Password |
-|------|-------|----------|
-| Job Seeker | `jashan@gmail.com` | `password123` |
-| Recruiter | `recruiter@company.com` | `password123` |
-
----
-
-## 👨‍💻 Creator & Maintainer
-
-**Jashanpreet Singh** — Full Stack Developer & Project Lead ([@Jashan-randhawa](https://github.com/Jashan-randhawa))
-
-**License:** MIT · [github.com/Jashan-randhawa/FOREWORK](https://github.com/Jashan-randhawa/FOREWORK)
+**Jashanpreet Singh** — Full Stack Developer ([@Jashan-randhawa](https://github.com/Jashan-randhawa))  
+📖 For the full technical reference, see [**README.md**](./README.md).
