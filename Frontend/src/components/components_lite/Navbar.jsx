@@ -185,15 +185,6 @@ const Navbar = () => {
                         )}
                       </div>
                     </div>
-
-                    {user?.profile?.bio && (
-                      <p
-                        className="text-xs text-gray-600 dark:text-[#B7ACD6] mt-2.5 line-clamp-2 leading-relaxed bg-white/70 dark:bg-[#141018]/60 p-2 rounded-lg border border-gray-200/60 dark:border-[#3D2166]/60 italic"
-                        title={user.profile.bio}
-                      >
-                        "{user.profile.bio}"
-                      </p>
-                    )}
                   </div>
 
                   {/* Mobile Navigation Links inside Popover */}
