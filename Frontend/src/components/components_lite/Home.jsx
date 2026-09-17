@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import Navbar from "./Navbar";
 import Header from "./Header";
@@ -14,6 +14,16 @@ const Home = () => {
   const { loading, error } = useGetAllJobs();
   const { user } = useSelector((store) => store.auth);
   const navigate = useNavigate();
+  const [activePillar, setActivePillar] = useState(0);
+
+  const handlePillarScroll = (e) => {
+    const scrollLeft = e.currentTarget.scrollLeft;
+    const itemWidth = e.currentTarget.scrollWidth / platformPillars.length;
+    if (itemWidth > 0) {
+      const index = Math.round(scrollLeft / itemWidth);
+      setActivePillar(Math.min(Math.max(0, index), platformPillars.length - 1));
+    }
+  };
 
   useEffect(() => {
     if (user?.role === "Recruiter") {
@@ -53,9 +63,9 @@ const Home = () => {
         <Header />
 
         {/* 2. Platform Value Props / Why ForeWork */}
-        <section className="py-16 sm:py-20 bg-white dark:bg-[#120E19] border-b border-gray-200 dark:border-[#231E2D] relative overflow-hidden transition-colors">
+        <section className="py-10 sm:py-16 md:py-20 bg-white dark:bg-[#120E19] border-b border-gray-200 dark:border-[#231E2D] relative overflow-hidden transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="text-center max-w-2xl mx-auto mb-12">
+            <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-100/70 dark:bg-purple-950/70 text-[#6B3AC2] dark:text-purple-300 border border-purple-200 dark:border-purple-800/60 mb-3">
                 <Sparkles className="w-3.5 h-3.5" /> Platform Advantages
               </span>
@@ -67,29 +77,44 @@ const Home = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            <div
+              onScroll={handlePillarScroll}
+              className="flex md:grid md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-3 md:pb-0 px-1 md:px-0"
+            >
               {platformPillars.map((item, idx) => {
                 const Icon = item.icon;
                 return (
                   <div
                     key={idx}
-                    className="p-7 rounded-2xl bg-white dark:bg-[#171221] border border-gray-200 dark:border-[#2A2337] hover:border-[#6B3AC2]/50 dark:hover:border-purple-500/50 shadow-sm hover:shadow-xl hover:shadow-purple-500/5 hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between relative overflow-hidden"
+                    className="min-w-[85%] xs:min-w-[80%] sm:min-w-[70%] md:min-w-0 snap-center shrink-0 md:shrink p-6 sm:p-7 rounded-2xl bg-white dark:bg-[#171221] border border-gray-200 dark:border-[#2A2337] hover:border-[#6B3AC2]/50 dark:hover:border-purple-500/50 shadow-sm hover:shadow-xl hover:shadow-purple-500/5 hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between relative overflow-hidden"
                   >
                     <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#6B3AC2]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div>
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${item.color} mb-5 group-hover:scale-105 transition-transform`}>
-                        <Icon className="w-6 h-6" />
+                      <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border ${item.color} mb-4 sm:mb-5 group-hover:scale-105 transition-transform`}>
+                        <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                       </div>
-                      <h3 className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-[#6B3AC2] dark:group-hover:text-purple-300 transition-colors mb-2.5">
+                      <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white group-hover:text-[#6B3AC2] dark:group-hover:text-purple-300 transition-colors mb-2">
                         {item.title}
                       </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                         {item.desc}
                       </p>
                     </div>
                   </div>
                 );
               })}
+            </div>
+
+            {/* Mobile Carousel Dot Indicators */}
+            <div className="flex md:hidden justify-center items-center gap-1.5 mt-4" aria-hidden="true">
+              {platformPillars.map((_, idx) => (
+                <span
+                  key={idx}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    activePillar === idx ? "w-5 bg-[#6B3AC2]" : "w-1.5 bg-gray-300 dark:bg-gray-700"
+                  }`}
+                />
+              ))}
             </div>
           </div>
         </section>
@@ -113,13 +138,13 @@ const Home = () => {
         {!loading && <LatestJobs />}
 
         {/* 5. Dual CTA Section */}
-        <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-r from-[#6B3AC2] to-indigo-700 text-white rounded-3xl p-8 sm:p-12 shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+        <section className="py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-gradient-to-r from-[#6B3AC2] to-indigo-700 text-white rounded-2xl sm:rounded-3xl p-6 sm:p-10 md:p-12 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 relative overflow-hidden">
             <div className="max-w-xl text-center md:text-left">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-white border border-white/20 mb-4">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-white border border-white/20 mb-3 sm:mb-4">
                 <Sparkles className="w-3.5 h-3.5" /> Join Over 10,000+ Professionals
               </div>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight mb-3">
+              <h2 className="text-xl xs:text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight mb-2.5 sm:mb-3">
                 Ready to Accelerate Your Career?
               </h2>
               <p className="text-purple-100 text-xs sm:text-sm leading-relaxed">

@@ -5,8 +5,8 @@ import { Github, Heart, ShieldCheck } from "lucide-react";
 const Footer = () => {
   return (
     <footer className="w-full bg-white dark:bg-[#0B090E] border-t border-gray-200 dark:border-[#231E2D] text-gray-600 dark:text-gray-300 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8 lg:gap-12">
           {/* Brand & Mission Column */}
           <div className="lg:col-span-2 space-y-4">
             <Link to="/" className="inline-flex items-center gap-2 group">
@@ -139,7 +139,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-gray-200 dark:border-[#231E2D] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
+        <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-gray-200 dark:border-[#231E2D] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
           <p>© {new Date().getFullYear()} ForeWork. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
