@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from "react";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import ErrorBoundary from "./components/components_lite/ErrorBoundary";
 import BottomTabBar from "./components/components_lite/BottomTabBar";
 
@@ -208,6 +209,7 @@ function App() {
           <RouterProvider router={appRouter}></RouterProvider>
         </Suspense>
         <Analytics />
+        <SpeedInsights />
       </div>
     </ErrorBoundary>
   );
