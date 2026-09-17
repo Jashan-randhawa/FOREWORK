@@ -393,47 +393,74 @@ const Jobs = () => {
         </div>
       </main>
 
-      {/* Mobile Slide-Over Filter Drawer */}
+      {/* Mobile Slide-Up Filter Bottom Sheet */}
       {isMobileFilterOpen && (
         <div
           id="jobs-mobile-filter-drawer"
+          data-testid="jobs-mobile-filter-sheet"
           role="dialog"
           aria-modal="true"
           aria-label="Job filters"
-          className="fixed inset-0 z-50 flex md:hidden"
+          className="fixed inset-0 z-50 flex flex-col justify-end md:hidden"
         >
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-black/60 dark:bg-black/75 backdrop-blur-xs transition-opacity"
             onClick={() => setIsMobileFilterOpen(false)}
             aria-hidden="true"
           />
 
-          {/* Drawer Panel */}
-          <div className="relative ml-auto w-full max-w-xs bg-white dark:bg-[#1F1B26] border-l border-gray-200 dark:border-[#3D2166] p-5 shadow-2xl flex flex-col h-full overflow-y-auto z-10">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-[#2A2434] mb-4">
-              <span className="font-bold text-base text-gray-900 dark:text-white">
-                Filter Jobs
-              </span>
+          {/* Bottom Sheet Panel */}
+          <div className="relative w-full max-h-[85vh] bg-white dark:bg-[#1F1B26] border-t border-gray-200 dark:border-[#3D2166] rounded-t-2xl shadow-2xl flex flex-col overflow-hidden z-10 animate-in slide-in-from-bottom duration-200">
+            {/* Drag Handle Indicator */}
+            <div className="pt-3 pb-1 shrink-0">
+              <div className="w-10 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto" />
+            </div>
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-2.5 border-b border-gray-100 dark:border-[#2A2434] shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-base text-gray-900 dark:text-white">
+                  Filter Jobs
+                </span>
+                {activeFiltersCount > 0 && (
+                  <span className="px-2 py-0.5 bg-[#6B3AC2] text-white rounded-full text-[11px] font-semibold">
+                    {activeFiltersCount} active
+                  </span>
+                )}
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsMobileFilterOpen(false)}
                 aria-label="Close filters"
-                className="w-8 h-8 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-[#958EA3] dark:hover:text-white dark:hover:bg-[#2A2434]"
+                className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-[#958EA3] dark:hover:text-white dark:hover:bg-[#2A2434] flex items-center justify-center"
               >
                 <X className="w-4 h-4" />
               </Button>
             </div>
 
-            <div className="flex-1 overflow-y-auto pr-1">
+            {/* Scrollable Filter Options */}
+            <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-3">
               <Filtercard />
             </div>
 
-            <div className="pt-4 border-t border-gray-200 dark:border-[#2A2434] mt-4">
+            {/* Sticky Action Footer */}
+            <div className="p-4 border-t border-gray-100 dark:border-[#2A2434] bg-white dark:bg-[#1F1B26] flex items-center gap-3 shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  dispatch(clearFilters());
+                  setSearchKeyword("");
+                }}
+                disabled={activeFiltersCount === 0}
+                className="flex-1 h-11 min-h-[44px] text-xs font-semibold border-gray-200 dark:border-[#3D2166] text-gray-700 dark:text-gray-300"
+              >
+                Clear All
+              </Button>
               <Button
                 onClick={() => setIsMobileFilterOpen(false)}
-                className="w-full bg-[#6B3AC2] hover:bg-[#552d9b] text-white text-xs font-semibold h-9"
+                className="flex-1 h-11 min-h-[44px] bg-[#6B3AC2] hover:bg-[#552d9b] text-white text-xs font-semibold shadow-sm"
               >
                 Apply Filters
               </Button>

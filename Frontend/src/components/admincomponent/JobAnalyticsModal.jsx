@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Dialog,
@@ -64,7 +64,7 @@ const JobAnalyticsModal = ({ isOpen, onClose, jobId, jobTitle }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-3xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto overscroll-contain rounded-xl sm:rounded-lg">
         <DialogHeader className="border-b pb-4">
           <DialogTitle className="text-xl font-bold flex items-center gap-2 text-gray-900">
             <TrendingUp className="w-5 h-5 text-[#6B3AC2]" />

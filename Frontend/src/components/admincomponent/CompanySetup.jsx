@@ -148,28 +148,30 @@ const CompanySetup = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0E0C14]">
       <Navbar />
-      <div className="max-w-xl mx-auto my-10">
-        <form onSubmit={submitHandler}>
-          <div className="flex items-center gap-5 p-8">
+      <div className="max-w-xl mx-auto my-6 sm:my-10 px-4 sm:px-6">
+        <form onSubmit={submitHandler} className="bg-white dark:bg-[#14101B] p-5 sm:p-8 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="flex items-center gap-4 mb-6">
             <Button
+              type="button"
               onClick={() => navigate("/recruiter/companies")}
               variant="outline"
-              className="flex items-center gap-2 text-gray-500 font-semibold"
+              className="flex items-center gap-2 text-gray-500 font-semibold min-h-[44px]"
             >
-              <ArrowLeft />
+              <ArrowLeft className="w-4 h-4" />
               <span>Back</span>
             </Button>
-            <h1 className="font-bold text-xl">Company Setup</h1>
+            <h1 className="font-bold text-xl text-gray-900 dark:text-white">Company Setup</h1>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>Company Name</Label>
               <Input
                 type="text"
                 name="name"
                 value={input.name}
+                className="my-1 h-11"
                 onChange={changeEventHandler}
               />
             </div>
@@ -179,15 +181,18 @@ const CompanySetup = () => {
                 type="text"
                 name="description"
                 value={input.description}
+                className="my-1 h-11"
                 onChange={changeEventHandler}
               />
             </div>
             <div>
               <Label>Website</Label>
               <Input
-                type="text"
+                type="url"
                 name="website"
                 value={input.website}
+                placeholder="https://..."
+                className="my-1 h-11"
                 onChange={changeEventHandler}
               />
             </div>
@@ -197,25 +202,28 @@ const CompanySetup = () => {
                 type="text"
                 name="location"
                 value={input.location}
+                placeholder="City, Country"
+                className="my-1 h-11"
                 onChange={changeEventHandler}
               />
             </div>
-            <div>
-              <Label>Logo</Label>
+            <div className="sm:col-span-2">
+              <Label>Company Logo</Label>
               <Input
                 type="file"
                 accept="image/*"
+                className="my-1 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-[#6A38C2] hover:file:bg-purple-100"
                 onChange={changeFileHandler}
               />
             </div>
           </div>
           {loading ? (
-            <Button className="w-full my-4">
+            <Button disabled className="w-full min-h-[44px] mt-6 bg-[#6A38C2] text-white">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
             </Button>
           ) : (
-            <Button type="submit" className="w-full my-4">
-              Update
+            <Button type="submit" className="w-full min-h-[44px] mt-6 bg-[#6A38C2] hover:bg-[#5b30a6] text-white">
+              Update Company
             </Button>
           )}
         </form>

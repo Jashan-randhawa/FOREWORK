@@ -562,6 +562,7 @@ const Register = () => {
                       <Input
                         id="reg-adharcard"
                         type="text"
+                        inputMode="numeric"
                         value={input.adharcard}
                         name="adharcard"
                         required

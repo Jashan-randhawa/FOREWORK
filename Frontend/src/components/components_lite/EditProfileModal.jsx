@@ -136,8 +136,8 @@ const EditProfileModal = ({ open, setOpen }) => {
           </DialogHeader>
 
           <form onSubmit={submitHandler} className="space-y-4 py-2">
-            <div className="grid grid-cols-4 items-center gap-3">
-              <Label htmlFor="fullname" className="text-right text-sm">
+            <div className="flex flex-col sm:grid sm:grid-cols-4 items-start sm:items-center gap-1.5 sm:gap-3">
+              <Label htmlFor="fullname" className="text-left sm:text-right text-xs sm:text-sm font-medium">
                 Full Name
               </Label>
               <input
@@ -145,14 +145,15 @@ const EditProfileModal = ({ open, setOpen }) => {
                 id="fullname"
                 value={input.fullname}
                 name="fullname"
+                autoComplete="name"
                 onChange={changeEventHandler}
                 required
-                className="col-span-3 border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                className="w-full sm:col-span-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg p-2.5 sm:p-2 text-sm min-h-[44px] sm:min-h-0 focus:outline-none focus:ring-1 focus:ring-purple-500"
               />
             </div>
 
-            <div className="grid grid-cols-4 items-center gap-3">
-              <Label htmlFor="email" className="text-right text-sm">
+            <div className="flex flex-col sm:grid sm:grid-cols-4 items-start sm:items-center gap-1.5 sm:gap-3">
+              <Label htmlFor="email" className="text-left sm:text-right text-xs sm:text-sm font-medium">
                 Email
               </Label>
               <input
@@ -160,14 +161,15 @@ const EditProfileModal = ({ open, setOpen }) => {
                 id="email"
                 value={input.email}
                 name="email"
+                autoComplete="email"
                 onChange={changeEventHandler}
                 required
-                className="col-span-3 border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                className="w-full sm:col-span-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg p-2.5 sm:p-2 text-sm min-h-[44px] sm:min-h-0 focus:outline-none focus:ring-1 focus:ring-purple-500"
               />
             </div>
 
-            <div className="grid grid-cols-4 items-center gap-3">
-              <Label htmlFor="phone" className="text-right text-sm">
+            <div className="flex flex-col sm:grid sm:grid-cols-4 items-start sm:items-center gap-1.5 sm:gap-3">
+              <Label htmlFor="phone" className="text-left sm:text-right text-xs sm:text-sm font-medium">
                 Phone
               </Label>
               <input
@@ -175,14 +177,16 @@ const EditProfileModal = ({ open, setOpen }) => {
                 id="phone"
                 value={input.phoneNumber}
                 name="phoneNumber"
+                autoComplete="tel"
+                inputMode="tel"
                 onChange={changeEventHandler}
                 required
-                className="col-span-3 border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                className="w-full sm:col-span-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg p-2.5 sm:p-2 text-sm min-h-[44px] sm:min-h-0 focus:outline-none focus:ring-1 focus:ring-purple-500"
               />
             </div>
 
-            <div className="grid grid-cols-4 items-center gap-3">
-              <Label htmlFor="bio" className="text-right text-sm">
+            <div className="flex flex-col sm:grid sm:grid-cols-4 items-start gap-1.5 sm:gap-3">
+              <Label htmlFor="bio" className="text-left sm:text-right text-xs sm:text-sm font-medium pt-1">
                 Bio
               </Label>
               <textarea
@@ -191,12 +195,12 @@ const EditProfileModal = ({ open, setOpen }) => {
                 name="bio"
                 rows={2}
                 onChange={changeEventHandler}
-                className="col-span-3 border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                className="w-full sm:col-span-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg p-2.5 sm:p-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
               />
             </div>
 
-            <div className="grid grid-cols-4 items-center gap-3">
-              <Label htmlFor="skills" className="text-right text-sm">
+            <div className="flex flex-col sm:grid sm:grid-cols-4 items-start sm:items-center gap-1.5 sm:gap-3">
+              <Label htmlFor="skills" className="text-left sm:text-right text-xs sm:text-sm font-medium">
                 Skills
               </Label>
               <input
@@ -205,23 +209,23 @@ const EditProfileModal = ({ open, setOpen }) => {
                 placeholder="e.g. React, Node.js, Python"
                 value={input.skills}
                 onChange={changeEventHandler}
-                className="col-span-3 border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                className="w-full sm:col-span-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg p-2.5 sm:p-2 text-sm min-h-[44px] sm:min-h-0 focus:outline-none focus:ring-1 focus:ring-purple-500"
               />
             </div>
 
             {/* Resume Upload with inline UX validation (CAND-003) */}
-            <div className="grid grid-cols-4 items-start gap-3">
-              <Label htmlFor="file" className="text-right text-sm pt-2">
+            <div className="flex flex-col sm:grid sm:grid-cols-4 items-start gap-1.5 sm:gap-3">
+              <Label htmlFor="file" className="text-left sm:text-right text-xs sm:text-sm font-medium pt-1">
                 Resume (PDF)
               </Label>
-              <div className="col-span-3 space-y-1">
+              <div className="w-full sm:col-span-3 space-y-1">
                 <input
                   type="file"
                   id="file"
                   name="file"
                   accept="application/pdf"
                   onChange={fileChangeHandler}
-                  className="w-full border border-gray-300 rounded-md p-1.5 text-xs file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                  className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg p-2 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 dark:file:bg-purple-950/40 dark:file:text-purple-300"
                 />
                 <p className="text-xs text-gray-500">
                   Allowed: PDF only, max {MAX_RESUME_SIZE_MB}MB.
@@ -243,26 +247,27 @@ const EditProfileModal = ({ open, setOpen }) => {
               </div>
             </div>
 
-            <DialogFooter className="pt-2">
+            <DialogFooter className="pt-2 flex-col-reverse sm:flex-row gap-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
-                disabled={loading}
+                className="w-full sm:w-auto min-h-[44px] text-xs"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                disabled={loading || Boolean(fileError)}
-                className="bg-[#6B3AC2] hover:bg-[#552d9b] text-white"
+                className="w-full sm:w-auto min-h-[44px] text-xs bg-purple-600 hover:bg-purple-700 text-white"
+                disabled={loading}
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
                   </>
                 ) : (
-                  "Save Changes"
+                  "Update Profile"
                 )}
               </Button>
             </DialogFooter>

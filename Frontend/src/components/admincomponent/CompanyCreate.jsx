@@ -36,29 +36,38 @@ const CompanyCreate = () => {
     }
   };
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0E0C14]">
       <Navbar />
-      <div className="max-w-4xl mx-auto">
-        <div className="my-10">
-          <h1 className="font-bold text-2xl ">Company Name</h1>
-          <p className="text-gray-600">Company Description</p>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        <div className="my-6 sm:my-10">
+          <h1 className="font-bold text-2xl sm:text-3xl text-gray-900 dark:text-white">Create a Company</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">What would you like to name your company? You can change this later.</p>
         </div>
-        <Label>Company Name</Label>
-        <Input
-          type="text"
-          placeholder="Company Name"
-          className="my-2"
-          onChange={(e) => setCompanyName(e.target.value)}
-        />
+        <div className="bg-white dark:bg-[#14101B] p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <Label htmlFor="company-name" className="text-sm font-semibold">Company Name</Label>
+          <Input
+            id="company-name"
+            type="text"
+            placeholder="Google, Microsoft, etc."
+            className="my-3 h-11"
+            onChange={(e) => setCompanyName(e.target.value)}
+          />
 
-        <div className="flex items-center gap-2 my-10">
-          <Button
-            variant="outline"
-            onClick={() => navigate("/recruiter/companies")}
-          >
-            Cancel
-          </Button>
-          <Button onClick={registerNewCompany}>Continue</Button>
+          <div className="flex items-center gap-3 mt-6">
+            <Button
+              variant="outline"
+              className="min-h-[44px] px-5"
+              onClick={() => navigate("/recruiter/companies")}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="min-h-[44px] px-6 bg-[#6B3AC2] hover:bg-[#582fa1] text-white"
+              onClick={registerNewCompany}
+            >
+              Continue
+            </Button>
+          </div>
         </div>
       </div>
     </div>

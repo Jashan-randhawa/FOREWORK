@@ -112,6 +112,7 @@
 @layer base {
   * {
     @apply border-border;
+    -webkit-tap-highlight-color: transparent;
   }
 
   html {
@@ -125,6 +126,15 @@
     @apply bg-background text-foreground;
     /* Prevent accidental horizontal overflow on mobile */
     overflow-x: hidden;
+  }
+
+  /* Optimize touch target responsiveness */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
   }
 
   /* Respect reduced-motion preferences */
