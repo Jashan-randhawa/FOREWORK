@@ -39,12 +39,15 @@ const AdminPlatformJobs = lazy(() => import("./components/admin/AdminJobs"));
 const AdminCompanies = lazy(() => import("./components/admin/AdminCompanies"));
 const AdminAuditLogs = lazy(() => import("./components/admin/AdminAuditLogs"));
 
+import OfflineBanner from "./components/shared/OfflineBanner";
+
 /**
- * Root layout that wraps all routes with bottom tab bar padding and the bar itself.
+ * Root layout that wraps all routes with bottom tab bar padding, offline banner, and tab bar.
  */
 function RootLayout() {
   return (
     <>
+      <OfflineBanner />
       <div className="pb-16 md:pb-0">
         <Outlet />
       </div>

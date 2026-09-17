@@ -1,0 +1,25 @@
+{
+  "name": "ForeWork — Verified Tech Careers",
+  "short_name": "ForeWork",
+  "description": "Find your next career opportunity with real-time application telemetry and verified hiring.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0E0C14",
+  "theme_color": "#6B3AC2",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"]
+}
