@@ -87,6 +87,106 @@ export const getMobileNavItems = (role) => {
   return items;
 };
 
+/** Mobile nav sheet — grouped navigation sections by role */
+export const getMobileNavSections = (role) => {
+  if (role === "Admin") {
+    return [
+      {
+        title: "Overview",
+        items: [
+          { label: "Admin Dashboard", path: "/admin/dashboard", icon: ShieldCheck },
+        ],
+      },
+      {
+        title: "Platform Management",
+        items: [
+          { label: "Users", path: "/admin/users", icon: Users },
+          { label: "Jobs", path: "/admin/jobs", icon: Briefcase },
+          { label: "Companies", path: "/admin/companies", icon: Building2 },
+        ],
+      },
+      {
+        title: "Security & Auditing",
+        items: [
+          { label: "Audit Logs", path: "/admin/audit-logs", icon: ScrollText },
+        ],
+      },
+    ];
+  }
+
+  if (role === "Recruiter") {
+    return [
+      {
+        title: "Overview",
+        items: [
+          { label: "Dashboard", path: "/recruiter/dashboard", icon: LayoutDashboard },
+        ],
+      },
+      {
+        title: "Hiring Hub",
+        items: [
+          { label: "My Jobs", path: "/recruiter/jobs", icon: Briefcase },
+          { label: "My Companies", path: "/recruiter/companies", icon: Building2 },
+        ],
+      },
+      {
+        title: "Activity & Profile",
+        items: [
+          { label: "Notifications", path: "/notifications", icon: Bell },
+          { label: "Profile", path: "/Profile", icon: User2 },
+        ],
+      },
+    ];
+  }
+
+  // Student (Candidate)
+  if (role === "Student") {
+    return [
+      {
+        title: "Explore",
+        items: [
+          { label: "Home", path: "/Home", icon: Home },
+          { label: "Browse", path: "/Browse", icon: Search },
+          { label: "Jobs", path: "/Jobs", icon: Briefcase },
+        ],
+      },
+      {
+        title: "Career Hub",
+        items: [
+          { label: "Applications", path: "/applications", icon: Briefcase },
+          { label: "Saved Jobs", path: "/saved-jobs", icon: Bookmark },
+          { label: "Job Alerts", path: "/job-alerts", icon: Bell },
+        ],
+      },
+      {
+        title: "Account",
+        items: [
+          { label: "Profile", path: "/Profile", icon: User2 },
+          { label: "About", path: "/Creator", icon: Info },
+        ],
+      },
+    ];
+  }
+
+  // Guest
+  return [
+    {
+      title: "Explore",
+      items: [
+        { label: "Home", path: "/Home", icon: Home },
+        { label: "Browse", path: "/Browse", icon: Search },
+        { label: "Jobs", path: "/Jobs", icon: Briefcase },
+      ],
+    },
+    {
+      title: "About",
+      items: [
+        { label: "About ForeWork", path: "/Creator", icon: Info },
+      ],
+    },
+  ];
+};
+
 /** Bottom tab bar items (authenticated Student / Recruiter only) */
 export const getBottomTabs = (role) => {
   if (role === "Student") {
