@@ -46,7 +46,7 @@ const CompaniesTable = () => {
         accessorKey: "name",
         priority: "primary",
         sortable: true,
-        cell: (company) => <span className="font-semibold text-gray-900 dark:text-gray-100">{company.name}</span>,
+        cell: (company) => <span className="font-semibold text-gray-900 dark:text-gray-100 break-words">{company.name}</span>,
       },
       {
         header: "Date",
@@ -66,7 +66,7 @@ const CompaniesTable = () => {
               <PopoverTrigger asChild>
                 <button
                   aria-label="Open company actions menu"
-                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
                 >
                   <MoreHorizontal className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                 </button>
@@ -103,7 +103,7 @@ const CompaniesTable = () => {
             />
           </Avatar>
           <div className="min-w-0">
-            <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
+            <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate break-words">
               {company.name}
             </h4>
             <p className="text-xs text-gray-500 dark:text-gray-400">Registered: {dateStr}</p>

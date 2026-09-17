@@ -171,7 +171,7 @@ const ApplicantsTable = () => {
         priority: "primary",
         sortable: true,
         cell: (item) => (
-          <span className="font-semibold text-gray-900 dark:text-gray-100">
+          <span className="font-semibold text-gray-900 dark:text-gray-100 break-words">
             {item?.applicant?.fullname || "Unknown"}
           </span>
         ),
@@ -181,7 +181,9 @@ const ApplicantsTable = () => {
         accessorKey: "applicantEmail",
         priority: "secondary",
         sortable: true,
-        cell: (item) => item?.applicant?.email || "—",
+        cell: (item) => (
+          <span className="break-all">{item?.applicant?.email || "—"}</span>
+        ),
       },
       {
         header: "Contact",
@@ -310,10 +312,10 @@ const ApplicantsTable = () => {
         {/* Row 1: applicant name + status badge + overflow menu */}
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
+            <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate break-words">
               {item?.applicant?.fullname || "Unknown"}
             </h4>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate break-all">
               {item?.applicant?.email || item?.applicant?.phoneNumber || "No contact"}
             </p>
           </div>
@@ -323,7 +325,7 @@ const ApplicantsTable = () => {
               <PopoverTrigger asChild>
                 <button
                   aria-label="Open status options"
-                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center transition-colors"
+                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
                 >
                   <MoreHorizontal className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                 </button>

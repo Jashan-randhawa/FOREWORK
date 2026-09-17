@@ -79,14 +79,14 @@ const AdminJobsTable = () => {
         accessorKey: "companyName",
         priority: "secondary",
         sortable: true,
-        cell: (job) => job?.company?.name || "N/A",
+        cell: (job) => <span className="break-words">{job?.company?.name || "N/A"}</span>,
       },
       {
         header: "Role",
         accessorKey: "title",
         priority: "primary",
         sortable: true,
-        cell: (job) => <span className="font-medium text-gray-900 dark:text-gray-100">{job.title}</span>,
+        cell: (job) => <span className="font-medium text-gray-900 dark:text-gray-100 break-words">{job.title}</span>,
       },
       {
         header: "Date",
@@ -223,7 +223,7 @@ const AdminJobsTable = () => {
       >
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
+            <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate break-words">
               {job.title}
             </h4>
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
@@ -236,7 +236,7 @@ const AdminJobsTable = () => {
               <PopoverTrigger asChild>
                 <button
                   aria-label="Open job actions menu"
-                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center transition-colors"
+                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
                 >
                   <MoreHorizontal className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                 </button>

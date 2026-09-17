@@ -47,7 +47,7 @@ export const CompanyCard = ({
             </Avatar>
             <div>
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 group-hover:text-purple-600 transition-colors">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 group-hover:text-purple-600 transition-colors break-words">
                   {name}
                 </h3>
                 {isVerified && (
@@ -72,7 +72,7 @@ export const CompanyCard = ({
         </div>
 
         {description && (
-          <p className="mt-3 text-xs text-gray-600 dark:text-gray-300 line-clamp-2 leading-relaxed">
+          <p className="mt-3 text-xs text-gray-600 dark:text-gray-300 line-clamp-2 leading-relaxed break-words [overflow-wrap:anywhere]">
             {description}
           </p>
         )}

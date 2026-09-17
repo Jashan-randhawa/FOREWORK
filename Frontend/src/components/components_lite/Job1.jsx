@@ -155,10 +155,10 @@ const Job1 = ({ job, isSavedInitial = false, onUnsaved = null }) => {
         </div>
 
         <div>
-          <h2 className="font-bold text-base my-2 text-gray-900 dark:text-white group-hover:text-[#6B3AC2] dark:group-hover:text-purple-200 line-clamp-1 transition-colors">
+          <h2 className="font-bold text-base my-2 text-gray-900 dark:text-white group-hover:text-[#6B3AC2] dark:group-hover:text-purple-200 line-clamp-1 transition-colors break-words">
             {job?.title}
           </h2>
-          <p className="text-xs text-gray-600 dark:text-[#B7ACD6] line-clamp-2 leading-relaxed">
+          <p className="text-xs text-gray-600 dark:text-[#B7ACD6] line-clamp-2 leading-relaxed break-words [overflow-wrap:anywhere]">
             {job?.description}
           </p>
         </div>

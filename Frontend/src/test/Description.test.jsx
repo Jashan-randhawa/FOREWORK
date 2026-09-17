@@ -197,4 +197,38 @@ describe("Description Component - Duplicate Application Prevention", () => {
       expect(screen.queryByTestId("related-job-job-101")).not.toBeInTheDocument();
     });
   });
+
+  it("renders action button row with flex-wrap and responsive gap to prevent narrow phone overflow", async () => {
+    renderDescription({ _id: "user-1", role: "Student" });
+
+    await waitFor(() => {
+      expect(screen.getByText("Frontend Developer")).toBeInTheDocument();
+    });
+
+    const shareBtn = screen.getByRole("button", { name: /share/i });
+    const buttonRow = shareBtn.parentElement;
+    expect(buttonRow.className).toContain("flex-wrap");
+    expect(buttonRow.className).toContain("gap-2");
+  });
+
+  it("renders job description and title with break-words to prevent overflow from unbroken text", async () => {
+    const jobWithLongText = {
+      ...mockJob,
+      title: "SuperLongJobTitleThatCouldPotentiallyOverflowSmallScreensWithoutWordBreakingUtility",
+      description: "https://example.com/very/long/unbroken/url/that/should/not/cause/horizontal/overflow/on/mobile/devices/even/at/320px/width",
+    };
+
+    renderDescription(
+      { _id: "user-1", role: "Student" },
+      { singleJob: jobWithLongText }
+    );
+
+    await waitFor(() => {
+      const heading = screen.getByRole("heading", { level: 1 });
+      expect(heading.className).toContain("break-words");
+
+      const descParagraph = screen.getByText(new RegExp(jobWithLongText.description));
+      expect(descParagraph.className).toContain("break-words");
+    });
+  });
 });

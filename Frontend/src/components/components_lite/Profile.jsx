@@ -98,10 +98,10 @@ const Profile = () => {
                   />
                 </Avatar>
                 <div>
-                  <h1 className="font-bold text-2xl text-gray-900 dark:text-gray-100">
+                  <h1 className="font-bold text-2xl text-gray-900 dark:text-gray-100 break-words">
                     {user?.fullname || "User"}
                   </h1>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 leading-relaxed break-words [overflow-wrap:anywhere]">
                     {user?.profile?.bio || "No bio added yet. Tell recruiters about yourself!"}
                   </p>
                 </div>

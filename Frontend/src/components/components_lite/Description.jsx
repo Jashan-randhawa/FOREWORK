@@ -244,7 +244,7 @@ const Description = () => {
                 <Building2 className="w-4 h-4" />
                 <span>{singleJob?.company?.name || "Company"}</span>
               </div>
-              <h1 className="font-bold text-2xl sm:text-3xl text-gray-900 dark:text-gray-100">
+              <h1 className="font-extrabold text-2xl sm:text-3xl text-gray-900 dark:text-gray-100 tracking-tight break-words">
                 {singleJob?.title}
               </h1>
 
@@ -272,13 +272,14 @@ const Description = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 self-start md:self-auto">
+            <div className="flex items-center flex-wrap gap-2 sm:gap-3 self-start md:self-auto">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleShare}
-                className="flex items-center gap-2 border-gray-300 hover:bg-gray-50"
+                className="flex items-center gap-2 border-gray-300 hover:bg-gray-50 min-h-[40px]"
                 title="Share job opening"
+                aria-label="Share job opening"
               >
                 <Share2 className="w-4 h-4 text-gray-600" />
                 <span>Share</span>
@@ -294,7 +295,14 @@ const Description = () => {
                     ? "Already Applied"
                     : "Apply for this job"
                 }
-                className={`px-5 rounded-lg font-medium transition-all ${
+                aria-label={
+                  isRecruiter
+                    ? "Recruiter (Cannot Apply)"
+                    : isApplied
+                    ? "Already Applied"
+                    : "Apply"
+                }
+                className={`px-4 sm:px-5 rounded-lg font-medium transition-all min-h-[40px] ${
                   isApplied || isRecruiter
                     ? "bg-gray-400 cursor-not-allowed text-white hover:bg-gray-400"
                     : "bg-purple-600 hover:bg-purple-700 text-white shadow-sm hover:shadow"
@@ -306,7 +314,10 @@ const Description = () => {
                     Applying...
                   </>
                 ) : isRecruiter ? (
-                  "Recruiter (Cannot Apply)"
+                  <>
+                    <span className="sm:hidden">Recruiter</span>
+                    <span className="hidden sm:inline">Recruiter (Cannot Apply)</span>
+                  </>
                 ) : isApplied ? (
                   "Already Applied"
                 ) : (
@@ -321,7 +332,7 @@ const Description = () => {
             <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-2">
               Job Description
             </h2>
-            <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+            <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line break-words [overflow-wrap:anywhere]">
               {singleJob?.description}
             </p>
           </div>
@@ -419,10 +430,10 @@ const Description = () => {
                       </Badge>
                     </div>
 
-                    <h3 className="font-bold text-base text-gray-900 dark:text-gray-100 line-clamp-1">
+                    <h3 className="font-bold text-base text-gray-900 dark:text-gray-100 line-clamp-1 break-words">
                       {job.title}
                     </h3>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed break-words [overflow-wrap:anywhere]">
                       {job.description}
                     </p>
                   </div>

@@ -47,12 +47,12 @@ const JobCards = ({ job }) => {
         </div>
 
         {/* Job Title */}
-        <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white group-hover:text-[#6B3AC2] transition-colors line-clamp-1 mb-2">
+        <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white group-hover:text-[#6B3AC2] transition-colors line-clamp-1 mb-2 break-words">
           {job.title}
         </h3>
 
         {/* Truncated Description */}
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed mb-4">
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed mb-4 break-words [overflow-wrap:anywhere]">
           {job.description || "Exciting career opportunity at a fast-growing organization. Review responsibilities and apply now."}
         </p>
       </div>
