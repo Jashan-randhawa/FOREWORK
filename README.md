@@ -97,13 +97,13 @@ docker run -d -p 5001:5001 --env-file Backend/.env forework-backend
 
 ---
 
-## 📚 In-Depth Technical Documentation
+## 📚 In-Depth Technical Documentation & Wiki
 
-For deep dives into the underlying architecture and API specifications, see the [`/docs`](./docs) directory:
+Explore our comprehensive [**Project Wiki**](./wiki/Home.md) or dive into specific architectural blueprints:
 
 | Architecture & Security | Features & Workflows | API & Deployment |
 | :--- | :--- | :--- |
-| • [Security Architecture](./docs/architecture/security.md)<br/>• [Database & Indexing](./docs/architecture/database.md) | • [Candidate Experience](./docs/features/candidate-experience.md)<br/>• [Employer & Analytics](./docs/features/employer-experience.md)<br/>• [Admin Moderation](./docs/features/administration.md) | • [API Authorization](./docs/api/authorization.md)<br/>• [Docker & Production Guide](./docs/deployment/docker-and-production.md) |
+| • [Security Architecture](./wiki/Security-&-Encryption.md)<br/>• [Architecture Overview](./wiki/Architecture-Overview.md) | • [Candidate Experience](./wiki/Candidate-Portal.md)<br/>• [Employer & Analytics](./wiki/Recruiter-Suite.md)<br/>• [Admin Moderation](./wiki/Admin-Console.md) | • [API Reference](./wiki/API-Reference.md)<br/>• [Mobile & PWA Guide](./wiki/Mobile-&-PWA.md)<br/>• [Docker & Production Guide](./wiki/Deployment-Guide.md) |
 
 ---
 
