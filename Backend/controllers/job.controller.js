@@ -146,6 +146,7 @@ export const getAllJobs = async (req, res, next) => {
       sort = "latest",
       sortBy,
       status,
+      fields,
     } = req.query;
 
     const query = {};
@@ -222,7 +223,19 @@ export const getAllJobs = async (req, res, next) => {
     const total = await Job.countDocuments(query);
     const totalPages = Math.ceil(total / limitNum) || 1;
 
-    const jobs = await Job.find(query)
+    let jobQuery = Job.find(query);
+    if (fields && typeof fields === "string") {
+      const selectedFields = fields
+        .split(",")
+        .map((f) => f.trim())
+        .filter(Boolean)
+        .join(" ");
+      if (selectedFields) {
+        jobQuery = jobQuery.select(selectedFields);
+      }
+    }
+
+    const jobs = await jobQuery
       .populate({
         path: "company",
       })
@@ -303,7 +316,7 @@ export const getJobById = async (req, res, next) => {
 export const getAdminJobs = async (req, res, next) => {
   try {
     const adminId = req.id;
-    const { status } = req.query;
+    const { status, fields } = req.query;
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 20));
     const skip = (page - 1) * limit;
@@ -315,7 +328,19 @@ export const getAdminJobs = async (req, res, next) => {
     const total = await Job.countDocuments(query);
     const totalPages = Math.ceil(total / limit) || 1;
 
-    const jobs = await Job.find(query)
+    let jobQuery = Job.find(query);
+    if (fields && typeof fields === "string") {
+      const selectedFields = fields
+        .split(",")
+        .map((f) => f.trim())
+        .filter(Boolean)
+        .join(" ");
+      if (selectedFields) {
+        jobQuery = jobQuery.select(selectedFields);
+      }
+    }
+
+    const jobs = await jobQuery
       .populate({
         path: "company",
       })

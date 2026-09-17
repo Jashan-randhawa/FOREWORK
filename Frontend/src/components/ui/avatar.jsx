@@ -11,9 +11,11 @@ const Avatar = React.forwardRef(({ className, ...props }, ref) => (
 ))
 Avatar.displayName = AvatarPrimitive.Root.displayName
 
-const AvatarImage = React.forwardRef(({ className, ...props }, ref) => (
+const AvatarImage = React.forwardRef(({ className, loading = "lazy", decoding = "async", ...props }, ref) => (
   <AvatarPrimitive.Image
     ref={ref}
+    loading={loading}
+    decoding={decoding}
     className={cn("aspect-square h-full w-full", className)}
     {...props} />
 ))

@@ -16,6 +16,7 @@ export default defineConfig({
           "vendor-react": ["react", "react-dom", "react-router-dom"],
           "vendor-redux": ["@reduxjs/toolkit", "react-redux", "redux-persist"],
           "vendor-motion": ["framer-motion"],
+          "vendor-charts": ["recharts"],
           "vendor-radix": [
             "@radix-ui/react-avatar",
             "@radix-ui/react-dialog",

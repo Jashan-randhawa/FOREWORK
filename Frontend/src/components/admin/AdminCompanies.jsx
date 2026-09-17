@@ -96,6 +96,8 @@ const AdminCompanies = () => {
                 <img
                   src={company.logo}
                   alt={company.name}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -215,7 +217,7 @@ const AdminCompanies = () => {
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden border border-gray-200 dark:border-gray-700 shrink-0">
             {company.logo ? (
-              <img src={company.logo} alt={company.name} className="w-full h-full object-cover" />
+              <img src={company.logo} alt={company.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
             ) : (
               <Building2 className="w-4 h-4 text-gray-400" />
             )}
