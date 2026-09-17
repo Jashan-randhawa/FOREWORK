@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { ApplicationStatusBadge } from "../shared";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 
 const FILTER_TABS = [
   { id: "all", label: "All Applications" },
@@ -34,11 +35,13 @@ const FILTER_TABS = [
 ];
 
 const AppliedJob = () => {
+  const isMobile = useIsMobile();
   const { allAppliedJobs = [] } = useSelector((store) => store.job);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState("table"); // 'table' | 'cards'
+  const effectiveViewMode = isMobile ? "cards" : viewMode;
 
   // Calculate status counts for filter tabs
   const counts = useMemo(() => {
@@ -243,9 +246,9 @@ const AppliedJob = () => {
             <ArrowUpDown className="w-3 h-3 text-gray-400 dark:text-[#958EA3] pointer-events-none absolute left-2.5" />
           </div>
 
-          {/* View Mode Toggle */}
+          {/* View Mode Toggle (desktop only; mobile always uses card list) */}
           <div
-            className="flex items-center p-0.5 rounded-lg border border-gray-200 dark:border-[#3D2166] bg-white dark:bg-[#1F1B26]"
+            className="hidden sm:flex items-center p-0.5 rounded-lg border border-gray-200 dark:border-[#3D2166] bg-white dark:bg-[#1F1B26]"
             role="group"
             aria-label="Applications view mode"
           >
@@ -279,8 +282,8 @@ const AppliedJob = () => {
         </div>
       </div>
 
-      {/* Cards View (when toggled) */}
-      {viewMode === "cards" && filteredApplications.length > 0 && (
+      {/* Cards View (when toggled or on mobile) */}
+      {effectiveViewMode === "cards" && filteredApplications.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredApplications.map((appliedJob) => {
             const hasInterview = Boolean(
@@ -392,11 +395,11 @@ const AppliedJob = () => {
       <div
         id="applied-jobs-table"
         className={`bg-white dark:bg-[#1F1B26] rounded-xl border border-gray-200 dark:border-[#3D2166] overflow-hidden shadow-xs ${
-          viewMode === "cards" && filteredApplications.length > 0 ? "hidden" : "block"
+          effectiveViewMode === "cards" && filteredApplications.length > 0 ? "hidden" : "block"
         }`}
       >
         <div className="w-full overflow-x-auto">
-          <Table className="min-w-[650px]">
+          <Table className="md:min-w-[650px]">
             <TableCaption className="py-3.5 text-xs text-gray-500 dark:text-[#958EA3]">
               Showing {filteredApplications.length} of {allAppliedJobs.length} applications
             </TableCaption>

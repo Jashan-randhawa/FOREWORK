@@ -168,6 +168,7 @@ const ApplicantsTable = () => {
       {
         header: "Full Name",
         accessorKey: "applicantName",
+        priority: "primary",
         sortable: true,
         cell: (item) => (
           <span className="font-semibold text-gray-900 dark:text-gray-100">
@@ -178,15 +179,18 @@ const ApplicantsTable = () => {
       {
         header: "Email",
         accessorKey: "applicantEmail",
+        priority: "secondary",
         sortable: true,
         cell: (item) => item?.applicant?.email || "—",
       },
       {
         header: "Contact",
+        priority: "hidden-mobile",
         cell: (item) => item?.applicant?.phoneNumber || "N/A",
       },
       {
         header: "Resume",
+        priority: "secondary",
         cell: (item) => (
           <ResumeViewer
             resumeUrl={item?.applicant?.profile?.resume}
@@ -198,11 +202,13 @@ const ApplicantsTable = () => {
       {
         header: "Status",
         accessorKey: "status",
+        priority: "primary",
         sortable: true,
         cell: (item) => <ApplicationStatusBadge status={item.status || "pending"} />,
       },
       {
         header: "Interview",
+        priority: "secondary",
         cell: (item) => {
           return item.scheduledAt ? (
             <div className="flex flex-col gap-1 text-xs">
@@ -242,6 +248,7 @@ const ApplicantsTable = () => {
       },
       {
         header: "Notes",
+        priority: "secondary",
         cell: (item) => (
           <Button
             size="sm"
@@ -256,6 +263,7 @@ const ApplicantsTable = () => {
       },
       {
         header: "Action",
+        priority: "primary",
         className: "text-right",
         headerClassName: "text-right",
         cell: (item) => (
@@ -292,6 +300,90 @@ const ApplicantsTable = () => {
     []
   );
 
+  const renderApplicantMobileCard = (item) => {
+    const appliedDate = item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "Recent";
+    return (
+      <div
+        data-testid="applicant-mobile-card"
+        className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm space-y-3"
+      >
+        {/* Row 1: applicant name + status badge + overflow menu */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
+              {item?.applicant?.fullname || "Unknown"}
+            </h4>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+              {item?.applicant?.email || item?.applicant?.phoneNumber || "No contact"}
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <ApplicationStatusBadge status={item.status || "pending"} />
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  aria-label="Open status options"
+                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center transition-colors"
+                >
+                  <MoreHorizontal className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-36 p-1.5 text-sm shadow-md" align="end">
+                <div className="text-xs font-semibold text-gray-400 px-2 py-1 uppercase tracking-wider">
+                  Update Status
+                </div>
+                {["accepted", "rejected", "pending"].map((status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    onClick={() => statusHandler(status, item._id)}
+                    className="w-full text-left px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded cursor-pointer capitalize text-xs text-gray-700 dark:text-gray-200"
+                  >
+                    {status}
+                  </button>
+                ))}
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        {/* Row 2: applied date + resume link */}
+        <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100 dark:border-gray-800/60 text-xs">
+          <span className="text-gray-500 dark:text-gray-400">
+            Applied: <span className="font-medium text-gray-700 dark:text-gray-300">{appliedDate}</span>
+          </span>
+          <ResumeViewer
+            resumeUrl={item?.applicant?.profile?.resume}
+            resumeOriginalName={item?.applicant?.profile?.resumeOriginalName}
+            fallbackText="No resume"
+          />
+        </div>
+
+        {/* Mobile quick actions: Interview & Notes */}
+        <div className="flex items-center gap-2 pt-1">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => openScheduleModal(item)}
+            className="flex-1 h-8 text-xs flex items-center justify-center gap-1.5"
+          >
+            <Calendar className="w-3.5 h-3.5 text-green-600" />
+            <span>{item.scheduledAt ? "Reschedule" : "Schedule"}</span>
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => openNotesModal(item)}
+            className="flex-1 h-8 text-xs flex items-center justify-center gap-1.5"
+          >
+            <MessageSquare className="w-3.5 h-3.5 text-purple-600" />
+            <span>Notes ({item.recruiterNotes?.length || 0})</span>
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   const tableData = useMemo(() => {
     return (applicants?.applications || []).map((app) => ({
       ...app,
@@ -307,7 +399,8 @@ const ApplicantsTable = () => {
         data={tableData}
         caption="A list of your recent applied user"
         emptyMessage="No applicants yet"
-        tableClassName="min-w-[850px]"
+        tableClassName="md:min-w-[850px]"
+        mobileCard={renderApplicantMobileCard}
       />
 
       {/* Recruiter Notes Modal (EMP-003) */}

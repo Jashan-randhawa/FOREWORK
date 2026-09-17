@@ -27,10 +27,10 @@ describe("Phase 8 - Responsive and Accessibility Pass", () => {
   });
 
   describe("DataTable Responsive Structure", () => {
-    it("wraps the table in an overflow-x-auto container for mobile scrolling", () => {
+    it("wraps the table in an overflow-x-auto container for desktop view", () => {
       const columns = [
-        { header: "Name", accessorKey: "name" },
-        { header: "Role", accessorKey: "role" },
+        { header: "Name", accessorKey: "name", priority: "primary" },
+        { header: "Role", accessorKey: "role", priority: "secondary" },
       ];
       const data = [{ name: "Alice", role: "Engineer" }];
 
@@ -43,6 +43,72 @@ describe("Phase 8 - Responsive and Accessibility Pass", () => {
 
       const table = container.querySelector("table");
       expect(table.className).toContain("min-w-[600px]");
+    });
+
+    it("renders mobile cards when viewport is mobile", () => {
+      const origMatchMedia = window.matchMedia;
+      window.matchMedia = vi.fn().mockImplementation((query) => ({
+        matches: query.includes("max-width"),
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }));
+
+      const columns = [
+        { header: "Name", accessorKey: "name", priority: "primary" },
+        { header: "Role", accessorKey: "role", priority: "secondary" },
+      ];
+      const data = [{ name: "Bob", role: "Designer" }];
+
+      render(
+        <DataTable
+          columns={columns}
+          data={data}
+          mobileCard={(item) => (
+            <div data-testid="custom-card">{item.name} - {item.role}</div>
+          )}
+        />
+      );
+
+      expect(screen.getByTestId("custom-card")).toBeInTheDocument();
+      expect(screen.getByText("Bob - Designer")).toBeInTheDocument();
+      expect(screen.queryByRole("table")).not.toBeInTheDocument();
+
+      window.matchMedia = origMatchMedia;
+    });
+
+    it("derives default mobile cards from column priorities when mobileCard is not provided", () => {
+      const origMatchMedia = window.matchMedia;
+      window.matchMedia = vi.fn().mockImplementation((query) => ({
+        matches: query.includes("max-width"),
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }));
+
+      const columns = [
+        { header: "Name", accessorKey: "name", priority: "primary" },
+        { header: "Role", accessorKey: "role", priority: "secondary" },
+        { header: "Secret", accessorKey: "secret", priority: "hidden-mobile" },
+      ];
+      const data = [{ name: "Charlie", role: "Manager", secret: "12345" }];
+
+      render(<DataTable columns={columns} data={data} />);
+
+      expect(screen.getByTestId("data-table-mobile-card")).toBeInTheDocument();
+      expect(screen.getByText("Charlie")).toBeInTheDocument();
+      expect(screen.getByText("Manager")).toBeInTheDocument();
+      expect(screen.queryByText("12345")).not.toBeInTheDocument();
+
+      window.matchMedia = origMatchMedia;
     });
   });
 

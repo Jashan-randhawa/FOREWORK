@@ -1,15 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import AdminNavbar from "./AdminNavbar";
 import API from "@/utils/axiosInstance";
 import { ADMIN_API_ENDPOINT } from "@/utils/data";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
+import { DataTable } from "../shared";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import {
@@ -107,6 +100,191 @@ const AdminJobs = () => {
     }
   };
 
+  const columns = useMemo(
+    () => [
+      {
+        header: "Job Title",
+        accessorKey: "title",
+        priority: "primary",
+        cell: (job) => (
+          <div className="font-semibold text-gray-900 dark:text-gray-100">
+            {job.title}
+            <div className="text-xs font-normal text-gray-500 dark:text-gray-400">
+              {job.jobType} · {job.location} · ₹{job.salary?.toLocaleString()}
+            </div>
+          </div>
+        ),
+      },
+      {
+        header: "Company",
+        priority: "secondary",
+        cell: (job) => (
+          <span className="font-medium text-gray-800 dark:text-gray-200">
+            {job.company?.name || "N/A"}
+          </span>
+        ),
+      },
+      {
+        header: "Recruiter",
+        priority: "hidden-mobile",
+        cell: (job) => (
+          <div>
+            <div className="text-xs text-gray-700 dark:text-gray-300 font-medium">
+              {job.created_by?.fullname || "Unknown"}
+            </div>
+            <div className="text-xs text-gray-400">
+              {job.created_by?.email}
+            </div>
+          </div>
+        ),
+      },
+      {
+        header: "Status",
+        priority: "primary",
+        cell: (job) => {
+          const currentStatus = (job.status || "published").toLowerCase();
+          const badgeClass = STATUS_CLASSES[currentStatus] || STATUS_CLASSES.published;
+          return (
+            <span
+              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${badgeClass}`}
+            >
+              {currentStatus}
+            </span>
+          );
+        },
+      },
+      {
+        header: "Created",
+        priority: "secondary",
+        cell: (job) => (
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {job.createdAt?.split("T")[0]}
+          </span>
+        ),
+      },
+      {
+        header: "Actions",
+        priority: "primary",
+        className: "text-right",
+        headerClassName: "text-right",
+        cell: (job) => {
+          const currentStatus = (job.status || "published").toLowerCase();
+          return (
+            <div className="flex items-center justify-end gap-1.5">
+              {currentStatus !== "published" && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={actionId === job._id}
+                  onClick={() => handleModerateStatus(job._id, "published")}
+                  className="h-7 px-2 text-xs text-green-700 hover:bg-green-50"
+                >
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  Publish
+                </Button>
+              )}
+              {currentStatus !== "closed" && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={actionId === job._id}
+                  onClick={() => handleModerateStatus(job._id, "closed")}
+                  className="h-7 px-2 text-xs text-red-700 hover:bg-red-50"
+                >
+                  <XCircle className="w-3 h-3 mr-1" />
+                  Close
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                aria-label="Delete job listing"
+                disabled={actionId === job._id}
+                onClick={() => setJobToDelete(job)}
+                className="h-7 px-2 text-xs text-gray-400 hover:text-red-600 hover:bg-red-50"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          );
+        },
+      },
+    ],
+    [actionId]
+  );
+
+  const renderAdminJobMobileCard = (job) => {
+    const currentStatus = (job.status || "published").toLowerCase();
+    const badgeClass = STATUS_CLASSES[currentStatus] || STATUS_CLASSES.published;
+
+    return (
+      <div
+        data-testid="platform-job-mobile-card"
+        className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm space-y-3"
+      >
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
+              {job.title}
+            </h4>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+              {job.company?.name || "No Company"} · {job.location} · ₹{job.salary?.toLocaleString()}
+            </p>
+          </div>
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border capitalize shrink-0 ${badgeClass}`}
+          >
+            {currentStatus}
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800/60 text-xs">
+          <span className="text-gray-500 dark:text-gray-400">
+            By: <span className="text-gray-700 dark:text-gray-300">{job.created_by?.fullname || "Unknown"}</span>
+          </span>
+          <span className="text-gray-400">{job.createdAt?.split("T")[0]}</span>
+        </div>
+
+        <div className="flex items-center gap-2 pt-1">
+          {currentStatus !== "published" && (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={actionId === job._id}
+              onClick={() => handleModerateStatus(job._id, "published")}
+              className="flex-1 h-8 text-xs text-green-700 hover:bg-green-50 min-h-[44px]"
+            >
+              <CheckCircle className="w-3.5 h-3.5 mr-1" />
+              Publish
+            </Button>
+          )}
+          {currentStatus !== "closed" && (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={actionId === job._id}
+              onClick={() => handleModerateStatus(job._id, "closed")}
+              className="flex-1 h-8 text-xs text-red-700 hover:bg-red-50 min-h-[44px]"
+            >
+              <XCircle className="w-3.5 h-3.5 mr-1" />
+              Close
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="ghost"
+            aria-label="Delete job listing"
+            disabled={actionId === job._id}
+            onClick={() => setJobToDelete(job)}
+            className="h-8 px-3 text-xs text-gray-400 hover:text-red-600 hover:bg-red-50 min-h-[44px]"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50/50">
       <AdminNavbar />
@@ -151,141 +329,20 @@ const AdminJobs = () => {
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-          {loading ? (
-            <div className="flex justify-center py-16">
-              <Loader2 className="w-8 h-8 animate-spin text-red-600" />
-            </div>
-          ) : (
-            <Table className="min-w-[750px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Job Title</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Recruiter</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {jobs.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-400">
-                      No jobs match the search criteria.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  jobs.map((job) => {
-                    const currentStatus = (job.status || "published").toLowerCase();
-                    const badgeClass = STATUS_CLASSES[currentStatus] || STATUS_CLASSES.published;
-
-                    return (
-                      <TableRow key={job._id}>
-                        <TableCell className="font-semibold text-gray-900">
-                          {job.title}
-                          <div className="text-xs font-normal text-gray-500">
-                            {job.jobType} · {job.location} · ₹{job.salary?.toLocaleString()}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-medium text-gray-800">
-                            {job.company?.name || "N/A"}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-xs text-gray-700 font-medium">
-                            {job.created_by?.fullname || "Unknown"}
-                          </div>
-                          <div className="text-xs text-gray-400">
-                            {job.created_by?.email}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${badgeClass}`}
-                          >
-                            {currentStatus}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-xs text-gray-500">
-                          {job.createdAt?.split("T")[0]}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            {currentStatus !== "published" && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                disabled={actionId === job._id}
-                                onClick={() => handleModerateStatus(job._id, "published")}
-                                className="h-7 px-2 text-xs text-green-700 hover:bg-green-50"
-                              >
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Publish
-                              </Button>
-                            )}
-                            {currentStatus !== "closed" && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                disabled={actionId === job._id}
-                                onClick={() => handleModerateStatus(job._id, "closed")}
-                                className="h-7 px-2 text-xs text-red-700 hover:bg-red-50"
-                              >
-                                <XCircle className="w-3 h-3 mr-1" />
-                                Close
-                              </Button>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              aria-label="Delete job listing"
-                              disabled={actionId === job._id}
-                              onClick={() => setJobToDelete(job)}
-                              className="h-7 px-2 text-xs text-gray-400 hover:text-red-600 hover:bg-red-50"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          )}
-
-          {/* Pagination */}
-          {pagination.totalPages > 1 && (
-            <div className="flex justify-between items-center px-6 py-3 border-t border-gray-100 text-xs text-gray-500">
-              <span>Total: {pagination.total} jobs</span>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={pagination.page <= 1}
-                  onClick={() => fetchJobs(pagination.page - 1)}
-                  className="h-7 text-xs"
-                >
-                  Previous
-                </Button>
-                <span className="flex items-center px-2">
-                  Page {pagination.page} of {pagination.totalPages}
-                </span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={pagination.page >= pagination.totalPages}
-                  onClick={() => fetchJobs(pagination.page + 1)}
-                  className="h-7 text-xs"
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          )}
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm p-4">
+          <DataTable
+            columns={columns}
+            data={jobs}
+            isLoading={loading}
+            emptyMessage="No jobs match the search criteria."
+            manualPagination={true}
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            totalCount={pagination.total}
+            onPageChange={(page) => fetchJobs(page)}
+            tableClassName="md:min-w-[750px]"
+            mobileCard={renderAdminJobMobileCard}
+          />
         </div>
 
         {/* Delete Confirmation Dialog */}

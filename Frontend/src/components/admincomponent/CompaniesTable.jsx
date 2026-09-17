@@ -30,6 +30,7 @@ const CompaniesTable = () => {
     () => [
       {
         header: "Logo",
+        priority: "primary",
         className: "w-16",
         cell: (company) => (
           <Avatar className="w-9 h-9">
@@ -43,17 +44,20 @@ const CompaniesTable = () => {
       {
         header: "Company Name",
         accessorKey: "name",
+        priority: "primary",
         sortable: true,
         cell: (company) => <span className="font-semibold text-gray-900 dark:text-gray-100">{company.name}</span>,
       },
       {
         header: "Date",
         accessorKey: "createdAt",
+        priority: "secondary",
         sortable: true,
         cell: (company) => (company.createdAt ? company.createdAt.split("T")[0] : "Recent"),
       },
       {
         header: "Action",
+        priority: "primary",
         className: "text-right",
         headerClassName: "text-right",
         cell: (company) => (
@@ -84,6 +88,39 @@ const CompaniesTable = () => {
     [navigate]
   );
 
+  const renderCompanyMobileCard = (company) => {
+    const dateStr = company.createdAt ? company.createdAt.split("T")[0] : "Recent";
+    return (
+      <div
+        data-testid="company-mobile-card"
+        className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm flex items-center justify-between gap-3"
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <Avatar className="w-11 h-11 ring-1 ring-gray-200 dark:ring-gray-700 shrink-0">
+            <AvatarImage
+              src={company.logo || "https://www.shutterstock.com/image-vector/circle-line-simple-design-logo-600w-2174926871.jpg"}
+              alt={`${company.name} logo`}
+            />
+          </Avatar>
+          <div className="min-w-0">
+            <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
+              {company.name}
+            </h4>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Registered: {dateStr}</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate(`/recruiter/companies/${company._id}`)}
+          className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 shrink-0 min-h-[44px]"
+        >
+          <Edit2 className="w-3.5 h-3.5 text-purple-600" />
+          <span>Edit</span>
+        </button>
+      </div>
+    );
+  };
+
   if (!companies) {
     return <div>Loading...</div>;
   }
@@ -95,7 +132,8 @@ const CompaniesTable = () => {
         data={filterCompany}
         caption="Your recent registered Companies"
         emptyMessage="No Companies Added"
-        tableClassName="min-w-[550px]"
+        tableClassName="md:min-w-[550px]"
+        mobileCard={renderCompanyMobileCard}
       />
     </div>
   );

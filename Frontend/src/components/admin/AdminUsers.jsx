@@ -1,15 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import AdminNavbar from "./AdminNavbar";
 import API from "@/utils/axiosInstance";
 import { ADMIN_API_ENDPOINT } from "@/utils/data";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
+import { DataTable } from "../shared";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import {
@@ -82,6 +75,205 @@ const AdminUsers = () => {
     }
   };
 
+  const columns = useMemo(
+    () => [
+      {
+        header: "User",
+        accessorKey: "fullname",
+        priority: "primary",
+        cell: (u) => (
+          <div>
+            <div className="font-semibold text-gray-900 dark:text-gray-100">{u.fullname}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">{u.email}</div>
+          </div>
+        ),
+      },
+      {
+        header: "Role",
+        accessorKey: "role",
+        priority: "primary",
+        cell: (u) => (
+          <span
+            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+              u.role === "Admin"
+                ? "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300"
+                : u.role === "Recruiter"
+                ? "bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300"
+                : "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300"
+            }`}
+          >
+            {u.role === "Admin" && <Shield className="w-3 h-3" />}
+            {u.role}
+          </span>
+        ),
+      },
+      {
+        header: "Email Verified",
+        priority: "secondary",
+        cell: (u) =>
+          u.isEmailVerified ? (
+            <span className="text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+              Verified
+            </span>
+          ) : (
+            <span className="text-xs font-medium text-gray-500 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700">
+              Pending
+            </span>
+          ),
+      },
+      {
+        header: "Status",
+        priority: "primary",
+        cell: (u) =>
+          u.isSuspended ? (
+            <span className="text-xs font-bold text-red-700 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded border border-red-200 dark:border-red-800">
+              Suspended
+            </span>
+          ) : (
+            <span className="text-xs font-medium text-green-700 bg-green-50 dark:bg-green-950/40 px-2 py-0.5 rounded border border-green-200 dark:border-green-800">
+              Active
+            </span>
+          ),
+      },
+      {
+        header: "Registered",
+        priority: "secondary",
+        cell: (u) => (
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {u.createdAt?.split("T")[0]}
+          </span>
+        ),
+      },
+      {
+        header: "Action",
+        priority: "primary",
+        className: "text-right",
+        headerClassName: "text-right",
+        cell: (u) =>
+          u.role === "Admin" ? (
+            <span className="text-xs text-gray-400 italic">Protected</span>
+          ) : (
+            <Button
+              size="sm"
+              variant={u.isSuspended ? "outline" : "destructive"}
+              disabled={actionId === u._id}
+              onClick={() => {
+                if (u.isSuspended) {
+                  handleToggleStatus(u);
+                } else {
+                  setSuspendTargetUser(u);
+                }
+              }}
+              className="h-7 text-xs"
+            >
+              {actionId === u._id ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : u.isSuspended ? (
+                <>
+                  <UserCheck className="w-3 h-3 mr-1 text-emerald-600" />
+                  Activate
+                </>
+              ) : (
+                <>
+                  <UserX className="w-3 h-3 mr-1" />
+                  Suspend
+                </>
+              )}
+            </Button>
+          ),
+      },
+    ],
+    [actionId]
+  );
+
+  const renderUserMobileCard = (u) => (
+    <div
+      data-testid="admin-user-mobile-card"
+      className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm space-y-3"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">{u.fullname}</span>
+            <span
+              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                u.role === "Admin"
+                  ? "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300"
+                  : u.role === "Recruiter"
+                  ? "bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300"
+                  : "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300"
+              }`}
+            >
+              {u.role === "Admin" && <Shield className="w-2.5 h-2.5" />}
+              {u.role}
+            </span>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{u.email}</p>
+        </div>
+        <div className="shrink-0">
+          {u.isSuspended ? (
+            <span className="text-xs font-bold text-red-700 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded border border-red-200 dark:border-red-800">
+              Suspended
+            </span>
+          ) : (
+            <span className="text-xs font-medium text-green-700 bg-green-50 dark:bg-green-950/40 px-2 py-0.5 rounded border border-green-200 dark:border-green-800">
+              Active
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800/60 text-xs">
+        <span className="text-gray-500 dark:text-gray-400">
+          Registered: {u.createdAt?.split("T")[0]}
+        </span>
+        <span>
+          {u.isEmailVerified ? (
+            <span className="text-[11px] font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+              Verified
+            </span>
+          ) : (
+            <span className="text-[11px] font-medium text-gray-500 bg-gray-50 dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700">
+              Pending
+            </span>
+          )}
+        </span>
+      </div>
+
+      {u.role !== "Admin" && (
+        <div className="pt-1">
+          <Button
+            size="sm"
+            variant={u.isSuspended ? "outline" : "destructive"}
+            disabled={actionId === u._id}
+            onClick={() => {
+              if (u.isSuspended) {
+                handleToggleStatus(u);
+              } else {
+                setSuspendTargetUser(u);
+              }
+            }}
+            className="w-full h-8 text-xs min-h-[44px]"
+          >
+            {actionId === u._id ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : u.isSuspended ? (
+              <>
+                <UserCheck className="w-3.5 h-3.5 mr-1 text-emerald-600" />
+                Activate Account
+              </>
+            ) : (
+              <>
+                <UserX className="w-3.5 h-3.5 mr-1" />
+                Suspend Account
+              </>
+            )}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50/50">
       <AdminNavbar />
@@ -124,145 +316,20 @@ const AdminUsers = () => {
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-          {loading ? (
-            <div className="flex justify-center py-16">
-              <Loader2 className="w-8 h-8 animate-spin text-red-600" />
-            </div>
-          ) : (
-            <Table className="min-w-[700px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Email Verified</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Registered</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-400">
-                      No users match the search criteria.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  users.map((u) => (
-                    <TableRow key={u._id}>
-                      <TableCell>
-                        <div className="font-semibold text-gray-900">{u.fullname}</div>
-                        <div className="text-xs text-gray-500">{u.email}</div>
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                            u.role === "Admin"
-                              ? "bg-red-100 text-red-800"
-                              : u.role === "Recruiter"
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-blue-100 text-blue-800"
-                          }`}
-                        >
-                          {u.role === "Admin" && <Shield className="w-3 h-3" />}
-                          {u.role}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {u.isEmailVerified ? (
-                          <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                            Verified
-                          </span>
-                        ) : (
-                          <span className="text-xs font-medium text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-200">
-                            Pending
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {u.isSuspended ? (
-                          <span className="text-xs font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-200">
-                            Suspended
-                          </span>
-                        ) : (
-                          <span className="text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200">
-                            Active
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-xs text-gray-500">
-                        {u.createdAt?.split("T")[0]}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {u.role === "Admin" ? (
-                          <span className="text-xs text-gray-400 italic">Protected</span>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant={u.isSuspended ? "outline" : "destructive"}
-                            disabled={actionId === u._id}
-                            onClick={() => {
-                              if (u.isSuspended) {
-                                handleToggleStatus(u);
-                              } else {
-                                setSuspendTargetUser(u);
-                              }
-                            }}
-                            className="h-7 text-xs"
-                          >
-                            {actionId === u._id ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                            ) : u.isSuspended ? (
-                              <>
-                                <UserCheck className="w-3 h-3 mr-1 text-emerald-600" />
-                                Activate
-                              </>
-                            ) : (
-                              <>
-                                <UserX className="w-3 h-3 mr-1" />
-                                Suspend
-                              </>
-                            )}
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          )}
-
-          {/* Pagination */}
-          {pagination.totalPages > 1 && (
-            <div className="flex justify-between items-center px-6 py-3 border-t border-gray-100 text-xs text-gray-500">
-              <span>Total: {pagination.total} users</span>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={pagination.page <= 1}
-                  onClick={() => fetchUsers(pagination.page - 1)}
-                  className="h-7 text-xs"
-                >
-                  Previous
-                </Button>
-                <span className="flex items-center px-2">
-                  Page {pagination.page} of {pagination.totalPages}
-                </span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={pagination.page >= pagination.totalPages}
-                  onClick={() => fetchUsers(pagination.page + 1)}
-                  className="h-7 text-xs"
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          )}
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm p-4">
+          <DataTable
+            columns={columns}
+            data={users}
+            isLoading={loading}
+            emptyMessage="No users match the search criteria."
+            manualPagination={true}
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            totalCount={pagination.total}
+            onPageChange={(page) => fetchUsers(page)}
+            tableClassName="md:min-w-[700px]"
+            mobileCard={renderUserMobileCard}
+          />
         </div>
 
         {/* Suspend Confirmation Dialog */}

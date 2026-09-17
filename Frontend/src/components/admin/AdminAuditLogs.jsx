@@ -12,6 +12,7 @@ import {
 } from "../ui/table";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 import {
   Loader2,
   ScrollText,
@@ -75,6 +76,7 @@ const ACTION_CONFIG = {
 };
 
 const AdminAuditLogs = () => {
+  const isMobile = useIsMobile();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [targetTypeFilter, setTargetTypeFilter] = useState("");
@@ -84,6 +86,7 @@ const AdminAuditLogs = () => {
   const [expandedIds, setExpandedIds] = useState(new Set());
   const [copiedId, setCopiedId] = useState(null);
   const [viewMode, setViewMode] = useState("table"); // "table" | "timeline"
+  const effectiveViewMode = isMobile ? "timeline" : viewMode;
 
   const fetchLogs = async (page = 1) => {
     try {
@@ -303,10 +306,10 @@ const AdminAuditLogs = () => {
               </button>
             )}
           </div>
-        ) : viewMode === "timeline" ? (
+        ) : effectiveViewMode === "timeline" ? (
           /* Forensic Visual Timeline View */
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm">
-            <div className="relative border-l-2 border-gray-200 dark:border-gray-800 ml-4 pl-6 space-y-8">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 sm:p-6 shadow-sm">
+            <div className="relative border-l-2 border-gray-200 dark:border-gray-800 ml-3 sm:ml-4 pl-4 sm:pl-6 space-y-6 sm:space-y-8">
               {filteredLogs.map((log) => {
                 const config = ACTION_CONFIG[log.action] || {
                   label: log.action,
@@ -321,10 +324,10 @@ const AdminAuditLogs = () => {
                   <div key={log._id} className="relative group">
                     {/* Timeline Node Dot */}
                     <div
-                      className={`absolute -left-[31px] top-1 w-5 h-5 rounded-full border-2 border-white dark:border-gray-900 ${config.dotColor} flex items-center justify-center shadow-sm`}
+                      className={`absolute -left-[23px] sm:-left-[31px] top-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 border-white dark:border-gray-900 ${config.dotColor} flex items-center justify-center shadow-sm`}
                     />
 
-                    <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-4 bg-gray-50/40 dark:bg-gray-900/80 hover:bg-white dark:hover:bg-gray-800 hover:shadow-sm transition-all">
+                    <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-3.5 sm:p-4 bg-gray-50/40 dark:bg-gray-900/80 hover:bg-white dark:hover:bg-gray-800 hover:shadow-sm transition-all">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span
@@ -336,7 +339,7 @@ const AdminAuditLogs = () => {
                           <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
                             Target: <strong>{log.targetType}</strong>
                           </span>
-                          <span className="text-xs font-mono text-gray-400">
+                          <span className="hidden sm:inline text-xs font-mono text-gray-400">
                             (ID: {log.targetId})
                           </span>
                         </div>
@@ -384,14 +387,14 @@ const AdminAuditLogs = () => {
                       <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
                         <button
                           onClick={() => toggleExpand(log._id)}
-                          className="inline-flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-700"
+                          className="inline-flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-700 min-h-[44px] sm:min-h-0"
                         >
                           {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                           {isExpanded ? "Hide raw JSON details" : "Inspect raw JSON details"}
                         </button>
                         <button
                           onClick={() => copyToClipboard(log.details || {}, log._id)}
-                          className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"
+                          className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 min-h-[44px] sm:min-h-0"
                         >
                           {copiedId === log._id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                           {copiedId === log._id ? "Copied" : "Copy details"}
@@ -399,7 +402,11 @@ const AdminAuditLogs = () => {
                       </div>
 
                       {isExpanded && (
-                        <div className="mt-3">
+                        <div className="mt-3 space-y-2">
+                          <div className="p-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-xs font-mono space-y-1">
+                            <div><span className="text-gray-500">Target ID:</span> <span className="text-gray-800 dark:text-gray-200">{log.targetId}</span></div>
+                            {log.metadata && <div><span className="text-gray-500">Metadata:</span> <span className="text-gray-800 dark:text-gray-200">{JSON.stringify(log.metadata)}</span></div>}
+                          </div>
                           <pre className="bg-gray-900 text-gray-100 p-3 rounded-lg text-xs font-mono overflow-x-auto">
                             {JSON.stringify(log.details || {}, null, 2)}
                           </pre>
