@@ -1,7 +1,8 @@
 import React, { lazy, Suspense } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import ErrorBoundary from "./components/components_lite/ErrorBoundary";
+import BottomTabBar from "./components/components_lite/BottomTabBar";
 
 const Home = lazy(() => import("./components/components_lite/Home"));
 const Login = lazy(() => import("./components/authentication/Login"));
@@ -38,199 +39,161 @@ const AdminPlatformJobs = lazy(() => import("./components/admin/AdminJobs"));
 const AdminCompanies = lazy(() => import("./components/admin/AdminCompanies"));
 const AdminAuditLogs = lazy(() => import("./components/admin/AdminAuditLogs"));
 
+/**
+ * Root layout that wraps all routes with bottom tab bar padding and the bar itself.
+ */
+function RootLayout() {
+  return (
+    <>
+      <div className="pb-16 md:pb-0">
+        <Outlet />
+      </div>
+      <BottomTabBar />
+    </>
+  );
+}
+
 const appRouter = createBrowserRouter([
-  { path: "/", element: <Home /> },
   {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/register",
-    element: <Register />,
-  },
-  {
-    path: "/forgot-password",
-    element: <ForgotPassword />,
-  },
-  {
-    path: "/reset-password",
-    element: <ResetPassword />,
-  },
-  {
-    path: "/verify-email",
-    element: <VerifyEmail />,
-  },
-  {
-    path: "/description/:id",
-    element: <Description />,
-  },
-  {
-    path: "/Profile",
-    element: <Profile />,
-  },
-  {
-    path: "/applications",
-    element: <ApplicationsPage />,
-  },
-  {
-    path: "/saved-jobs",
-    element: <SavedJobs />,
-  },
-  {
-    path: "/job-alerts",
-    element: <JobAlerts />,
-  },
-  {
-    path: "/suspended",
-    element: <SuspendedAccount />,
-  },
-  {
-    path: "/notifications",
-    element: <NotificationsPage />,
-  },
-  {
-    path: "/PrivacyPolicy",
-    element: <PrivacyPolicy />,
-  },
-  {
-    path: "/TermsofService",
-    element: <TermsofService />,
-  },
-  {
-    path: "/Jobs",
-    element: <Jobs />,
-  },
-  {
-    path: "/Home",
-    element: <Home />,
-  },
-  {
-    path: "/Browse",
-    element: <Browse />,
-  },
-  {
-    path: "/Creator",
-    element: <Creator />,
-  },
-  {
-    path: "/about",
-    element: <Creator />,
-  },
+    element: <RootLayout />,
+    children: [
+      { path: "/", element: <Home /> },
+      { path: "/login", element: <Login /> },
+      { path: "/register", element: <Register /> },
+      { path: "/forgot-password", element: <ForgotPassword /> },
+      { path: "/reset-password", element: <ResetPassword /> },
+      { path: "/verify-email", element: <VerifyEmail /> },
+      { path: "/description/:id", element: <Description /> },
+      { path: "/Profile", element: <Profile /> },
+      { path: "/applications", element: <ApplicationsPage /> },
+      { path: "/saved-jobs", element: <SavedJobs /> },
+      { path: "/job-alerts", element: <JobAlerts /> },
+      { path: "/suspended", element: <SuspendedAccount /> },
+      { path: "/notifications", element: <NotificationsPage /> },
+      { path: "/PrivacyPolicy", element: <PrivacyPolicy /> },
+      { path: "/TermsofService", element: <TermsofService /> },
+      { path: "/Jobs", element: <Jobs /> },
+      { path: "/Home", element: <Home /> },
+      { path: "/Browse", element: <Browse /> },
+      { path: "/Creator", element: <Creator /> },
+      { path: "/about", element: <Creator /> },
 
-  // Recruiter route tree (/recruiter/*)
-  {
-    path: "/recruiter",
-    element: (
-      <ProtectedRoute>
-        <RecruiterDashboard />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/recruiter/dashboard",
-    element: (
-      <ProtectedRoute>
-        <RecruiterDashboard />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/recruiter/companies",
-    element: (
-      <ProtectedRoute>
-        <Companies />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/recruiter/companies/create",
-    element: (
-      <ProtectedRoute>
-        <CompanyCreate />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/recruiter/companies/:id",
-    element: (
-      <ProtectedRoute>
-        <CompanySetup />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/recruiter/jobs",
-    element: (
-      <ProtectedRoute>
-        <AdminJobs />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/recruiter/jobs/create",
-    element: (
-      <ProtectedRoute>
-        <PostJob />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/recruiter/jobs/:id/applicants",
-    element: (
-      <ProtectedRoute>
-        <Applicants />
-      </ProtectedRoute>
-    ),
-  },
+      // Recruiter route tree (/recruiter/*)
+      {
+        path: "/recruiter",
+        element: (
+          <ProtectedRoute>
+            <RecruiterDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/recruiter/dashboard",
+        element: (
+          <ProtectedRoute>
+            <RecruiterDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/recruiter/companies",
+        element: (
+          <ProtectedRoute>
+            <Companies />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/recruiter/companies/create",
+        element: (
+          <ProtectedRoute>
+            <CompanyCreate />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/recruiter/companies/:id",
+        element: (
+          <ProtectedRoute>
+            <CompanySetup />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/recruiter/jobs",
+        element: (
+          <ProtectedRoute>
+            <AdminJobs />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/recruiter/jobs/create",
+        element: (
+          <ProtectedRoute>
+            <PostJob />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/recruiter/jobs/:id/applicants",
+        element: (
+          <ProtectedRoute>
+            <Applicants />
+          </ProtectedRoute>
+        ),
+      },
 
-  // Platform Admin route tree (/admin/*) (ADMIN-004)
-  {
-    path: "/admin",
-    element: (
-      <AdminRoute>
-        <AdminDashboard />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: "/admin/dashboard",
-    element: (
-      <AdminRoute>
-        <AdminDashboard />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: "/admin/users",
-    element: (
-      <AdminRoute>
-        <AdminUsers />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: "/admin/jobs",
-    element: (
-      <AdminRoute>
-        <AdminPlatformJobs />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: "/admin/companies",
-    element: (
-      <AdminRoute>
-        <AdminCompanies />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: "/admin/audit-logs",
-    element: (
-      <AdminRoute>
-        <AdminAuditLogs />
-      </AdminRoute>
-    ),
+      // Platform Admin route tree (/admin/*) (ADMIN-004)
+      {
+        path: "/admin",
+        element: (
+          <AdminRoute>
+            <AdminDashboard />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "/admin/dashboard",
+        element: (
+          <AdminRoute>
+            <AdminDashboard />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "/admin/users",
+        element: (
+          <AdminRoute>
+            <AdminUsers />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "/admin/jobs",
+        element: (
+          <AdminRoute>
+            <AdminPlatformJobs />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "/admin/companies",
+        element: (
+          <AdminRoute>
+            <AdminCompanies />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "/admin/audit-logs",
+        element: (
+          <AdminRoute>
+            <AdminAuditLogs />
+          </AdminRoute>
+        ),
+      },
+    ],
   },
 ]);
 
@@ -248,3 +211,4 @@ function App() {
 }
 
 export default App;
+

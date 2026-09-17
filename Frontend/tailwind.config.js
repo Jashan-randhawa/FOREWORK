@@ -1,5 +1,4 @@
 /** @type {import('tailwindcss').Config} */
-const plugin = require("tailwindcss/plugin");
 
 export default {
     darkMode: ["class"],

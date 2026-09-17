@@ -10,6 +10,8 @@ const Toaster = ({
     (<Sonner
       theme={theme}
       className="toaster group"
+      position="bottom-center"
+      offset={72}
       toastOptions={{
         classNames: {
           toast:
@@ -26,3 +28,4 @@ const Toaster = ({
 }
 
 export { Toaster }
+
