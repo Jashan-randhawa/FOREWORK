@@ -18,6 +18,7 @@ import {
   Loader2,
   Plus,
   Video,
+  Sparkles,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ import { APPLICATION_API_ENDPOINT } from "@/utils/data";
 import API from "@/utils/axiosInstance";
 import { setAllApplicants } from "@/redux/applicationSlice";
 import { DataTable, ApplicationStatusBadge, ResumeViewer } from "../shared";
+import ATSAnalysisModal from "../ats/ATSAnalysisModal";
 
 const ApplicantsTable = () => {
   const dispatch = useDispatch();
@@ -42,6 +44,9 @@ const ApplicantsTable = () => {
     meetingLink: "",
   });
   const [scheduling, setScheduling] = useState(false);
+
+  // ATS Analysis Modal state
+  const [selectedAppForATS, setSelectedAppForATS] = useState(null);
 
   // Update an application in Redux store
   const updateApplicationInStore = (applicationId, updatedFields) => {
@@ -207,6 +212,49 @@ const ApplicantsTable = () => {
         priority: "primary",
         sortable: true,
         cell: (item) => <ApplicationStatusBadge status={item.status || "pending"} />,
+      },
+      {
+        header: "ATS Match",
+        accessorKey: "atsScore",
+        priority: "secondary",
+        sortable: true,
+        cell: (item) => {
+          const score = item?.atsScore;
+          const hasScore = score !== null && score !== undefined;
+
+          let badgeClass = "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300";
+          if (hasScore && score < 60) {
+            badgeClass = "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border-rose-300";
+          } else if (hasScore && score < 80) {
+            badgeClass = "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300";
+          }
+
+          return (
+            <div className="flex items-center gap-1.5">
+              {hasScore ? (
+                <button
+                  type="button"
+                  onClick={() => setSelectedAppForATS(item)}
+                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border cursor-pointer hover:opacity-85 transition-opacity ${badgeClass}`}
+                  title="Click to view ATS analysis breakdown"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  {score}%
+                </button>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setSelectedAppForATS(item)}
+                  className="h-7 text-xs flex items-center gap-1 text-purple-700 border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-950/40"
+                >
+                  <Sparkles className="w-3 h-3 text-purple-600" />
+                  Analyze
+                </Button>
+              )}
+            </div>
+          );
+        },
       },
       {
         header: "Interview",
@@ -581,6 +629,19 @@ const ApplicantsTable = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* ATS Analysis Details Modal */}
+      {selectedAppForATS && (
+        <ATSAnalysisModal
+          open={Boolean(selectedAppForATS)}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) setSelectedAppForATS(null);
+          }}
+          applicationId={selectedAppForATS._id}
+          candidateName={selectedAppForATS?.applicant?.fullname || "Candidate"}
+          jobTitle={applicants?.title || "Position"}
+        />
+      )}
     </div>
   );
 };

@@ -11,6 +11,7 @@ import {
   Users,
   ScrollText,
   Info,
+  Sparkles,
 } from "lucide-react";
 
 /**
@@ -41,6 +42,7 @@ export const getHeaderLinks = (role) => {
     { label: "Home", path: "/Home" },
     { label: "Browse", path: "/Browse" },
     { label: "Jobs", path: "/Jobs" },
+    { label: "ATS Checker", path: "/ats" },
   ];
   if (role === "Student") {
     links.push({ label: "Applications", path: "/applications" });
@@ -74,6 +76,7 @@ export const getMobileNavItems = (role) => {
     { label: "Home", path: "/Home", icon: Home },
     { label: "Browse", path: "/Browse", icon: Search },
     { label: "Jobs", path: "/Jobs", icon: Briefcase },
+    { label: "ATS Checker", path: "/ats", icon: Sparkles },
   ];
   if (role === "Student") {
     items.push(
@@ -153,6 +156,7 @@ export const getMobileNavSections = (role) => {
       {
         title: "Career Hub",
         items: [
+          { label: "ATS Checker", path: "/ats", icon: Sparkles },
           { label: "Applications", path: "/applications", icon: Briefcase },
           { label: "Saved Jobs", path: "/saved-jobs", icon: Bookmark },
           { label: "Job Alerts", path: "/job-alerts", icon: Bell },

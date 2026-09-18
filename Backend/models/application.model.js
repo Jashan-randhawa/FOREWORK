@@ -47,6 +47,20 @@ const applicationSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    atsScore: {
+      type: Number,
+      default: null,
+      index: true,
+    },
+    atsDetails: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
+    atsAnalysis: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ATSAnalysis",
+      default: null,
+    },
   },
   {
     timestamps: true,

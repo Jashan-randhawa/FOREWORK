@@ -10,7 +10,7 @@ An end-to-end recruitment platform connecting **Job Seekers**, **Recruiters**, a
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-forework.vercel.app-00dfa2?style=for-the-badge&logo=vercel&logoColor=white)](https://forework.vercel.app)
 [![API Service](https://img.shields.io/badge/API_Service-forework.onrender.com-4682b4?style=for-the-badge&logo=render&logoColor=white)](https://forework.onrender.com)
-[![Tests Passing](https://img.shields.io/badge/Tests-133%20Passing-2ea44f?style=for-the-badge&logo=vitest&logoColor=white)](https://github.com/Jashan-randhawa/FOREWORK)
+[![Tests Passing](https://img.shields.io/badge/Tests-152%20Passing-2ea44f?style=for-the-badge&logo=vitest&logoColor=white)](https://github.com/Jashan-randhawa/FOREWORK)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 <br/>
@@ -33,21 +33,22 @@ An end-to-end recruitment platform connecting **Job Seekers**, **Recruiters**, a
 
 | Portal | Core Functionality |
 | :--- | :--- |
-| **👩‍💼 Candidate Hub** | Browse & filter jobs across 14 tech categories, apply with Cloudinary-backed PDF resumes, track real-time application stages, save jobs, and configure custom periodic alerts |
-| **🏢 Recruiter Suite** | Manage verified company identities, post jobs across a 5-stage lifecycle (`draft` → `published` → `paused` → `expired` → `closed`), screen applicants, review CVs, schedule video calls, and inspect Recharts funnel analytics |
+| **👩‍💼 Candidate Hub** | Run ATS Compatibility & Job Match scans, browse & filter jobs across 14 tech categories, apply with Cloudinary-backed PDF/DOCX resumes, track real-time application stages, save jobs, and configure custom periodic alerts |
+| **🏢 Recruiter Suite** | Manage verified company identities, post jobs across a 5-stage lifecycle (`draft` → `published` → `paused` → `expired` → `closed`), screen applicants with real-time ATS match scores and modal breakdown, review CVs, schedule video calls, and inspect Recharts funnel analytics |
 | **🛡️ Admin Console** | Platform governance: suspend/reinstate users, moderate listings, verify enterprise organizations, and inspect immutable forensic audit logs |
 
 ---
 
 ## ✨ Key Capabilities & Security
 
+- 🎯 **Explainable ATS Predictor** — Dual deterministic scoring (**ATS Compatibility** 0–100 and **Job Match** 0–100) with in-memory PDF/DOCX parsing, canonical skill extraction, layout hazard detection, and prioritized actionable recommendations.
 - 🔐 **Zero-Trust Data Protection** — National IDs (PAN, Aadhaar) encrypted at rest using **AES-256-GCM** with blind indexing for rapid queries without exposing plaintext.
 - 🛡️ **Hardened Auth** — JWT tokens issued in `HttpOnly`, `SameSite: Lax/None`, `Secure` cookies with bcrypt password hashing (10 salt rounds).
 - 🚦 **Server Boot Guard** — Refuses to launch in production if cryptographic keys are absent or default.
-- 📂 **Cloud File Pipeline** — In-memory Multer buffering with streaming to Cloudinary for avatars, corporate logos, and PDF resumes.
+- 📂 **Cloud File Pipeline** — In-memory Multer buffering with streaming to Cloudinary for avatars, corporate logos, and PDF/DOCX resumes.
 - 📊 **Talent Analytics** — Recharts dashboard tracking listing views, application conversion rates, and candidate pipeline distribution.
 - 📧 **Transactional Mailer** — Automated email verification, anti-enumeration password resets, and interview alerts via Nodemailer.
-- ⚡ **Production Ready** — Gzip compression, graceful `SIGTERM`/`SIGINT` connection draining, multi-stage Alpine Dockerfile, and 133/133 passing Vitest tests.
+- ⚡ **Production Ready** — Gzip compression, graceful `SIGTERM`/`SIGINT` connection draining, multi-stage Alpine Dockerfile, and 152/152 passing Vitest tests.
 
 ---
 
@@ -103,7 +104,7 @@ Explore our comprehensive [**Project Wiki**](./wiki/Home.md) or dive into specif
 
 | Architecture & Security | Features & Workflows | API & Deployment |
 | :--- | :--- | :--- |
-| • [Security Architecture](./wiki/Security-&-Encryption.md)<br/>• [Architecture Overview](./wiki/Architecture-Overview.md) | • [Candidate Experience](./wiki/Candidate-Portal.md)<br/>• [Employer & Analytics](./wiki/Recruiter-Suite.md)<br/>• [Admin Moderation](./wiki/Admin-Console.md) | • [API Reference](./wiki/API-Reference.md)<br/>• [Mobile & PWA Guide](./wiki/Mobile-&-PWA.md)<br/>• [Docker & Production Guide](./wiki/Deployment-Guide.md) |
+| • [Security Architecture](./wiki/Security-&-Encryption.md)<br/>• [Architecture Overview](./wiki/Architecture-Overview.md)<br/>• [ATS Predictor Architecture](./docs/ATS_ARCHITECTURE.md) | • [ATS Predictor Wiki](./wiki/ATS-Predictor.md)<br/>• [Candidate Experience](./wiki/Candidate-Portal.md)<br/>• [Employer & Analytics](./wiki/Recruiter-Suite.md)<br/>• [Admin Moderation](./wiki/Admin-Console.md) | • [API Reference](./wiki/API-Reference.md)<br/>• [ATS API Reference](./docs/ATS_API.md)<br/>• [Mobile & PWA Guide](./wiki/Mobile-&-PWA.md)<br/>• [Docker & Production Guide](./wiki/Deployment-Guide.md) |
 
 ---
 

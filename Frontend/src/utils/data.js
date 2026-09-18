@@ -5,4 +5,5 @@ export const APPLICATION_API_ENDPOINT = `${BASE}/api/application`;
 export const COMPANY_API_ENDPOINT = `${BASE}/api/company`;
 export const ADMIN_API_ENDPOINT = `${BASE}/api/admin`;
 export const NOTIFICATION_API_END_POINT = `${BASE}/api/notification`;
+export const ATS_API_ENDPOINT = `${BASE}/api/ats`;
 

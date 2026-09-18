@@ -61,3 +61,15 @@ All ForeWork API endpoints are prefixed with `/api/v1` and support JSON request/
 | `POST` | `/users/:id/suspend` | Suspend user account | Admin |
 | `GET` | `/audit-logs` | Paginated security audit logs | Admin |
 | `POST` | `/companies/:id/verify` | Grant verified status to company | Admin |
+
+---
+
+## 🎯 ATS Predictor Endpoints (`/api/v1/ats`)
+
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :---: |
+| `POST` | `/analyze` | Analyze resume buffer or profile against optional JD | Yes |
+| `POST` | `/score` | Lightweight normalized match score for given resume and job | Yes |
+| `GET` | `/history` | Fetch user's recent ATS analysis records | Yes |
+| `GET` | `/analysis/:id` | Retrieve saved ATS analysis by ID | Yes |
+| `GET` | `/application/:appId` | Get or compute ATS score for job applicant | Yes |

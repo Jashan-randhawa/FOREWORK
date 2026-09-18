@@ -1,4 +1,4 @@
-﻿### [🏠 ForeWork Wiki](Home)
+### [🏠 ForeWork Wiki](Home)
 
 ---
 
@@ -8,6 +8,7 @@
 - [📱 Mobile & PWA Guide](Mobile-&-PWA)
 
 ### Feature Portals
+- [🎯 ATS Resume Predictor](ATS-Predictor)
 - [👩‍💼 Candidate Experience](Candidate-Portal)
 - [🏢 Recruiter Suite](Recruiter-Suite)
 - [🛡️ Admin Governance](Admin-Console)

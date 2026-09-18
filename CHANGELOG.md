@@ -1,6 +1,34 @@
-﻿# Changelog
+# Changelog
 
 All notable changes to the ForeWork platform are documented in this file.
+
+## [v2.1.0] - 2026-09-18
+
+### 🎯 Feature Release: FOREWORK ATS Resume Predictor & Job Match Engine
+
+This release introduces an explainable, deterministic Applicant Tracking System (ATS) compatibility engine integrated directly across candidate and recruiter flows.
+
+- **Deterministic Scoring Rubric (`ats_v1.0`)**:
+  - Dual scoring: **ATS Compatibility Score (0–100)** and **Job Match Score (0–100)**.
+  - 6-category evaluation: Parseability (20), Job Alignment (30), Experience Relevance (20), Structure (10), Qualifications (10), Quality/Evidence (10).
+- **Document & File Processing**:
+  - In-memory stream extraction for PDF (`pdf-parse`) and DOCX (`mammoth`).
+  - Scanned / image-only PDF detection with extraction confidence calculation.
+- **Entity & Canonical Skill Extraction**:
+  - Word-boundary aware skill matching with 60+ taxonomy mappings and synonym normalization.
+  - Heading normalization into 10 canonical sections.
+  - Regex and heuristic contact extraction with field confidence ratings.
+- **Formatting Risk Analyzer**:
+  - Identifies multi-column reading hazards, complex tables, encoding noise, and missing core sections.
+- **Candidate & Recruiter UI**:
+  - Interactive `/ats` page with dual gauges, score breakdowns, filterable skill pills, and historical scans.
+  - Recruiter `ApplicantsTable` ATS Score column and modal breakdown dialog (`ATSAnalysisModal`).
+  - "Check ATS Score" quick-action shortcut on candidate profile.
+- **Testing & Docs**:
+  - 19 new backend tests (152 total passing) and 6 new frontend tests (139 total passing).
+  - New blueprints: `docs/ATS_ARCHITECTURE.md`, `docs/ATS_SCORING.md`, `docs/ATS_API.md`, and `wiki/ATS-Predictor.md`.
+
+---
 
 ## [v2.0.0] - 2026-09-17
 

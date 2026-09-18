@@ -1,4 +1,4 @@
-﻿# 💼 Welcome to the FOREWORK Official Wiki
+# 💼 Welcome to the FOREWORK Official Wiki
 
 Welcome to the technical knowledge base and architecture wiki for **FOREWORK** — the modern, telemetry-driven career marketplace and talent acquisition platform built on the MERN stack (MongoDB, Express, React, Node.js).
 
@@ -10,6 +10,7 @@ Welcome to the technical knowledge base and architecture wiki for **FOREWORK** �
 FOREWORK Wiki
 ├── 🚀 Getting Started               -> Developer onboarding, env setup & docker
 ├── 🏗️ Architecture Overview          -> System design, MERN architecture & data flow
+├── 🎯 ATS Resume Predictor (v2.1)    -> Explainable ATS scoring, skill matching & recommendations
 ├── 📱 Mobile & PWA Guide (v2.0)     -> Responsive carousels, app shell & offline caching
 ├── 👩‍💼 Candidate Experience          -> Discovery, telemetry tracking, resumes & alerts
 ├── 🏢 Recruiter Suite               -> 5-stage job lifecycle, applicant screening & analytics
@@ -17,7 +18,7 @@ FOREWORK Wiki
 ├── 🔐 Security & Encryption         -> AES-256-GCM, blind indexing & auth hardening
 ├── 📡 API Reference                 -> Endpoints, auth guards & request/response specs
 └── 🚢 Deployment Guide              -> Production setup on Vercel, Render & Docker
-`
+```
 
 ---
 
@@ -27,10 +28,11 @@ ForeWork bridges ambitious engineering candidates and vetted tech employers with
 
 Traditional hiring platforms suffer from "black hole" application tracking, fraudulent job postings, and clumsy desktop-only interfaces. ForeWork solves this with:
 
-1. **Real-Time Telemetry Tracking**: Candidates know the exact second an application is reviewed, shortlisted, or scheduled for an interview.
-2. **100% Employer Verification**: Every corporate entity undergoes manual administrative validation before publishing jobs.
-3. **Mobile-First & PWA Ergonomics**: Fully responsive touch design with offline caching, bottom navigation, and swipeable carousels.
-4. **Military-Grade Data Protection**: Sensitive PII is encrypted at rest using **AES-256-GCM** with blind indexing.
+1. **Deterministic ATS Resume Predictor**: Dual scoring (ATS Compatibility + Job Match) with granular parseability diagnostics, canonical skill matching, and prioritized recommendations.
+2. **Real-Time Telemetry Tracking**: Candidates know the exact second an application is reviewed, shortlisted, or scheduled for an interview.
+3. **100% Employer Verification**: Every corporate entity undergoes manual administrative validation before publishing jobs.
+4. **Mobile-First & PWA Ergonomics**: Fully responsive touch design with offline caching, bottom navigation, and swipeable carousels.
+5. **Military-Grade Data Protection**: Sensitive PII is encrypted at rest using **AES-256-GCM** with blind indexing.
 
 ---
 

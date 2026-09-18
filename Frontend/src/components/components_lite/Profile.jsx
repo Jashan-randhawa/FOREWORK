@@ -177,15 +177,29 @@ const Profile = () => {
                     Your resume is automatically attached when you apply to jobs.
                   </p>
                 </div>
-                <Button
-                  onClick={() => setOpen(true)}
-                  variant="outline"
-                  size="sm"
-                  className="text-xs self-start sm:self-auto flex items-center gap-1.5"
-                >
-                  <UploadCloud className="w-3.5 h-3.5" />
-                  <span>{user?.profile?.resume ? "Update Resume" : "Upload Resume"}</span>
-                </Button>
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                  {user?.profile?.resume && (
+                    <Link to="/ats">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs flex items-center gap-1.5 text-purple-600 border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-950/40"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+                        <span>Check ATS Score</span>
+                      </Button>
+                    </Link>
+                  )}
+                  <Button
+                    onClick={() => setOpen(true)}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs flex items-center gap-1.5"
+                  >
+                    <UploadCloud className="w-3.5 h-3.5" />
+                    <span>{user?.profile?.resume ? "Update Resume" : "Upload Resume"}</span>
+                  </Button>
+                </div>
               </div>
               <div className="mt-3">
                 <ResumeViewer

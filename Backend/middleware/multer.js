@@ -38,7 +38,21 @@ export const logoUpload = createUpload({
 }).single("file");
 
 export const resumeUpload = createUpload({
-  allowedMimeTypes: ["application/pdf"],
+  allowedMimeTypes: [
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/msword",
+  ],
+  maxSizeMB: 5,
+}).single("file");
+
+export const atsUpload = createUpload({
+  allowedMimeTypes: [
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/msword",
+    "text/plain",
+  ],
   maxSizeMB: 5,
 }).single("file");
 
