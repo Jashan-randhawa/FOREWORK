@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import Navbar from "../components/components_lite/Navbar";
 import Footer from "../components/components_lite/Footer";
@@ -52,6 +52,9 @@ const ATSAnalysis = () => {
     fetchAvailableJobs();
     if (user) {
       fetchUserHistory();
+      if (user.profile?.resume && !selectedFile && sourceMode === "file") {
+        setSourceMode("profile");
+      }
     }
   }, [user]);
 
@@ -120,27 +123,33 @@ const ATSAnalysis = () => {
 
     try {
       setAnalyzing(true);
-      const formData = new FormData();
+      let res;
 
-      if (sourceMode === "file" && selectedFile) {
+      if (sourceMode === "file") {
+        const formData = new FormData();
         formData.append("file", selectedFile);
+        if (selectedJobId) {
+          formData.append("job_id", selectedJobId);
+        } else if (jobDescription.trim()) {
+          formData.append("job_description", jobDescription.trim());
+        }
+        // Do not pass manual Content-Type header so browser sets multipart boundary correctly
+        res = await API.post(`${ATS_API_ENDPOINT}/analyze`, formData);
       } else if (sourceMode === "profile") {
-        formData.append("use_profile_resume", "true");
+        res = await API.post(`${ATS_API_ENDPOINT}/analyze`, {
+          use_profile_resume: true,
+          job_id: selectedJobId || undefined,
+          job_description: jobDescription.trim() || undefined,
+        });
       } else if (sourceMode === "paste") {
-        formData.append("resume_text", pastedText.trim());
+        res = await API.post(`${ATS_API_ENDPOINT}/analyze`, {
+          resume_text: pastedText.trim(),
+          job_id: selectedJobId || undefined,
+          job_description: jobDescription.trim() || undefined,
+        });
       }
 
-      if (selectedJobId) {
-        formData.append("job_id", selectedJobId);
-      } else if (jobDescription.trim()) {
-        formData.append("job_description", jobDescription.trim());
-      }
-
-      const res = await API.post(`${ATS_API_ENDPOINT}/analyze`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      if (res.data?.success) {
+      if (res?.data?.success) {
         setAnalysisResult(res.data);
         toast.success("Resume analysis completed successfully!");
         fetchUserHistory();
@@ -154,7 +163,12 @@ const ATSAnalysis = () => {
         }, 150);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to analyze resume. Please verify the document format.");
+      const errorMsg =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to analyze resume. Please verify the document format.";
+      toast.error(errorMsg);
+      console.error("ATS analysis error:", err.response?.data || err);
     } finally {
       setAnalyzing(false);
     }

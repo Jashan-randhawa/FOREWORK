@@ -1,11 +1,11 @@
-const CACHE_NAME = "forework-v1";
+const CACHE_NAME = "forework-v2";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
   "/manifest.json",
   "/icon-192.svg",
   "/icon-512.svg",
-  "/vite.svg"
+  "/vite.svg",
 ];
 
 // Install event - precache core shell
@@ -34,21 +34,38 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Fetch event - caching strategy
+// Fetch event - robust caching strategy ensuring a valid Response is always returned
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // Skip non-GET requests and API calls
-  if (event.request.method !== "GET" || url.pathname.startsWith("/api/")) {
+  // Skip non-GET requests, API calls, and cross-origin requests
+  if (
+    event.request.method !== "GET" ||
+    url.pathname.startsWith("/api/") ||
+    url.origin !== self.location.origin
+  ) {
     return;
   }
 
-  // Navigation requests: Network-first, fallback to cache
+  // Navigation requests: Network-first, fallback to cached index.html or fallback Response
   if (event.request.mode === "navigate") {
     event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match("/index.html") || caches.match("/");
-      })
+      (async () => {
+        try {
+          const networkResponse = await fetch(event.request);
+          return networkResponse;
+        } catch {
+          const cached = (await caches.match("/index.html")) || (await caches.match("/"));
+          if (cached) return cached;
+          return new Response(
+            "<!DOCTYPE html><html><head><title>ForeWork Offline</title></head><body><h2>Offline</h2><p>Please check your internet connection and refresh.</p></body></html>",
+            {
+              status: 200,
+              headers: { "Content-Type": "text/html" },
+            }
+          );
+        }
+      })()
     );
     return;
   }
@@ -62,26 +79,38 @@ self.addEventListener("fetch", (event) => {
     url.pathname.endsWith(".js")
   ) {
     event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
+      (async () => {
+        const cachedResponse = await caches.match(event.request);
         if (cachedResponse) {
           return cachedResponse;
         }
-        return fetch(event.request).then((networkResponse) => {
+        try {
+          const networkResponse = await fetch(event.request);
           if (networkResponse && networkResponse.status === 200) {
             const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(event.request, responseToCache);
           }
           return networkResponse;
-        });
-      })
+        } catch {
+          return new Response("", { status: 404, statusText: "Not Found" });
+        }
+      })()
     );
     return;
   }
 
-  // Default: Network with cache fallback
+  // Default: Network with cache fallback, guaranteed never to resolve to undefined
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    (async () => {
+      try {
+        const networkResponse = await fetch(event.request);
+        return networkResponse;
+      } catch {
+        const cached = await caches.match(event.request);
+        if (cached) return cached;
+        return new Response("", { status: 404, statusText: "Not Found" });
+      }
+    })()
   );
 });

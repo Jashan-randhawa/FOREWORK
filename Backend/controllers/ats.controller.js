@@ -1,4 +1,4 @@
-﻿import mongoose from "mongoose";
+import mongoose from "mongoose";
 import { User } from "../models/user.model.js";
 import { Job } from "../models/job.model.js";
 import { Application } from "../models/application.model.js";
@@ -34,38 +34,51 @@ export const analyzeResume = async (req, res, next) => {
     let resumeMimeType = file ? file.mimetype : "";
     let rawText = resume_text || "";
 
+    const isProfileMode =
+      use_profile_resume === true ||
+      use_profile_resume === "true" ||
+      use_profile_resume === 1 ||
+      use_profile_resume === "1";
+
     // 1. Resolve Resume Source
     if (file && file.buffer) {
       resumeBuffer = file.buffer;
-    } else if (use_profile_resume || (!resumeUrl && !rawText && !resume_id)) {
+    } else if (isProfileMode) {
       const user = await User.findById(userId);
       if (!user || !user.profile?.resume) {
         return res.status(400).json({
           success: false,
-          message: "No uploaded resume found in your profile. Please upload a PDF or DOCX file.",
+          message: "No uploaded resume found in your profile. Please upload a PDF or DOCX file to analyze.",
         });
       }
       resumeUrl = user.profile.resume;
-      resumeFilename = user.profile.resumeOriginalname || "profile_resume.pdf";
+      resumeFilename = user.profile.resumeOriginalname || user.profile.resumeOriginalName || "profile_resume.pdf";
     } else if (resume_id && mongoose.Types.ObjectId.isValid(resume_id)) {
       // Check if resume_id is a User ID or an Application ID
       const candidate = await User.findById(resume_id);
       if (candidate && candidate.profile?.resume) {
         resumeUrl = candidate.profile.resume;
-        resumeFilename = candidate.profile.resumeOriginalname || "resume.pdf";
+        resumeFilename = candidate.profile.resumeOriginalname || candidate.profile.resumeOriginalName || "resume.pdf";
       } else {
         const app = await Application.findById(resume_id).populate("applicant");
         if (app && app.applicant?.profile?.resume) {
           resumeUrl = app.applicant.profile.resume;
-          resumeFilename = app.applicant.profile.resumeOriginalname || "resume.pdf";
+          resumeFilename = app.applicant.profile.resumeOriginalname || app.applicant.profile.resumeOriginalName || "resume.pdf";
         }
+      }
+    } else if (!resumeUrl && !rawText) {
+      // Convenient fallback: if user has a profile resume, use it
+      const user = await User.findById(userId);
+      if (user && user.profile?.resume) {
+        resumeUrl = user.profile.resume;
+        resumeFilename = user.profile.resumeOriginalname || user.profile.resumeOriginalName || "profile_resume.pdf";
       }
     }
 
     if (!resumeBuffer && !resumeUrl && !rawText) {
       return res.status(400).json({
         success: false,
-        message: "Please provide a resume file, resume URL, or select your profile resume for analysis.",
+        message: "Please provide a resume file (PDF or DOCX), paste resume text, or select your profile resume for analysis.",
       });
     }
 

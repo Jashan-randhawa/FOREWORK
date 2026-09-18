@@ -1,4 +1,4 @@
-﻿import { PDFParse } from "pdf-parse";
+import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
 import AppError from "../../utils/AppError.js";
 
@@ -20,9 +20,20 @@ export class DocumentExtractor {
     }
 
     try {
-      const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 ForeWork-ATS/2.0",
+          Accept:
+            "application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,text/plain,*/*",
+        },
+        signal: AbortSignal.timeout(20000),
+      });
       if (!response.ok) {
-        throw new AppError(`Failed to download resume from storage: ${response.statusText}`, 400);
+        throw new AppError(
+          `Failed to download resume from storage (${response.status}: ${response.statusText})`,
+          400
+        );
       }
 
       const contentType = response.headers.get("content-type") || "";
@@ -108,24 +119,26 @@ export class DocumentExtractor {
     }
     if (lowerName.endsWith(".txt") || lowerMime.includes("text/plain")) return "txt";
 
+    // Magic bytes detection
     if (buffer && buffer.length >= 4) {
-      if (
-        buffer[0] === 0x25 &&
-        buffer[1] === 0x50 &&
-        buffer[2] === 0x44 &&
-        buffer[3] === 0x46
-      ) {
+      // PDF standard allows %PDF- anywhere within the first 1024 bytes
+      const headerSnippet = buffer.subarray(0, Math.min(buffer.length, 1024)).toString("binary");
+      if (headerSnippet.includes("%PDF")) {
         return "pdf";
       }
+
+      // DOCX / ZIP magic bytes (PK\x03\x04 or PK\x05\x06 or PK\x07\x08)
       if (
         buffer[0] === 0x50 &&
         buffer[1] === 0x4b &&
-        buffer[2] === 0x03 &&
-        buffer[3] === 0x04
+        (buffer[2] === 0x03 || buffer[2] === 0x05 || buffer[2] === 0x07)
       ) {
         return "docx";
       }
     }
+
+    if (lowerName.includes(".pdf")) return "pdf";
+    if (lowerName.includes(".docx") || lowerName.includes(".doc")) return "docx";
 
     return "unknown";
   }
