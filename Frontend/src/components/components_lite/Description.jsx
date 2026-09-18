@@ -18,7 +18,9 @@ import {
   Users,
   Clock,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
+import JobDetailATSCheck from "../ats/JobDetailATSCheck";
 
 const Description = () => {
   const params = useParams();
@@ -273,6 +275,23 @@ const Description = () => {
             </div>
 
             <div className="flex items-center flex-wrap gap-2 sm:gap-3 self-start md:self-auto">
+              {!isRecruiter && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const atsElem = document.getElementById("job-ats-check-section");
+                    if (atsElem) {
+                      atsElem.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                  className="flex items-center gap-1.5 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 min-h-[40px]"
+                  title="Check resume compatibility before applying"
+                >
+                  <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <span>Check Match</span>
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -378,6 +397,16 @@ const Description = () => {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* ATS Resume Compatibility & Match Checker */}
+        <div id="job-ats-check-section">
+          <JobDetailATSCheck
+            job={singleJob}
+            onApply={isApplied || submitting || isRecruiter ? null : applyJobHandler}
+            isApplied={isApplied}
+            submitting={submitting}
+          />
         </div>
 
         {/* Related Jobs Section */}
