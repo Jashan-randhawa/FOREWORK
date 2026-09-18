@@ -1,6 +1,7 @@
 import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
 import AppError from "../../utils/AppError.js";
+import cloudinary from "../../utils/cloud.js";
 
 /**
  * Validates document buffer, size, and MIME type/extension.
@@ -8,6 +9,72 @@ import AppError from "../../utils/AppError.js";
  */
 export class DocumentExtractor {
   static MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+
+  /**
+   * Generates authenticated and signed download candidate URLs for Cloudinary assets.
+   * Resolves 401 Unauthorized errors caused by Cloudinary's default PDF delivery restrictions.
+   * @param {string} url
+   * @returns {string[]}
+   */
+  static getCloudinaryCandidates(url) {
+    if (!url || typeof url !== "string" || !url.includes("res.cloudinary.com")) {
+      return [];
+    }
+
+    const config = cloudinary.config();
+    const hasCredentials = Boolean(config.api_key && config.api_secret);
+    const candidates = [];
+
+    try {
+      const match = url.match(
+        /\/res\.cloudinary\.com\/([^/]+)\/(image|raw|video|auto)\/upload\/(?:s--[^/]+--\/)?(?:v\d+\/)?(.+?)(?:\.([a-zA-Z0-9]+))?$/
+      );
+
+      if (match) {
+        const [, cloudName, resType, publicId, format] = match;
+
+        if (hasCredentials) {
+          // 1. Authenticated download URL with HMAC signature (designed for private/restricted downloads)
+          candidates.push(
+            cloudinary.utils.private_download_url(publicId, format || "pdf", {
+              resource_type: resType || "image",
+              type: "upload",
+            })
+          );
+
+          if (resType !== "raw") {
+            candidates.push(
+              cloudinary.utils.private_download_url(publicId, format || "pdf", {
+                resource_type: "raw",
+                type: "upload",
+              })
+            );
+          }
+
+          // 2. Signed delivery URL
+          candidates.push(
+            cloudinary.url(format ? `${publicId}.${format}` : publicId, {
+              resource_type: resType || "image",
+              type: "upload",
+              sign_url: true,
+              secure: true,
+            })
+          );
+        }
+
+        // 3. Fallback direct URLs with explicit extension
+        if (!format) {
+          candidates.push(
+            `https://res.cloudinary.com/${cloudName}/${resType}/upload/${publicId}.pdf`
+          );
+        }
+      }
+    } catch {
+      // ignore regex/config errors
+    }
+
+    return candidates;
+  }
 
   /**
    * Fetches a remote document from a URL into a Buffer.
@@ -19,41 +86,76 @@ export class DocumentExtractor {
       throw new AppError("Invalid document URL provided", 400);
     }
 
-    try {
-      const response = await fetch(url, {
-        headers: {
+    const config = cloudinary.config();
+    const isCloudinary = url.includes("res.cloudinary.com") || url.includes("api.cloudinary.com");
+    const basicAuth =
+      isCloudinary && config.api_key && config.api_secret
+        ? `Basic ${Buffer.from(`${config.api_key}:${config.api_secret}`).toString("base64")}`
+        : null;
+
+    const urlsToTry = [
+      ...this.getCloudinaryCandidates(url),
+      url,
+    ];
+    const uniqueUrls = [...new Set(urlsToTry)];
+
+    let lastError = null;
+
+    for (const targetUrl of uniqueUrls) {
+      try {
+        const headers = {
           "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 ForeWork-ATS/2.0",
           Accept:
             "application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,text/plain,*/*",
-        },
-        signal: AbortSignal.timeout(20000),
-      });
-      if (!response.ok) {
-        throw new AppError(
-          `Failed to download resume from storage (${response.status}: ${response.statusText})`,
-          400
-        );
+        };
+
+        if (basicAuth && targetUrl.includes("cloudinary.com")) {
+          headers["Authorization"] = basicAuth;
+        }
+
+        const response = await fetch(targetUrl, {
+          headers,
+          signal: AbortSignal.timeout(20000),
+        });
+
+        if (!response.ok) {
+          lastError = new AppError(
+            `Failed to download resume from storage (${response.status}: ${response.statusText})`,
+            400
+          );
+          continue;
+        }
+
+        const contentType = response.headers.get("content-type") || "";
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        if (buffer.length === 0) {
+          lastError = new AppError("The fetched resume file is empty (0 bytes)", 400);
+          continue;
+        }
+
+        let filename = "resume";
+        try {
+          const parsedUrl = new URL(url);
+          const pathParts = parsedUrl.pathname.split("/");
+          filename = pathParts[pathParts.length - 1] || "resume";
+        } catch {
+          // use default
+        }
+
+        return { buffer, mimeType: contentType, filename };
+      } catch (err) {
+        lastError = err;
       }
-
-      const contentType = response.headers.get("content-type") || "";
-      const arrayBuffer = await response.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
-      let filename = "resume";
-      try {
-        const parsedUrl = new URL(url);
-        const pathParts = parsedUrl.pathname.split("/");
-        filename = pathParts[pathParts.length - 1] || "resume";
-      } catch {
-        // use default
-      }
-
-      return { buffer, mimeType: contentType, filename };
-    } catch (err) {
-      if (err instanceof AppError) throw err;
-      throw new AppError(`Could not retrieve resume from URL: ${err.message}`, 400);
     }
+
+    if (lastError instanceof AppError) throw lastError;
+    throw new AppError(
+      `Could not retrieve resume from storage: ${lastError?.message || "Storage access restricted (401)"}`,
+      400
+    );
   }
 
   /**

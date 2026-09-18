@@ -105,6 +105,8 @@ const Navbar = () => {
                             src={user?.profile?.profilePhoto}
                             alt={user?.fullname || "User avatar"}
                             className="object-cover"
+                            crossOrigin="anonymous"
+                            referrerPolicy="no-referrer"
                           />
                           <AvatarFallback className="bg-purple-100 dark:bg-[#3D2166] text-[#6B3AC2] dark:text-purple-300 font-bold text-xs">
                             {user?.fullname ? user.fullname.charAt(0).toUpperCase() : "U"}
@@ -125,6 +127,8 @@ const Navbar = () => {
                                 src={user?.profile?.profilePhoto}
                                 alt={user?.fullname || "User avatar"}
                                 className="object-cover"
+                                crossOrigin="anonymous"
+                                referrerPolicy="no-referrer"
                               />
                               <AvatarFallback className="bg-purple-100 dark:bg-[#3D2166] text-[#6B3AC2] dark:text-purple-300 font-bold text-base">
                                 {user?.fullname ? user.fullname.charAt(0).toUpperCase() : "U"}

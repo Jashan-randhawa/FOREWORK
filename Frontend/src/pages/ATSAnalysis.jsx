@@ -169,6 +169,20 @@ const ATSAnalysis = () => {
         "Failed to analyze resume. Please verify the document format.";
       toast.error(errorMsg);
       console.error("ATS analysis error:", err.response?.data || err);
+
+      // If downloading profile resume failed due to cloud storage permissions, guide user to upload directly
+      if (
+        sourceMode === "profile" &&
+        (errorMsg.toLowerCase().includes("storage") ||
+          errorMsg.toLowerCase().includes("unauthorized") ||
+          errorMsg.toLowerCase().includes("401"))
+      ) {
+        toast.info(
+          "Your cloud-stored resume is restricted. Please select your resume file (PDF or DOCX) directly below to analyze.",
+          { duration: 7000 }
+        );
+        setSourceMode("file");
+      }
     } finally {
       setAnalyzing(false);
     }
