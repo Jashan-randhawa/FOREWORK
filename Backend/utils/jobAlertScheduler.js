@@ -22,7 +22,9 @@ import { User } from "../models/user.model.js";
 import { createNotification } from "./createNotification.js";
 import { sendEmail } from "./mailer.js";
 
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const FRONTEND_URL = (process.env.FRONTEND_URL || "http://localhost:5173")
+  .split(",")[0]
+  .trim();
 
 /**
  * Build a Mongoose query filter from alert criteria.

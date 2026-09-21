@@ -25,7 +25,8 @@ export const sendEmail = async ({ to, subject, html, text }) => {
 };
 
 export const sendVerificationEmail = async (email, token, frontendUrl) => {
-  const baseUrl = frontendUrl || process.env.FRONTEND_URL || "http://localhost:5173";
+  const primaryFrontend = (process.env.FRONTEND_URL || "http://localhost:5173").split(",")[0].trim();
+  const baseUrl = frontendUrl || primaryFrontend;
   const verifyLink = `${baseUrl}/verify-email?token=${token}`;
   return sendEmail({
     to: email,
@@ -43,7 +44,8 @@ export const sendVerificationEmail = async (email, token, frontendUrl) => {
 };
 
 export const sendPasswordResetEmail = async (email, token, frontendUrl) => {
-  const baseUrl = frontendUrl || process.env.FRONTEND_URL || "http://localhost:5173";
+  const primaryFrontend = (process.env.FRONTEND_URL || "http://localhost:5173").split(",")[0].trim();
+  const baseUrl = frontendUrl || primaryFrontend;
   const resetLink = `${baseUrl}/reset-password?token=${token}`;
   return sendEmail({
     to: email,

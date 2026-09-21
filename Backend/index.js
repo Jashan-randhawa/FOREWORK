@@ -55,10 +55,15 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 
 // CORS configuration
+const frontendUrls = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(",").map((url) => url.trim())
+  : [];
+
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
+  ...frontendUrls,
   "http://localhost:5173",
   "http://localhost:3000",
+  "http://localhost:8081",
 ].filter(Boolean);
 
 const corsOptions = {
