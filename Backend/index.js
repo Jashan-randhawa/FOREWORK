@@ -56,11 +56,13 @@ app.use(cookieParser());
 
 // CORS configuration
 const frontendUrls = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(",").map((url) => url.trim())
+  ? process.env.FRONTEND_URL.split(",").map((url) => url.trim().replace(/\/+$/, ""))
   : [];
 
 const allowedOrigins = [
   ...frontendUrls,
+  "https://forework.vercel.app",
+  "https://forework-mobile.vercel.app",
   "http://localhost:5173",
   "http://localhost:3000",
   "http://localhost:8081",
@@ -68,7 +70,14 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin) {
+      return callback(null, true);
+    }
+    const cleanOrigin = origin.trim().replace(/\/+$/, "");
+    if (
+      allowedOrigins.includes(cleanOrigin) ||
+      cleanOrigin.endsWith(".vercel.app")
+    ) {
       return callback(null, true);
     }
     console.error(`Blocked by CORS: ${origin} not in`, allowedOrigins);
