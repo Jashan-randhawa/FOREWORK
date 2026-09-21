@@ -78,11 +78,8 @@ export const register = async (req, res, next) => {
       const fileUri = getDataUri(file);
       const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
       profilePhotoUrl = cloudResponse.secure_url;
-    } else if (process.env.NODE_ENV !== "test") {
-      return res.status(400).json({
-        message: "Profile image is required",
-        success: false,
-      });
+    } else {
+      profilePhotoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullname)}&background=6B3AC2&color=fff&size=256`;
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
