@@ -149,15 +149,15 @@ export const login = async (req, res, next) => {
       });
     }
 
+    const isMobileClient = req.headers["x-client"] === "mobile";
     const tokenData = {
       userId: user._id,
       role: user.role,
     };
     const token = jwt.sign(tokenData, process.env.JWT_SECRET, {
-      expiresIn: "1d",
+      expiresIn: isMobileClient ? "30d" : "1d",
     });
 
-    // Strip raw PAN and Aadhaar from sanitizedUser to prevent PII leakage
     const sanitizedUser = {
       _id: user._id,
       fullname: user.fullname,
@@ -171,11 +171,14 @@ export const login = async (req, res, next) => {
       .status(200)
       .cookie("token", token, {
         ...COOKIE_OPTIONS,
-        maxAge: 24 * 60 * 60 * 1000,
+        maxAge: isMobileClient
+          ? 30 * 24 * 60 * 60 * 1000
+          : 24 * 60 * 60 * 1000,
       })
       .json({
         message: `Welcome back ${user.fullname}`,
         user: sanitizedUser,
+        ...(isMobileClient ? { token } : {}),
         success: true,
       });
   } catch (error) {

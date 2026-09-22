@@ -3,7 +3,13 @@ import { User } from "../models/user.model.js";
 
 const authenticateToken = async (req, res, next) => {
   try {
-    const token = req.cookies?.token;
+    const bearerHeader = req.headers.authorization;
+    const bearerToken = bearerHeader?.startsWith("Bearer ")
+      ? bearerHeader.slice(7)
+      : null;
+
+    const token = req.cookies?.token || bearerToken;
+
     if (!token) {
       return res.status(401).json({
         message: "Authentication token required",
