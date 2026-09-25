@@ -1,2 +1,8 @@
 Backend/.env
 Backend/node_modules
+Frontend
+.git
+.github
+wiki
+docs
+*.md

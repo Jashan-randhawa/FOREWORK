@@ -24,6 +24,22 @@ CMD ["node", "index.js"]
 ```
 
 ### Build & Run
+
+#### Option A: Pull Pre-Built Container from GitHub Packages
+```bash
+# Pull production image from GitHub Container Registry (GHCR)
+docker pull ghcr.io/jashan-randhawa/forework-backend:latest
+
+# Run container with environment file
+docker run -d \
+  --name forework-api \
+  -p 5001:5001 \
+  --restart unless-stopped \
+  --env-file Backend/.env \
+  ghcr.io/jashan-randhawa/forework-backend:latest
+```
+
+#### Option B: Build Image Locally
 ```bash
 # Build image
 docker build -t forework-api:latest .

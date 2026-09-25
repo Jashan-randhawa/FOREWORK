@@ -12,6 +12,7 @@ An end-to-end recruitment platform connecting **Job Seekers**, **Recruiters**, a
 [![API Service](https://img.shields.io/badge/API_Service-forework.onrender.com-4682b4?style=for-the-badge&logo=render&logoColor=white)](https://forework.onrender.com)
 [![Tests Passing](https://img.shields.io/badge/Tests-291%20Passing-2ea44f?style=for-the-badge&logo=vitest&logoColor=white)](https://github.com/Jashan-randhawa/FOREWORK)
 [![Version](https://img.shields.io/badge/Version-v2.1.0-6B3AC2?style=for-the-badge)](./CHANGELOG.md)
+[![GitHub Package](https://img.shields.io/badge/Package-ghcr.io-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://github.com/Jashan-randhawa/FOREWORK/pkgs/container/forework-backend)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 <br/>
@@ -84,6 +85,15 @@ npm run dev              # Client starts on http://localhost:5173
 ```
 
 ### 🐳 Docker Container Run
+
+#### Option A: Pull Pre-Built Image from GitHub Packages
+```bash
+# Pull and run the production image directly from GHCR
+docker pull ghcr.io/jashan-randhawa/forework-backend:latest
+docker run -d -p 5001:5001 --env-file Backend/.env ghcr.io/jashan-randhawa/forework-backend:latest
+```
+
+#### Option B: Build Locally
 ```bash
 docker build -t forework-backend .
 docker run -d -p 5001:5001 --env-file Backend/.env forework-backend
