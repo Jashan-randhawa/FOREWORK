@@ -4,13 +4,14 @@
 
 ### Enterprise MERN Stack Job Portal & Talent Acquisition Platform
 
-An end-to-end recruitment platform connecting **Job Seekers**, **Recruiters**, and **Platform Administrators**. Features military-grade AES-256-GCM PII encryption, real-time funnel analytics, PDF resume streaming, video interview scheduling, and automated security audit logs.
+An end-to-end recruitment platform connecting **Job Seekers**, **Recruiters**, and **Platform Administrators**. Features an explainable ATS Resume Predictor with pre-apply checks, military-grade AES-256-GCM PII encryption, Bearer token auth & 30-day mobile sessions, real-time funnel analytics, and multi-domain CORS support.
 
 <br/>
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-forework.vercel.app-00dfa2?style=for-the-badge&logo=vercel&logoColor=white)](https://forework.vercel.app)
 [![API Service](https://img.shields.io/badge/API_Service-forework.onrender.com-4682b4?style=for-the-badge&logo=render&logoColor=white)](https://forework.onrender.com)
-[![Tests Passing](https://img.shields.io/badge/Tests-152%20Passing-2ea44f?style=for-the-badge&logo=vitest&logoColor=white)](https://github.com/Jashan-randhawa/FOREWORK)
+[![Tests Passing](https://img.shields.io/badge/Tests-291%20Passing-2ea44f?style=for-the-badge&logo=vitest&logoColor=white)](https://github.com/Jashan-randhawa/FOREWORK)
+[![Version](https://img.shields.io/badge/Version-v2.1.0-6B3AC2?style=for-the-badge)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 <br/>
@@ -33,22 +34,23 @@ An end-to-end recruitment platform connecting **Job Seekers**, **Recruiters**, a
 
 | Portal | Core Functionality |
 | :--- | :--- |
-| **👩‍💼 Candidate Hub** | Run ATS Compatibility & Job Match scans, browse & filter jobs across 14 tech categories, apply with Cloudinary-backed PDF/DOCX resumes, track real-time application stages, save jobs, and configure custom periodic alerts |
-| **🏢 Recruiter Suite** | Manage verified company identities, post jobs across a 5-stage lifecycle (`draft` → `published` → `paused` → `expired` → `closed`), screen applicants with real-time ATS match scores and modal breakdown, review CVs, schedule video calls, and inspect Recharts funnel analytics |
+| **👩‍💼 Candidate Hub** | Run ATS Compatibility & Job Match scans, evaluate pre-apply resume compatibility directly on job detail pages, browse & filter jobs across 14 tech categories, apply with Cloudinary-backed PDF/DOCX resumes, track real-time application stages, save jobs, and configure periodic email alerts |
+| **🏢 Recruiter Suite** | Manage verified company identities, post jobs across a 5-stage lifecycle (`draft` → `published` → `paused` → `expired` → `closed`), screen applicants with real-time ATS match scores and modal breakdown dialog (`ATSAnalysisModal`), review CVs, schedule video calls, and inspect Recharts funnel analytics |
 | **🛡️ Admin Console** | Platform governance: suspend/reinstate users, moderate listings, verify enterprise organizations, and inspect immutable forensic audit logs |
 
 ---
 
 ## ✨ Key Capabilities & Security
 
-- 🎯 **Explainable ATS Predictor** — Dual deterministic scoring (**ATS Compatibility** 0–100 and **Job Match** 0–100) with in-memory PDF/DOCX parsing, canonical skill extraction, layout hazard detection, and prioritized actionable recommendations.
-- 🔐 **Zero-Trust Data Protection** — National IDs (PAN, Aadhaar) encrypted at rest using **AES-256-GCM** with blind indexing for rapid queries without exposing plaintext.
-- 🛡️ **Hardened Auth** — JWT tokens issued in `HttpOnly`, `SameSite: Lax/None`, `Secure` cookies with bcrypt password hashing (10 salt rounds).
-- 🚦 **Server Boot Guard** — Refuses to launch in production if cryptographic keys are absent or default.
+- 🎯 **Explainable ATS Predictor (v2.1)** — Dual deterministic scoring (**ATS Compatibility** 0–100 and **Job Match** 0–100) using the `ats_v1.0` 100-point rubric. Features in-memory PDF/DOCX parsing, canonical skill taxonomy (60+ mappings), layout hazard detection, pre-apply compatibility checks on job pages, authenticated Cloudinary resume downloads, and prioritized recommendations.
+- 🔐 **Zero-Trust Data Protection** — Sensitive PII (National IDs: PAN, Aadhaar) encrypted at rest using **AES-256-GCM** with blind indexing (HMAC-SHA256) for rapid queries without exposing plaintext.
+- 🛡️ **Hardened Auth & Mobile Sessions** — Dual-source authentication accepting `HttpOnly` JWT cookies or `Authorization: Bearer <token>` header. Supports `X-Client: mobile` for extended **30-day sessions** with tokens returned in response bodies for secure mobile storage. Optional registration photo with UI-Avatars branded fallback.
+- 🌐 **Multi-Domain CORS Architecture** — Multi-origin support with trailing-slash normalization, allowing multiple comma-separated `FRONTEND_URL` endpoints and automatic `*.vercel.app` preview wildcard matching.
+- 🚦 **Server Boot Guard** — Refuses to launch in production if cryptographic keys (`FIELD_ENCRYPTION_KEY`, `JWT_SECRET`) are absent or using default placeholders.
 - 📂 **Cloud File Pipeline** — In-memory Multer buffering with streaming to Cloudinary for avatars, corporate logos, and PDF/DOCX resumes.
 - 📊 **Talent Analytics** — Recharts dashboard tracking listing views, application conversion rates, and candidate pipeline distribution.
-- 📧 **Transactional Mailer** — Automated email verification, anti-enumeration password resets, and interview alerts via Nodemailer.
-- ⚡ **Production Ready** — Gzip compression, graceful `SIGTERM`/`SIGINT` connection draining, multi-stage Alpine Dockerfile, and 152/152 passing Vitest tests.
+- 📧 **Transactional Mailer & Job Alerts** — Automated email verification, anti-enumeration password resets, interview invitations, and cron-scheduled job alerts (Daily & Weekly) via Nodemailer.
+- ⚡ **Production Ready** — Gzip compression, graceful `SIGTERM`/`SIGINT` connection draining, multi-stage Alpine Dockerfile, and **291/291 passing Vitest tests** across Frontend and Backend.
 
 ---
 
@@ -56,9 +58,9 @@ An end-to-end recruitment platform connecting **Job Seekers**, **Recruiters**, a
 
 | Layer | Technologies |
 | :--- | :--- |
-| **Frontend** | React 18, Vite 6, Redux Toolkit, React Router v7, Tailwind CSS, shadcn/ui, Recharts, Framer Motion |
-| **Backend** | Node.js (ESM), Express 4.21, MongoDB Atlas, Mongoose 8.8, JWT, Multer, Cloudinary, Nodemailer |
-| **DevOps & QA** | Docker (Multi-stage), Vitest (10 suites, 133 tests), GitHub Actions CI, Vercel, Render |
+| **Frontend** | React 18, Vite 6, Redux Toolkit, React Router v7, Tailwind CSS, shadcn/ui, Recharts, Framer Motion, Vercel Speed Insights |
+| **Backend** | Node.js (ESM), Express 4.21, MongoDB Atlas, Mongoose 8.8, JWT, Multer, Cloudinary, Nodemailer, pdf-parse, mammoth |
+| **DevOps & QA** | Docker (Multi-stage), Vitest (30 suites, 291 tests: 152 backend + 139 frontend), GitHub Actions CI, Vercel, Render |
 
 ---
 
@@ -92,9 +94,10 @@ docker run -d -p 5001:5001 --env-file Backend/.env forework-backend
 ## 🔑 Demo Sandbox Credentials
 
 | Role | Email | Password | Permissions |
-| :--- | :--- | :---: | :--- |
-| **Job Seeker (Student)** | `jashan@gmail.com` | `password123` | Search, bookmark, apply, upload resume, view status |
-| **Corporate Recruiter** | `recruiter@company.com` | `password123` | Post jobs, update status, screen resumes, schedule calls |
+| :--- | :--- | :--- | :--- |
+| **Job Seeker (Student)** | `jashan@gmail.com` | `password123` | Search, bookmark, apply, upload resume, run ATS checks, view status |
+| **Corporate Recruiter** | `recruiter@company.com` | `password123` | Post jobs, update status, screen applicants with ATS modal, schedule calls |
+| **Platform Administrator** | `admin@forework.com` | `admin123` | Moderate jobs, approve companies, audit forensic logs |
 
 ---
 
@@ -104,7 +107,7 @@ Explore our comprehensive [**Project Wiki**](./wiki/Home.md) or dive into specif
 
 | Architecture & Security | Features & Workflows | API & Deployment |
 | :--- | :--- | :--- |
-| • [Security Architecture](./wiki/Security-&-Encryption.md)<br/>• [Architecture Overview](./wiki/Architecture-Overview.md)<br/>• [ATS Predictor Architecture](./docs/ATS_ARCHITECTURE.md) | • [ATS Predictor Wiki](./wiki/ATS-Predictor.md)<br/>• [Candidate Experience](./wiki/Candidate-Portal.md)<br/>• [Employer & Analytics](./wiki/Recruiter-Suite.md)<br/>• [Admin Moderation](./wiki/Admin-Console.md) | • [API Reference](./wiki/API-Reference.md)<br/>• [ATS API Reference](./docs/ATS_API.md)<br/>• [Mobile & PWA Guide](./wiki/Mobile-&-PWA.md)<br/>• [Docker & Production Guide](./wiki/Deployment-Guide.md) |
+| • [Security Architecture](./wiki/Security-&-Encryption.md)<br/>• [Architecture Overview](./wiki/Architecture-Overview.md)<br/>• [ATS Predictor Architecture](./docs/ATS_ARCHITECTURE.md)<br/>• [ATS Scoring Rubric](./docs/ATS_SCORING.md) | • [ATS Predictor Wiki](./wiki/ATS-Predictor.md)<br/>• [Candidate Experience](./wiki/Candidate-Portal.md)<br/>• [Employer & Analytics](./wiki/Recruiter-Suite.md)<br/>• [Admin Moderation](./wiki/Admin-Console.md) | • [API Reference](./wiki/API-Reference.md)<br/>• [ATS API Reference](./docs/ATS_API.md)<br/>• [Mobile & PWA Guide](./wiki/Mobile-&-PWA.md)<br/>• [Docker & Production Guide](./wiki/Deployment-Guide.md) |
 
 ---
 
