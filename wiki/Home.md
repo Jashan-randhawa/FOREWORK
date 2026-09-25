@@ -6,16 +6,16 @@ Welcome to the technical knowledge base and architecture wiki for **FOREWORK** �
 
 ## 🧭 Quick Navigation
 
-`
-FOREWORK Wiki
+```
+FOREWORK Wiki (v2.1)
 ├── 🚀 Getting Started               -> Developer onboarding, env setup & docker
 ├── 🏗️ Architecture Overview          -> System design, MERN architecture & data flow
-├── 🎯 ATS Resume Predictor (v2.1)    -> Explainable ATS scoring, skill matching & recommendations
-├── 📱 Mobile & PWA Guide (v2.0)     -> Responsive carousels, app shell & offline caching
+├── 🎯 ATS Resume Predictor (v2.1)    -> Explainable ATS scoring, pre-apply check, skill matching & recommendations
+├── 📱 Mobile & PWA Guide (v2.0)     -> Responsive carousels, app shell, offline caching & 30-day mobile sessions
 ├── 👩‍💼 Candidate Experience          -> Discovery, telemetry tracking, resumes & alerts
 ├── 🏢 Recruiter Suite               -> 5-stage job lifecycle, applicant screening & analytics
 ├── 🛡️ Admin Governance              -> User moderation, audit logs & verification
-├── 🔐 Security & Encryption         -> AES-256-GCM, blind indexing & auth hardening
+├── 🔐 Security & Encryption         -> AES-256-GCM, blind indexing, Bearer token fallback & auth hardening
 ├── 📡 API Reference                 -> Endpoints, auth guards & request/response specs
 └── 🚢 Deployment Guide              -> Production setup on Vercel, Render & Docker
 ```
@@ -28,21 +28,23 @@ ForeWork bridges ambitious engineering candidates and vetted tech employers with
 
 Traditional hiring platforms suffer from "black hole" application tracking, fraudulent job postings, and clumsy desktop-only interfaces. ForeWork solves this with:
 
-1. **Deterministic ATS Resume Predictor**: Dual scoring (ATS Compatibility + Job Match) with granular parseability diagnostics, canonical skill matching, and prioritized recommendations.
+1. **Deterministic ATS Resume Predictor**: Dual scoring (ATS Compatibility + Job Match) with granular parseability diagnostics, canonical skill matching, pre-apply compatibility checks, and prioritized recommendations.
 2. **Real-Time Telemetry Tracking**: Candidates know the exact second an application is reviewed, shortlisted, or scheduled for an interview.
 3. **100% Employer Verification**: Every corporate entity undergoes manual administrative validation before publishing jobs.
-4. **Mobile-First & PWA Ergonomics**: Fully responsive touch design with offline caching, bottom navigation, and swipeable carousels.
+4. **Mobile-First & PWA Ergonomics**: Fully responsive touch design with offline caching, bottom navigation, swipeable carousels, and extended 30-day mobile sessions.
 5. **Military-Grade Data Protection**: Sensitive PII is encrypted at rest using **AES-256-GCM** with blind indexing.
+6. **Multi-Domain & Cross-Platform CORS**: Secure multi-origin support for web, mobile, and preview deployments with trailing-slash normalization and `*.vercel.app` wildcard matching.
 
 ---
 
 ## 📊 High-Level System Architecture
 
-`mermaid
+```mermaid
 flowchart TD
     subgraph Clients["Client Layer (Frontend)"]
         Web[Desktop Web Browser]
         PWA[Mobile App / PWA]
+        MobileWeb[Mobile Web Client]
     end
 
     subgraph CDN["Edge & Storage"]
@@ -52,7 +54,8 @@ flowchart TD
 
     subgraph Core["Backend Application Layer"]
         API[Express 4.21 API Server]
-        AuthGuard[JWT Cookie Auth Middleware]
+        AuthGuard[JWT Cookie + Bearer Auth Middleware]
+        ATS[ATS Resume Predictor Engine]
         Crypto[AES-256-GCM Encryption Engine]
         Scheduler[Node Cron Background Scheduler]
     end
@@ -64,14 +67,16 @@ flowchart TD
 
     Web --> Vercel
     PWA --> Vercel
+    MobileWeb --> Vercel
     Vercel --> API
     API --> AuthGuard
+    AuthGuard --> ATS
     AuthGuard --> Crypto
     Crypto --> Mongo
     API --> Cloudinary
     API --> Mail
     Scheduler --> Mongo
-`
+```
 
 ---
 
@@ -81,6 +86,7 @@ flowchart TD
 | :--- | :--- |
 | [🚀 Getting Started](Getting-Started) | Local development setup, prerequisites, environment variables, and Docker. |
 | [🏗️ Architecture Overview](Architecture-Overview) | Deep dive into codebase structure, state management, and request lifecycle. |
+| [🎯 ATS Resume Predictor](ATS-Predictor) | Explainable ATS scoring engine, pre-apply compatibility checker, and recruiter insights. |
 | [📱 Mobile & PWA Guide](Mobile-&-PWA) | Details on the v2.0 mobile adaptation, touch ergonomics, and Service Worker. |
 | [👩‍💼 Candidate Portal](Candidate-Portal) | Search filters, application telemetry, resume streaming, and periodic job alerts. |
 | [🏢 Recruiter Suite](Recruiter-Suite) | Multi-stage job lifecycle, applicant review, interview coordination, and Recharts analytics. |

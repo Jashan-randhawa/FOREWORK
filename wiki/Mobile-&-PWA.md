@@ -1,6 +1,6 @@
 # 📱 Mobile-First Architecture & PWA Guide
 
-ForeWork v2.0 introduces a comprehensive mobile-first design pass and Progressive Web App implementation.
+ForeWork v2.0+ introduces a comprehensive mobile-first design pass and Progressive Web App implementation, with extended session support in v2.1.
 
 ---
 
@@ -17,7 +17,7 @@ ForeWork v2.0 introduces a comprehensive mobile-first design pass and Progressiv
 - Slide-over sheet from the right with glassmorphic backdrop.
 - **Single tactile close button** (double close button bug resolved).
 - **User Profile Card**:
-  - Avatar with online status ring.
+  - Avatar with online status ring (supports auto-generated avatars for users without photos).
   - Verified account checkmark.
   - Distinct role badge (`Candidate`, `Recruiter`, `Admin`).
   - Quick profile management link.
@@ -38,6 +38,23 @@ ForeWork v2.0 introduces a comprehensive mobile-first design pass and Progressiv
   - `priority: "primary"`: Always rendered prominently.
   - `priority: "secondary"`: Rendered with muted typography.
   - `priority: "hidden-mobile"`: Suppressed on small screens.
+
+---
+
+## 📲 Mobile Authentication (v2.1)
+
+### Extended Sessions
+Mobile clients sending `X-Client: mobile` header during login receive:
+- **30-day JWT expiry** (vs 1-day for web browsers)
+- **30-day cookie `maxAge`** for seamless session persistence
+- **Token in response body** for clients that store tokens in secure local storage (e.g., React Native SecureStore)
+
+### Bearer Token Authentication
+The `isAuthenticated` middleware supports dual token sources:
+1. **Primary**: `req.cookies.token` (HttpOnly cookie)
+2. **Fallback**: `Authorization: Bearer <token>` header
+
+This enables authentication across web browsers, PWA shells, WebView containers, and mobile native apps without cookie jar support.
 
 ---
 
@@ -70,4 +87,8 @@ ForeWork v2.0 introduces a comprehensive mobile-first design pass and Progressiv
 ### Service Worker (`Frontend/public/sw.js`)
 - **Cache-First Strategy**: Core static assets (`index.html`, CSS, icons) are pre-cached on install.
 - **Navigation Fallback**: If the network is unavailable, requests fall back to the cached application shell.
+- **API Request Bypass**: ATS analysis and other API calls bypass the service worker cache to prevent browser tracking prevention from blocking functional requests.
 - **Offline Banner**: `OfflineBanner.jsx` notifies users immediately when device connectivity is lost.
+
+### Vercel Speed Insights
+Production deployments include [Vercel Speed Insights](https://vercel.com/docs/speed-insights) for real-user performance monitoring.

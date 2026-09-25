@@ -50,8 +50,11 @@ docker run -d \
    - `MONGO_URI`
    - `JWT_SECRET`
    - `FIELD_ENCRYPTION_KEY`
-   - `CLOUD_NAME`, `API_KEY`, `API_SECRET`
-   - `FRONTEND_URL=https://forework.vercel.app`
+   - `CLOUD_NAME`, `CLOUD_API`, `API_SECRET`
+   - `FRONTEND_URL=https://forework.vercel.app,https://forework-mobile.vercel.app`
+   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`
+
+> **Multi-Domain**: Comma-separate `FRONTEND_URL` to support multiple frontend deployments (web + mobile). The first URL is used as the primary for email links.
 
 ### 2. Frontend on Vercel
 1. Import repository on [Vercel](https://vercel.com).
@@ -66,10 +69,16 @@ docker run -d \
 
 ## 🚦 Production Readiness Checklist
 
-- [x] Strict CORS configured matching production domain
+- [x] Multi-domain CORS configured matching production and mobile domains with `*.vercel.app` wildcard
 - [x] JWT cookies configured with `SameSite=None` and `Secure=true`
+- [x] Bearer token fallback for mobile/native clients
+- [x] Extended 30-day mobile sessions via `X-Client: mobile`
 - [x] Helmet security headers active
-- [x] Gzip compression active
-- [x] Rate limiting configured on auth and search endpoints
-- [x] 100% test suite passing (266 tests across Frontend and Backend)
+- [x] Gzip compression active (level 6, ≥1024 bytes)
+- [x] Rate limiting configured on auth (15 req/15min), apply (30 req/15min), and global (300 req/15min)
+- [x] Graceful `SIGTERM`/`SIGINT` shutdown with 10-second safety timeout
+- [x] 100% test suite passing (291 tests: 152 backend + 139 frontend)
 - [x] PWA offline service worker and manifest verified
+- [x] Vercel Speed Insights enabled for real-user monitoring
+- [x] Server boot guard refuses startup with missing/default crypto keys
+- [x] ATS engine with authenticated Cloudinary resume downloads

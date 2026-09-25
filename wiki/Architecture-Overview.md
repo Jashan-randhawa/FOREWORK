@@ -8,7 +8,7 @@ ForeWork is architected as a decoupled, multi-tier MERN enterprise system with d
 
 ```mermaid
 graph TD
-    User([User Browser / PWA])
+    User([User Browser / PWA / Mobile Web])
 
     subgraph Presentation["1. Presentation Tier (Frontend SPA)"]
         Router[React Router v7]
@@ -19,15 +19,16 @@ graph TD
 
     subgraph Gateway["2. Gateway & Edge"]
         RateLimit[Express Rate Limit]
-        Cors[Strict Dynamic CORS]
+        Cors[Multi-Domain Dynamic CORS]
         Helmet[Helmet Security Headers]
     end
 
     subgraph AppServer["3. Application Tier (Node/Express)"]
-        Auth[JWT Cookie AuthGuard]
+        Auth[JWT Cookie + Bearer AuthGuard]
         RoleCtrl[RBAC Role Guard]
         Audit[Forensic Audit Logger]
         Controllers[Domain Controllers]
+        ATSEngine[ATS Resume Predictor Engine]
     end
 
     subgraph DataTier["4. Data & Persistence Tier"]
@@ -51,6 +52,7 @@ graph TD
     Auth --> RoleCtrl
     RoleCtrl --> Audit
     Audit --> Controllers
+    Controllers --> ATSEngine
     Controllers --> AES
     AES --> Mongoose
     Mongoose --> MongoDB
@@ -87,14 +89,72 @@ The frontend is a single-page application built on **React 18** and bundled with
 The backend is an ECMAScript Module (ESM) Express application organized by domain:
 
 ### Middleware Pipeline Order (`Backend/index.js`)
-1. **`express.json()` & `express.urlencoded()`**: Request body parsers.
-2. **`cookieParser()`**: Cookie extraction for token validation.
-3. **`cors()`**: Dynamic origin matching with credentials allowed.
-4. **`helmet()`**: HTTP security headers (XSS, CSP, HSTS, Sniff).
-5. **`compression()`**: Gzip payload compression.
-6. **Rate Limiting**: IP-based rate limiting on sensitive endpoints.
+1. **`helmet()`**: HTTP security headers (XSS, CSP, HSTS, Sniff) with `crossOriginResourcePolicy: "cross-origin"`.
+2. **`compression()`**: Gzip payload compression (level 6, ≥1024 bytes threshold).
+3. **`express.json()` & `express.urlencoded()`**: Request body parsers (10MB limit).
+4. **`cookieParser()`**: Cookie extraction for token validation.
+5. **`cors()`**: Multi-domain dynamic origin matching with credentials allowed and `*.vercel.app` wildcard support.
+6. **Rate Limiting**: Tiered IP-based rate limiting (300 req/15min global, 15 req/15min auth, 30 req/15min apply).
 
 ### Request Flow
 ```
-Request ➔ RateLimiter ➔ Authenticate (JWT) ➔ RequireRole (RBAC) ➔ AuditLog ➔ Controller ➔ Service/Mongoose ➔ Response
+Request ➔ RateLimiter ➔ Authenticate (JWT Cookie or Bearer Token) ➔ RequireRole (RBAC) ➔ AuditLog ➔ Controller ➔ Service/Mongoose ➔ Response
 ```
+
+### API Route Mounting
+Routes are dual-mounted under both `/api` and `/api/v1` for versioning compatibility:
+```
+/api/user, /api/company, /api/job, /api/application, /api/admin, /api/notification, /api/ats
+/api/v1/user, /api/v1/company, /api/v1/job, /api/v1/application, /api/v1/admin, /api/v1/notification, /api/v1/ats
+```
+
+### Multi-Domain CORS Strategy
+```javascript
+const frontendUrls = process.env.FRONTEND_URL
+  .split(",").map(url => url.trim().replace(/\/+$/, ""));
+
+const allowedOrigins = [
+  ...frontendUrls,
+  "https://forework.vercel.app",
+  "https://forework-mobile.vercel.app",
+  "http://localhost:5173", "http://localhost:3000", "http://localhost:8081"
+];
+
+// Dynamic: any origin ending in .vercel.app is also allowed (preview deployments)
+```
+
+### Graceful Shutdown
+On `SIGTERM` or `SIGINT`, the server closes HTTP connections, drains the MongoDB connection pool, and force-terminates after a 10-second safety timeout.
+
+---
+
+## 🧠 ATS Engine Architecture
+
+The ATS Resume Predictor is a standalone module under `Backend/ats/` with its own sub-architecture:
+
+```
+Backend/ats/
+├── parser/              # Document ingestion (PDF, DOCX, TXT, Cloudinary URLs)
+│   ├── documentExtractor.js    # In-memory stream extraction with scan detection
+│   ├── resumeParser.js         # Orchestrates all extractors into normalized JSON
+│   └── jdParser.js             # Job description parser (required vs preferred skills)
+├── extraction/          # Entity extraction pipelines
+│   ├── sectionDetector.js      # Maps headings → 10 canonical sections
+│   ├── contactExtractor.js     # Name, email, phone, socials, location
+│   ├── experienceExtractor.js  # Dates, action verbs, metrics, role titles
+│   ├── educationExtractor.js   # Degrees, majors, GPA
+│   ├── skillExtractor.js       # Taxonomy-aware skill detection
+│   ├── skillTaxonomy.js        # 60+ skill aliases and synonym mappings
+│   └── formattingAnalyzer.js   # Layout risk analysis (columns, tables, encoding)
+├── matching/            # Skill alignment
+│   ├── keywordMatcher.js       # Exact and normalized keyword overlap
+│   └── semanticMatcher.js      # Conceptual similarity and cluster detection
+├── scoring/
+│   └── atsScoreEngine.js       # Deterministic 100-point rubric (ats_v1.0)
+├── recommendations/
+│   └── recommendationEngine.js # Prioritized, evidence-based action items
+└── explanations/
+    └── explanationEngine.js    # "Why is my score X?" natural language rationale
+```
+
+See [🎯 ATS Resume Predictor](ATS-Predictor) for detailed scoring rubric and API documentation.

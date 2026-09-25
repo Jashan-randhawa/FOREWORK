@@ -1,6 +1,6 @@
 # 🏢 Recruiter Suite Guide
 
-The Recruiter Suite empowers verified hiring teams to publish listings, manage corporate profiles, review candidate pipelines, and analyze talent conversion metrics.
+The Recruiter Suite empowers verified hiring teams to publish listings, manage corporate profiles, review candidate pipelines with **real-time ATS compatibility insights**, and analyze talent conversion metrics.
 
 ---
 
@@ -35,6 +35,16 @@ Listings progress through five states managed by `JobLifecycleBadge.jsx`:
 - **Inline CV Inspection**: Inspect candidate resumes directly in the browser with `ResumeViewer`.
 - **Status Progression**: Update applicant status between `pending`, `accepted`, and `rejected`.
 - **Interview Scheduling**: Schedule remote video calls with meeting URLs and calendar reminders.
+
+### ATS Integration (v2.1)
+- **ATS Score Column**: Each applicant row displays a computed ATS compatibility score retrieved from the `Application.atsScore` field.
+- **ATS Analysis Modal (`ATSAnalysisModal.jsx`)**: Click on an applicant's ATS score to view a full breakdown modal showing:
+  - Dual scores (ATS Compatibility + Job Match)
+  - 6-category score breakdown
+  - Matched and missing skills comparison
+  - Formatting issues and recommendations
+  - Algorithm version and analysis timestamp
+- **On-the-Fly Computation**: If an applicant has no pre-computed ATS score, the recruiter endpoint `GET /api/ats/application/:appId` triggers real-time analysis using the candidate's stored resume against the job description.
 
 ---
 

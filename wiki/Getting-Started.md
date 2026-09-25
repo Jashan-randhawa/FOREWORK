@@ -20,24 +20,29 @@ Before starting, ensure you have the following installed:
 ```
 FOREWORK/
 ├── Backend/               # Express + Node.js API server
+│   ├── ats/               # ATS Resume Predictor engine (parser, extraction, matching, scoring)
 │   ├── config/            # Database & Cloudinary configurations
-│   ├── controllers/       # Route controllers (user, job, company, application)
-│   ├── middlewares/       # Auth guards, role verification, multer, audit logger
-│   ├── models/            # Mongoose schemas (User, Job, Company, Application)
+│   ├── controllers/       # Route controllers (user, job, company, application, ats)
+│   ├── middleware/        # Auth guards, role verification, multer, audit logger
+│   ├── models/            # Mongoose schemas (User, Job, Company, Application, ATSAnalysis)
 │   ├── routes/            # Express route definitions
 │   ├── utils/             # Encryption, scheduler, email helpers
-│   └── test/              # Vitest backend integration & controller tests
+│   └── tests/             # Vitest backend integration & controller tests
 ├── Frontend/              # React 18 + Vite SPA client
 │   ├── public/            # Manifest, icons, service worker (sw.js)
 │   ├── src/
-│   │   ├── components/    # UI components (shadcn, admin, shared, lite)
-│   │   ├── config/        # Client configuration & nav mappings
+│   │   ├── components/    # UI components (shadcn, admin, shared, lite, ats)
 │   │   ├── context/       # Theme context (Light/Dark mode)
 │   │   ├── hooks/         # Custom hooks (useMediaQuery, useInstallPrompt, etc.)
+│   │   ├── pages/         # Page components (ATSAnalysis, etc.)
 │   │   ├── redux/         # Redux Toolkit slices & root store
-│   │   ├── utils/         # Axios instance, formatting helpers
+│   │   ├── services/      # HTTP service layer
+│   │   ├── utils/         # Axios instance, formatting helpers, nav config
 │   │   └── test/          # Vitest component & responsive tests
 ├── docs/                  # In-depth technical architecture documentation
+│   ├── ATS_API.md         # ATS REST API specification
+│   ├── ATS_ARCHITECTURE.md # ATS system architecture blueprint
+│   └── ATS_SCORING.md     # ATS scoring rubric & mathematical formulations
 ├── wiki/                  # GitHub Wiki documentation suite
 ├── Dockerfile             # Multi-stage Alpine containerization
 └── CHANGELOG.md           # Version release log
@@ -52,26 +57,36 @@ FOREWORK/
 Create `Backend/.env` by copying `Backend/.env.example` or populating the following:
 
 ```env
+# Core Application & Database
 PORT=5001
+NODE_ENV=production
 MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/forework?retryWrites=true&w=majority
+
+# Authentication & Security
 JWT_SECRET=your_super_secret_jwt_key_at_least_32_characters
 
 # Cryptographic Key for AES-256-GCM Field Encryption
 # Generate with: openssl rand -hex 32 (MUST be exactly 64 hex characters / 32 bytes)
 FIELD_ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
+# Client URL (for CORS validation)
+# For multiple frontends (e.g. web and mobile web), comma-separate the URLs:
+FRONTEND_URL=https://forework.vercel.app,https://forework-mobile.vercel.app
+
 # Cloudinary CDN Configuration
 CLOUD_NAME=your_cloudinary_cloud_name
-API_KEY=your_cloudinary_api_key
+CLOUD_API=your_cloudinary_api_key
 API_SECRET=your_cloudinary_api_secret
 
-# Email & SMTP Credentials (Optional for local testing)
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_app_specific_password
-
-# Client URL (for CORS validation)
-FRONTEND_URL=http://localhost:5173
+# SMTP / Email Service (Notifications & Password Resets)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_smtp_email@gmail.com
+SMTP_PASS=your_smtp_app_password
+EMAIL_FROM="ForeWork" <noreply@forework.com>
 ```
+
+> **Multi-Domain Note**: `FRONTEND_URL` supports comma-separated values for serving multiple frontend deployments (web + mobile). The first URL is used as the primary for email links.
 
 ### 2. Frontend (`Frontend/.env`)
 
@@ -119,8 +134,8 @@ ForeWork comes pre-configured with role-based test users:
 
 | Persona | Email | Password | Role & Permissions |
 | :--- | :--- | :--- | :--- |
-| **Candidate (Student)** | `jashan@gmail.com` | `password123` | Search, filter, apply with PDF resume, track status, set alerts |
-| **Corporate Recruiter** | `recruiter@company.com` | `password123` | Post jobs, update company, review applicants, schedule calls |
+| **Candidate (Student)** | `jashan@gmail.com` | `password123` | Search, filter, apply with PDF resume, ATS compatibility checks, track status, set alerts |
+| **Corporate Recruiter** | `recruiter@company.com` | `password123` | Post jobs, update company, review applicants with ATS scores, schedule calls |
 | **Platform Administrator** | `admin@forework.com` | `admin123` | Moderate jobs, approve companies, audit forensic logs |
 
 ---
@@ -130,14 +145,16 @@ ForeWork comes pre-configured with role-based test users:
 ForeWork maintains 100% passing test suites across both layers:
 
 ```bash
-# Run backend test suite (133 tests)
+# Run backend test suite (152 tests across 10 suites)
 cd Backend
 npm test
 
-# Run frontend test suite (133 tests)
+# Run frontend test suite (139 tests across 20 suites)
 cd Frontend
 npm test
 
 # Run frontend production build check
 npm run build
 ```
+
+> **Total**: 291 tests (152 backend + 139 frontend) all passing.
