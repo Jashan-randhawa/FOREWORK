@@ -1,0 +1,39 @@
+{
+  "name": "@jashan-randhawa/ats-predictor",
+  "version": "1.0.0",
+  "description": "Deterministic, explainable Applicant Tracking System (ATS) resume parser, skill extractor, and job match scoring engine.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jashan-randhawa/FOREWORK.git",
+    "directory": "packages/ats-predictor"
+  },
+  "keywords": [
+    "ats",
+    "resume-parser",
+    "applicant-tracking-system",
+    "resume-matcher",
+    "skill-extraction",
+    "job-match",
+    "deterministic-scoring"
+  ],
+  "author": "Jashanpreet Singh",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "dependencies": {
+    "mammoth": "^1.12.3",
+    "pdf-parse": "^2.4.5"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

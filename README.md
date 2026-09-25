@@ -13,6 +13,7 @@ An end-to-end recruitment platform connecting **Job Seekers**, **Recruiters**, a
 [![Tests Passing](https://img.shields.io/badge/Tests-291%20Passing-2ea44f?style=for-the-badge&logo=vitest&logoColor=white)](https://github.com/Jashan-randhawa/FOREWORK)
 [![Version](https://img.shields.io/badge/Version-v2.1.0-6B3AC2?style=for-the-badge)](./CHANGELOG.md)
 [![GitHub Package](https://img.shields.io/badge/Package-ghcr.io-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://github.com/Jashan-randhawa/FOREWORK/pkgs/container/forework-backend)
+[![npm package](https://img.shields.io/badge/npm%20package-@jashan--randhawa/ats--predictor-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://github.com/Jashan-randhawa/FOREWORK/packages)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 <br/>
@@ -98,6 +99,15 @@ docker run -d -p 5001:5001 --env-file Backend/.env ghcr.io/jashan-randhawa/forew
 docker build -t forework-backend .
 docker run -d -p 5001:5001 --env-file Backend/.env forework-backend
 ```
+
+### 📦 Standalone npm Package: `@jashan-randhawa/ats-predictor`
+ForeWork's deterministic ATS Resume Predictor and Skill Extraction engine is also published as a standalone package on the [GitHub Packages npm Registry](https://github.com/Jashan-randhawa/FOREWORK/packages):
+
+```bash
+# Install from GitHub Packages
+npm install @jashan-randhawa/ats-predictor
+```
+*See [packages/ats-predictor/README.md](./packages/ats-predictor/README.md) for full API documentation and examples.*
 
 ---
 
