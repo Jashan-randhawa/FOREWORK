@@ -145,11 +145,11 @@ ForeWork comes pre-configured with role-based test users:
 ForeWork maintains 100% passing test suites across both layers:
 
 ```bash
-# Run backend test suite (152 tests across 10 suites)
+# Run backend test suite (152 tests across 11 suites)
 cd Backend
 npm test
 
-# Run frontend test suite (139 tests across 20 suites)
+# Run frontend test suite (143 tests across 22 suites)
 cd Frontend
 npm test
 
@@ -157,4 +157,4 @@ npm test
 npm run build
 ```
 
-> **Total**: 291 tests (152 backend + 139 frontend) all passing.
+> **Total**: 295 tests (152 backend + 143 frontend) all passing.

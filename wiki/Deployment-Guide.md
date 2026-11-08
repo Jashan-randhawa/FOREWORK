@@ -93,7 +93,7 @@ docker run -d \
 - [x] Gzip compression active (level 6, ≥1024 bytes)
 - [x] Rate limiting configured on auth (15 req/15min), apply (30 req/15min), and global (300 req/15min)
 - [x] Graceful `SIGTERM`/`SIGINT` shutdown with 10-second safety timeout
-- [x] 100% test suite passing (291 tests: 152 backend + 139 frontend)
+- [x] 100% test suite passing (295 tests: 152 backend + 143 frontend)
 - [x] PWA offline service worker and manifest verified
 - [x] Vercel Speed Insights enabled for real-user monitoring
 - [x] Server boot guard refuses startup with missing/default crypto keys

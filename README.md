@@ -10,7 +10,7 @@ An end-to-end recruitment platform connecting **Job Seekers**, **Recruiters**, a
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-forework.vercel.app-00dfa2?style=for-the-badge&logo=vercel&logoColor=white)](https://forework.vercel.app)
 [![API Service](https://img.shields.io/badge/API_Service-forework.onrender.com-4682b4?style=for-the-badge&logo=render&logoColor=white)](https://forework.onrender.com)
-[![Tests Passing](https://img.shields.io/badge/Tests-291%20Passing-2ea44f?style=for-the-badge&logo=vitest&logoColor=white)](https://github.com/Jashan-randhawa/FOREWORK)
+[![Tests Passing](https://img.shields.io/badge/Tests-295%20Passing-2ea44f?style=for-the-badge&logo=vitest&logoColor=white)](https://github.com/Jashan-randhawa/FOREWORK)
 [![Version](https://img.shields.io/badge/Version-v2.1.0-6B3AC2?style=for-the-badge)](./CHANGELOG.md)
 [![GitHub Package](https://img.shields.io/badge/Package-ghcr.io-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://github.com/Jashan-randhawa/FOREWORK/pkgs/container/forework-backend)
 [![npm package](https://img.shields.io/badge/npm%20package-@jashan--randhawa/ats--predictor-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://github.com/Jashan-randhawa/FOREWORK/packages)
@@ -52,7 +52,7 @@ An end-to-end recruitment platform connecting **Job Seekers**, **Recruiters**, a
 - 📂 **Cloud File Pipeline** — In-memory Multer buffering with streaming to Cloudinary for avatars, corporate logos, and PDF/DOCX resumes.
 - 📊 **Talent Analytics** — Recharts dashboard tracking listing views, application conversion rates, and candidate pipeline distribution.
 - 📧 **Transactional Mailer & Job Alerts** — Automated email verification, anti-enumeration password resets, interview invitations, and cron-scheduled job alerts (Daily & Weekly) via Nodemailer.
-- ⚡ **Production Ready** — Gzip compression, graceful `SIGTERM`/`SIGINT` connection draining, multi-stage Alpine Dockerfile, and **291/291 passing Vitest tests** across Frontend and Backend.
+- ⚡ **Production Ready** — Gzip compression, graceful `SIGTERM`/`SIGINT` connection draining, multi-stage Alpine Dockerfile, and **295/295 passing Vitest tests** across Frontend and Backend.
 
 ---
 
@@ -62,7 +62,7 @@ An end-to-end recruitment platform connecting **Job Seekers**, **Recruiters**, a
 | :--- | :--- |
 | **Frontend** | React 18, Vite 6, Redux Toolkit, React Router v7, Tailwind CSS, shadcn/ui, Recharts, Framer Motion, Vercel Speed Insights |
 | **Backend** | Node.js (ESM), Express 4.21, MongoDB Atlas, Mongoose 8.8, JWT, Multer, Cloudinary, Nodemailer, pdf-parse, mammoth |
-| **DevOps & QA** | Docker (Multi-stage), Vitest (30 suites, 291 tests: 152 backend + 139 frontend), GitHub Actions CI, Vercel, Render |
+| **DevOps & QA** | Docker (Multi-stage), Vitest (33 suites, 295 tests: 152 backend + 143 frontend), GitHub Actions CI, Vercel, Render |
 
 ---
 
@@ -80,7 +80,7 @@ npm run dev              # Server starts on http://localhost:5001
 ```bash
 # In a separate terminal
 cd Frontend
-echo "VITE_API_URL=http://localhost:5001" > .env
+cp .env.example .env     # Set VITE_API_URL=http://localhost:5001 for local development
 npm install
 npm run dev              # Client starts on http://localhost:5173
 ```
@@ -104,7 +104,9 @@ docker run -d -p 5001:5001 --env-file Backend/.env forework-backend
 ForeWork's deterministic ATS Resume Predictor and Skill Extraction engine is also published as a standalone package on the [GitHub Packages npm Registry](https://github.com/Jashan-randhawa/FOREWORK/packages):
 
 ```bash
-# Install from GitHub Packages
+# Ensure your ~/.npmrc has GitHub Packages registry configured:
+# @jashan-randhawa:registry=https://npm.pkg.github.com
+
 npm install @jashan-randhawa/ats-predictor
 ```
 *See [packages/ats-predictor/README.md](./packages/ats-predictor/README.md) for full API documentation and examples.*
@@ -127,7 +129,7 @@ Explore our comprehensive [**Project Wiki**](./wiki/Home.md) or dive into specif
 
 | Architecture & Security | Features & Workflows | API & Deployment |
 | :--- | :--- | :--- |
-| • [Security Architecture](./wiki/Security-&-Encryption.md)<br/>• [Architecture Overview](./wiki/Architecture-Overview.md)<br/>• [ATS Predictor Architecture](./docs/ATS_ARCHITECTURE.md)<br/>• [ATS Scoring Rubric](./docs/ATS_SCORING.md) | • [ATS Predictor Wiki](./wiki/ATS-Predictor.md)<br/>• [Candidate Experience](./wiki/Candidate-Portal.md)<br/>• [Employer & Analytics](./wiki/Recruiter-Suite.md)<br/>• [Admin Moderation](./wiki/Admin-Console.md) | • [API Reference](./wiki/API-Reference.md)<br/>• [ATS API Reference](./docs/ATS_API.md)<br/>• [Mobile & PWA Guide](./wiki/Mobile-&-PWA.md)<br/>• [Docker & Production Guide](./wiki/Deployment-Guide.md) |
+| • [Getting Started](./wiki/Getting-Started.md)<br/>• [Security Architecture](./wiki/Security-&-Encryption.md)<br/>• [Architecture Overview](./wiki/Architecture-Overview.md)<br/>• [ATS Predictor Architecture](./docs/ATS_ARCHITECTURE.md)<br/>• [ATS Scoring Rubric](./docs/ATS_SCORING.md) | • [ATS Predictor Wiki](./wiki/ATS-Predictor.md)<br/>• [Candidate Experience](./wiki/Candidate-Portal.md)<br/>• [Employer & Analytics](./wiki/Recruiter-Suite.md)<br/>• [Admin Moderation](./wiki/Admin-Console.md) | • [API Reference](./wiki/API-Reference.md)<br/>• [ATS API Reference](./docs/ATS_API.md)<br/>• [Mobile & PWA Guide](./wiki/Mobile-&-PWA.md)<br/>• [Docker & Deployment Guide](./wiki/Deployment-Guide.md) |
 
 ---
 
