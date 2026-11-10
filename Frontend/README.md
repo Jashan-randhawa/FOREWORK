@@ -6,8 +6,8 @@ The frontend client for **FOREWORK**, a modern MERN stack recruitment and talent
 
 ## 🛠️ Tech Stack
 
-- **Framework**: React 18 (`react`, `react-dom`)
-- **Build Tool**: Vite 6
+- **Framework**: React 18 / React 19 DOM (`react`, `react-dom`)
+- **Build Tool**: Vite 8
 - **Routing**: React Router v7 (`react-router-dom`)
 - **State Management**: Redux Toolkit & `redux-persist`
 - **Styling**: Tailwind CSS 3.4 & `shadcn/ui` (Radix UI primitives)
