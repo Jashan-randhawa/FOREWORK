@@ -19,7 +19,7 @@ Before starting, ensure you have the following installed:
 
 ```
 FOREWORK/
-├── Backend/               # Express + Node.js API server
+├── Backend/               # Express 5 + Node.js API server
 │   ├── ats/               # ATS Resume Predictor engine (parser, extraction, matching, scoring)
 │   ├── config/            # Database & Cloudinary configurations
 │   ├── controllers/       # Route controllers (user, job, company, application, ats)
@@ -28,7 +28,7 @@ FOREWORK/
 │   ├── routes/            # Express route definitions
 │   ├── utils/             # Encryption, scheduler, email helpers
 │   └── tests/             # Vitest backend integration & controller tests
-├── Frontend/              # React 18 + Vite SPA client
+├── Frontend/              # React 18 / 19 + Vite 8 SPA client
 │   ├── public/            # Manifest, icons, service worker (sw.js)
 │   ├── src/
 │   │   ├── components/    # UI components (shadcn, admin, shared, lite, ats)

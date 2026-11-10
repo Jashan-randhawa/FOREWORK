@@ -33,7 +33,7 @@ graph TD
 
     subgraph DataTier["4. Data & Persistence Tier"]
         AES[AES-256-GCM Cipher]
-        Mongoose[Mongoose 8.8 ORM]
+        Mongoose[Mongoose 9.12 ORM]
         MongoDB[(MongoDB Atlas)]
     end
 
@@ -63,7 +63,7 @@ graph TD
 
 ## 🧩 Frontend Architecture
 
-The frontend is a single-page application built on **React 18** and bundled with **Vite 6**:
+The frontend is a single-page application built on **React 18 / React 19 DOM** and bundled with **Vite 8**:
 
 ### State Management (`Frontend/src/redux/`)
 - **`authSlice.js`**: Holds authenticated user identity, JWT state, and profile meta.

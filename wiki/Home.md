@@ -53,7 +53,7 @@ flowchart TD
     end
 
     subgraph Core["Backend Application Layer"]
-        API[Express 4.21 API Server]
+        API[Express 5.3 API Server]
         AuthGuard[JWT Cookie + Bearer Auth Middleware]
         ATS[ATS Resume Predictor Engine]
         Crypto[AES-256-GCM Encryption Engine]
@@ -61,7 +61,7 @@ flowchart TD
     end
 
     subgraph Data["Database & External"]
-        Mongo[(MongoDB Atlas 8.8)]
+        Mongo[(MongoDB Atlas 7.8 / Mongoose 9.12)]
         Mail[Nodemailer SMTP Transporter]
     end
 
