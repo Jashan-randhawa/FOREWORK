@@ -96,7 +96,7 @@ const userSchema = new mongoose.Schema(
 );
 
 // Pre-save hook to compute blind index hashes and encrypt sensitive PII
-userSchema.pre("save", function (next) {
+userSchema.pre("save", async function () {
   if (this.isModified("pancard") && this.pancard) {
     this.pancardHash = blindIndex(this.pancard);
     this.pancard = encrypt(this.pancard);
@@ -105,7 +105,6 @@ userSchema.pre("save", function (next) {
     this.adharcardHash = blindIndex(this.adharcard);
     this.adharcard = encrypt(this.adharcard);
   }
-  next();
 });
 
 export const User = mongoose.model("User", userSchema);
