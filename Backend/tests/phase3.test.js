@@ -131,6 +131,13 @@ describe("Phase 3: Candidate Experience Test Suite", () => {
       expect(res.body.message).toContain("Invalid or expired");
     });
 
+    it("should reject verification when token is not provided in path/query/body", async () => {
+      const res = await request(app).get("/api/user/verify-email");
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toContain("token is required");
+    });
+
     it("should resend verification email for unverified user", async () => {
       await User.findByIdAndUpdate(studentId, { isEmailVerified: false });
 
