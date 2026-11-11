@@ -28,7 +28,8 @@ router.route("/profile").get(authenticateToken, (req, res) => {
 });
 
 // Candidate Experience: Email verification & Password recovery (AUTH-010, AUTH-011)
-router.route("/verify-email/:token?").get(verifyEmail).post(verifyEmail);
+router.route("/verify-email").get(verifyEmail).post(verifyEmail);
+router.route("/verify-email/:token").get(verifyEmail).post(verifyEmail);
 router
   .route("/resend-verification")
   .post(authenticateToken, resendVerification);

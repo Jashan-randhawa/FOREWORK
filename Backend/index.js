@@ -157,7 +157,7 @@ app.use("/api/v1/notification", notificationRoute);
 app.use("/api/v1/ats", atsRoute);
 
 // 404 handler for undefined API routes
-app.use("/api/*", (req, res) => {
+app.use("/api", (req, res) => {
   res.status(404).json({
     success: false,
     message: `API endpoint ${req.originalUrl} not found`,
