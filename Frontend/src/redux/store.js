@@ -14,7 +14,41 @@ import {
   PURGE,
   REGISTER,
 } from "redux-persist";
-import storage from "redux-persist/lib/storage";
+// Safe localStorage engine for redux-persist that avoids Vite CJS/ESM interop issues
+const createStorage = () => {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return {
+      getItem: () => Promise.resolve(null),
+      setItem: (_key, value) => Promise.resolve(value),
+      removeItem: () => Promise.resolve(),
+    };
+  }
+  return {
+    getItem: (key) => {
+      try {
+        return Promise.resolve(window.localStorage.getItem(key));
+      } catch {
+        return Promise.resolve(null);
+      }
+    },
+    setItem: (key, value) => {
+      try {
+        return Promise.resolve(window.localStorage.setItem(key, value));
+      } catch {
+        return Promise.resolve();
+      }
+    },
+    removeItem: (key) => {
+      try {
+        return Promise.resolve(window.localStorage.removeItem(key));
+      } catch {
+        return Promise.resolve();
+      }
+    },
+  };
+};
+
+const storage = createStorage();
 
 // Transform to strip sensitive identity numbers (PAN, Aadhaar) before saving auth to localStorage
 const authTransform = createTransform(
