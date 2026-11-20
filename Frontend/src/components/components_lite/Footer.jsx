@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Github, Heart, ShieldCheck } from "lucide-react";
+import { Heart, ShieldCheck } from "lucide-react";
+import GithubIcon from "../icons/GithubIcon";
 
 const Footer = () => {
   return (
@@ -160,7 +161,7 @@ const Footer = () => {
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
-              <Github className="w-4 h-4" />
+              <GithubIcon className="w-4 h-4" />
               <span>GitHub</span>
             </a>
           </div>
