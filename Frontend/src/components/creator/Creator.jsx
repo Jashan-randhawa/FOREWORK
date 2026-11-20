@@ -4,6 +4,7 @@ import Footer from "../components_lite/Footer";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Link } from "react-router-dom";
+import GithubIcon from "../icons/GithubIcon";
 import {
   Sparkles,
   ShieldCheck,
@@ -13,7 +14,6 @@ import {
   Building2,
   CheckCircle2,
   ArrowRight,
-  Github,
   ExternalLink,
   Code2,
 } from "lucide-react";
@@ -354,7 +354,7 @@ const Creator = () => {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-xs font-medium hover:bg-gray-800 transition-colors shadow-sm"
                     >
-                      <Github className="w-4 h-4" />
+                      <GithubIcon className="w-4 h-4" />
                       <span>github.com/Jashan-randhawa</span>
                       <ExternalLink className="w-3 h-3 text-gray-400" />
                     </a>

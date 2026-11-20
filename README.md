@@ -18,11 +18,11 @@ An end-to-end recruitment platform connecting **Job Seekers**, **Recruiters**, a
 
 <br/>
 
-[![React](https://img.shields.io/badge/React-18%20%2F%2019-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8.3-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-2.5-764ABC?style=flat-square&logo=redux&logoColor=white)](https://redux-toolkit.js.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Node.js](https://img.shields.io/badge/Node.js-20.x-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20%2F22-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express-5.3-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas_7.8%20%2F%20Mongoose_9.12-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://mongodb.com/)
 [![Docker](https://img.shields.io/badge/Docker-Multi--Stage-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com/)
@@ -60,9 +60,9 @@ An end-to-end recruitment platform connecting **Job Seekers**, **Recruiters**, a
 
 | Layer | Technologies |
 | :--- | :--- |
-| **Frontend** | React 18 / React 19 DOM, Vite 8, Redux Toolkit, React Router v7, Tailwind CSS, shadcn/ui, Recharts, Framer Motion, Vercel Speed Insights |
-| **Backend** | Node.js (ESM), Express 5.3, MongoDB Atlas, Mongoose 9.12, JWT, Multer 2.5, Cloudinary, Nodemailer, pdf-parse, mammoth |
-| **DevOps & QA** | Docker (Multi-stage), Vitest (33 suites, 295 tests: 152 backend + 143 frontend), GitHub Actions CI, Vercel, Render |
+| **Frontend** | React 19, Vite 8, Redux Toolkit, React Router v7, Tailwind CSS, shadcn/ui, Recharts, Framer Motion, Lucide icons, Vercel Speed Insights |
+| **Backend** | Node.js (ESM), Express 5.3, MongoDB Atlas, Mongoose 9.12, JWT, Multer 2.5, Cloudinary, Nodemailer (optional, loaded at runtime), node-cron, pdf-parse, mammoth |
+| **DevOps & QA** | Docker (Multi-stage), Vitest (33 suites, 295 tests: 152 backend + 143 frontend), GitHub Actions CI (Node 20 and 22), Vercel, Render |
 
 ---
 
